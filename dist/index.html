@@ -3,143 +3,112 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="智能何以生长：围绕大模型后训练、智能体与自我演化，整理公开视频、技术分享与论文导读的结构化研究札记。">
+  <meta name="description" content="智能何以生长：汇集文档资料与视频资料，按后训练、Agentic RL、Agent 能力和自我演化等技术方向整理的大模型研究知识库。">
   <meta name="theme-color" content="#0b1930">
-  <title>智能何以生长：大模型、智能体与自我演化札记</title>
-  <style>
-    :root{--bg:#f3f6fa;--surface:#fff;--surface-2:#f8fafc;--ink:#172132;--muted:#657287;--line:#dde5ef;--navy:#0b1930;--blue:#1769e0;--blue-soft:#eaf2ff;--purple:#7954c8;--lime:#b9f45b;--green:#16825e;--orange:#c36918;--shadow:0 14px 38px rgba(23,40,70,.09);--sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,Menlo,monospace}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,input{font:inherit}
-    .hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 80% 14%,rgba(185,244,91,.18),transparent 24%),radial-gradient(circle at 12% 92%,rgba(121,84,200,.31),transparent 32%),linear-gradient(125deg,var(--navy),#162759 58%,#4b176d)}
-    .hero:after{content:"";position:absolute;inset:0;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
-    .hero-in{position:relative;z-index:1;max-width:1560px;margin:auto;padding:46px 22px 36px}.eyebrow{display:flex;align-items:center;gap:10px;color:#c7d0e2;font-size:12px;font-weight:800;letter-spacing:.15em}.eyebrow:before{content:"";width:32px;height:2px;background:var(--lime)}
-    .hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-top:14px}.hero h1{max-width:790px;margin:0;font-size:clamp(37px,5.3vw,66px);line-height:1.04;letter-spacing:-.045em}.hero p{max-width:760px;margin:18px 0 0;color:#cbd6e8;font-size:16px;line-height:1.75}
-    .stats{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;max-width:900px;margin-top:30px}.stat{padding:13px 15px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(3,17,37,.34);backdrop-filter:blur(5px)}.stat small{display:block;color:#aebbd2;font-size:11px;letter-spacing:.06em}.stat b{display:block;margin-top:3px;font-size:22px;line-height:1.2}.stat span{display:block;margin-top:2px;color:#aebbd2;font-size:11px}
-    .shell{max-width:1560px;margin:auto;padding:25px 22px 68px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}.filters{display:flex;flex-wrap:wrap;gap:8px}.filter{padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--surface);cursor:pointer}.filter:hover,.filter.active{color:var(--blue);border-color:#a9c8f7;background:var(--blue-soft)}
-    .search{position:relative;flex:0 1 360px}.search:before{content:"⌕";position:absolute;left:13px;top:50%;color:var(--muted);font-size:19px;transform:translateY(-52%)}.search input{width:100%;height:40px;padding:8px 13px 8px 39px;border:1px solid var(--line);border-radius:10px;outline:0;color:var(--ink);background:var(--surface);box-shadow:0 3px 12px rgba(23,40,70,.03)}.search input:focus{border-color:#8bb7f5;box-shadow:0 0 0 3px rgba(23,105,224,.11)}
-    .section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:25px 0 13px}.section-head h2{margin:0;font-size:23px;letter-spacing:-.025em}.section-head p{margin:0;color:var(--muted);font-size:13px}.count{font:700 12px var(--mono);color:var(--blue)}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{position:relative;display:flex;min-width:0;min-height:390px;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--surface);box-shadow:0 7px 22px rgba(23,40,70,.05);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}.card:hover{transform:translateY(-4px);border-color:#b9c9dd;box-shadow:var(--shadow)}.card:focus-visible{outline:3px solid rgba(23,105,224,.28);outline-offset:3px}.card[hidden]{display:none}
-    .thumb{position:relative;height:176px;overflow:hidden;background:#14213d}.thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}.card:hover .thumb img{transform:scale(1.025)}.thumb:after{content:"";position:absolute;inset:auto 0 0;height:52%;background:linear-gradient(transparent,rgba(4,12,27,.72))}.series{position:absolute;z-index:1;left:13px;bottom:12px;padding:4px 8px;border:1px solid rgba(255,255,255,.18);border-radius:7px;color:#f5f8ff;background:rgba(6,17,37,.58);backdrop-filter:blur(7px);font:750 10px var(--mono);letter-spacing:.06em;text-transform:uppercase}.edition{position:absolute;z-index:1;right:12px;top:12px;padding:4px 8px;border-radius:7px;color:#10223c;background:var(--lime);font-size:10px;font-weight:850}
-    .card-body{display:flex;flex:1;flex-direction:column;padding:17px 18px 16px}.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.tag{padding:3px 7px;border-radius:6px;color:#426087;background:#edf3fb;font-size:10px;font-weight:750}.tag.purple{color:#6345aa;background:#f1edfb}.tag.green{color:#126b50;background:#e8f6f0}.tag.orange{color:#9a5414;background:#fff1e2}.card h3{margin:0;font-size:18px;line-height:1.38;letter-spacing:-.012em}.desc{margin:9px 0 15px;color:var(--muted);font-size:13px;line-height:1.65}.meta{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}.meta strong{color:var(--ink);font-weight:750}.open{margin-left:auto;color:var(--blue);font-size:12px;font-weight:800}.open:after{content:" →"}.empty{display:none;padding:46px 20px;border:1px dashed var(--line);border-radius:15px;text-align:center;color:var(--muted);background:var(--surface)}.empty.show{display:block}
-    .note{display:grid;grid-template-columns:auto 1fr;gap:13px;margin-top:22px;padding:17px 19px;border:1px solid #cddcf0;border-radius:12px;background:linear-gradient(135deg,var(--blue-soft),var(--surface))}.note-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font-weight:850}.note h2{margin:0 0 3px;font-size:14px}.note p{margin:0;color:var(--muted);font-size:12px}.footer{display:flex;justify-content:space-between;gap:18px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}.kbd{padding:2px 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--surface);font:10px var(--mono)}
-    @media(max-width:1280px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:920px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-row{align-items:flex-start}.stats{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:680px){.hero-in{padding:36px 18px 29px}.hero-row{display:block}.hero h1{font-size:39px}.shell{padding:18px 13px 52px}.toolbar{align-items:stretch;flex-direction:column-reverse}.search{flex-basis:auto}.grid{grid-template-columns:1fr}.card{min-height:0}.thumb{height:188px}.stats{margin-top:23px}.section-head{align-items:flex-start;flex-direction:column;gap:3px}.footer{flex-direction:column}}
-    @media(max-width:420px){.hero h1{font-size:34px}.stats{grid-template-columns:1fr 1fr}.stat{padding:11px}.stat b{font-size:19px}.thumb{height:164px}}
-    @media print{body{background:#fff}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.hero:after,.toolbar{display:none}.hero p,.stat small,.stat span{color:#333}.stat{border-color:#aaa;background:#fff}.stat b{color:#111}.shell{max-width:none;padding:20px 0}.grid{grid-template-columns:1fr 1fr}.card{break-inside:avoid;box-shadow:none}.thumb{height:125px}.footer{display:none}}
-  </style>
-  <link rel="stylesheet" href="./assets/academic-report.css?v=20260919-7">
-  <link rel="stylesheet" href="./site.css?v=20260919-7">
+  <title>智能何以生长｜大模型与 Agent 技术资料库</title>
+  <link rel="stylesheet" href="./assets/academic-report.css?v=20260919-8">
+  <link rel="stylesheet" href="./site.css?v=20260919-8">
 </head>
 <body class="academic-index">
   <header class="hero">
     <div class="hero-in">
       <div class="site-nav">
-        <a class="site-brand" href="./index.html"><span class="brand-mark">IG</span><span><strong>How Intelligence Grows</strong><small>智能何以生长 · 大模型研究札记</small></span></a>
-        <nav aria-label="站点导航"><a href="#library">专题笔记</a><a href="#about">本站说明</a></nav>
+        <a class="site-brand" href="./index.html"><span class="brand-mark">IG</span><span><strong>How Intelligence Grows</strong><small>智能何以生长 · 大模型技术资料库</small></span></a>
+        <nav aria-label="站点导航"><a href="#library">技术资料库</a><a href="#about">本站说明</a></nav>
       </div>
       <div class="hero-overview">
         <div class="hero-main">
           <div class="eyebrow">HOW INTELLIGENCE GROWS · 2026</div>
-          <h1>智能何以生长<span>大模型、智能体与自我演化札记</span></h1>
-          <p>围绕大模型后训练、Agent 系统、自我演化与 AI 科研，整理公开视频、技术分享与论文材料；以结构化长文保留方法脉络、关键证据与适用边界。</p>
-          <div class="hero-topics" aria-label="核心研究方向"><span>Post-training</span><span>Agent Systems</span><span>Self-Evolution</span><span>AI for Research</span></div>
+          <h1>智能何以生长<span>大模型与 Agent 技术资料库</span></h1>
+          <p>汇集长文档与公开视频的结构化学习笔记，按后训练、Agentic RL、Agent 能力与自我演化等技术方向归档，保留方法脉络、工程证据和适用边界。</p>
+          <div class="hero-topics" aria-label="核心研究方向"><span>Post-training &amp; RL</span><span>Agentic Systems</span><span>Agent Skills</span><span>Self-Evolution</span></div>
         </div>
         <div class="stats" aria-label="索引概览">
-          <div class="stat"><small>收录笔记</small><b>08</b><span>深度图文专题</span></div>
-          <div class="stat"><small>研究主题</small><b>04</b><span>后训练 · Agent · 演化 · 科研</span></div>
-          <div class="stat"><small>内容结构</small><b>图文</b><span>方法 · 证据 · 边界</span></div>
-          <div class="stat"><small>维护状态</small><b>持续更新</b><span>随学习材料同步扩充</span></div>
+          <div class="stat"><small>全部资料</small><b>19</b><span>结构化 HTML 笔记</span></div>
+          <div class="stat"><small>文档资料</small><b>11</b><span>技术文章与实践复盘</span></div>
+          <div class="stat"><small>视频资料</small><b>08</b><span>演讲、访谈与技术分享</span></div>
+          <div class="stat"><small>技术方向</small><b>04</b><span>分组浏览 · 持续更新</span></div>
         </div>
       </div>
     </div>
   </header>
 
   <main class="shell" id="library">
-    <div class="section-head">
-      <div><span class="section-index">01</span><h2>专题笔记</h2><p>按研究方向浏览，或通过关键词检索方法、系统与技术概念。</p></div>
-      <div class="count" id="count">8 篇</div>
-    </div>
-    <div class="toolbar">
-      <div class="filters" aria-label="主题筛选">
-        <button class="filter active" type="button" data-filter="all">全部</button>
-        <button class="filter" type="button" data-filter="training">后训练</button>
-        <button class="filter" type="button" data-filter="agent">Agent 能力</button>
-        <button class="filter" type="button" data-filter="evolution">自进化</button>
-        <button class="filter" type="button" data-filter="research">AI 科研</button>
-      </div>
-      <label class="search">
-        <span hidden>搜索总结</span>
-        <input id="search" type="search" placeholder="搜索标题、主题或技术名词…" autocomplete="off">
-      </label>
+    <div class="section-head library-heading">
+      <div><span class="section-index">LIB</span><h2>技术资料库</h2><p>资料按技术方向分组展示；可继续按方向、资料类型或关键词筛选。</p></div>
+      <div class="count" id="count">19 篇</div>
     </div>
 
-    <section class="grid" id="grid" aria-label="学习笔记列表">
-      <a class="card" data-topic="training agent" data-search="MiMo V2.6 强化学习 后训练 RL GRPO PPO Agentic Rollout SFT 沙箱" href="./BV1RHe26VE4M-summary/summary.html">
-        <div class="thumb"><img src="./BV1RHe26VE4M-summary/frames/frame_0007_00-03-07.jpg" alt="MiMo 强化学习异步流水线画面" loading="lazy"><span class="series">RL POST-TRAINING</span><span class="edition">技术增强版</span></div>
-        <div class="card-body"><div class="tags"><span class="tag">后训练</span><span class="tag purple">Agentic RL</span><span class="tag green">系统工程</span></div><h3>MiMo‑V2.6：强化学习后训练的系统方法</h3><p class="desc">从超大规模 Rollout、动态采样和组内信用分配，深入到异步流水线、沙箱基础设施与训练稳定性。</p><div class="meta"><strong>高密度技术解析</strong><span>·</span><span>含拓展调研</span><span class="open">打开</span></div></div>
-      </a>
+    <div class="library-controls" aria-label="资料筛选">
+      <div class="filter-block"><span class="filter-label">技术方向</span><div class="filters" id="topic-filters">
+        <button class="filter active" type="button" data-filter="all">全部</button><button class="filter" type="button" data-filter="training">后训练与 RL</button><button class="filter" type="button" data-filter="agentic">Agentic RL 与系统</button><button class="filter" type="button" data-filter="skills">Agent 能力</button><button class="filter" type="button" data-filter="evolution">自进化与科研</button>
+      </div></div>
+      <div class="filter-block"><span class="filter-label">资料类型</span><div class="filters" id="material-filters">
+        <button class="filter active" type="button" data-material-filter="all">全部类型</button><button class="filter" type="button" data-material-filter="document">文档资料</button><button class="filter" type="button" data-material-filter="video">视频资料</button>
+      </div></div>
+      <label class="search"><span hidden>搜索资料</span><input id="search" type="search" placeholder="搜索标题、方法或技术名词…" autocomplete="off"></label>
+    </div>
 
-      <a class="card" data-topic="training" data-search="SFT RL OPD OPSD on-policy 蒸馏 分布 后训练 灾难性遗忘 李小羊" href="./BV1d6356hE41/summary.html">
-        <div class="thumb"><img src="./BV1d6356hE41/frames/frame_0021_00-10-03.jpg" alt="RL 在当前策略分布附近采样与更新" loading="lazy"><span class="series">SFT · RL · OPD</span><span class="edition">独立总结</span></div>
-        <div class="card-body"><div class="tags"><span class="tag">后训练</span><span class="tag purple">OPD</span><span class="tag green">On-policy</span></div><h3>SFT、RL 与 OPD：从训练分布理解后训练方法</h3><p class="desc">比较三种后训练方法如何重塑模型分布，解释灾难性遗忘、on-policy 泛化和密集 token 监督的利弊。</p><div class="meta"><strong>28:09</strong><span>·</span><span>方法原理</span><span class="open">打开</span></div></div>
-      </a>
+    <section class="topic-group" data-group="training" aria-labelledby="group-training"><div class="topic-heading"><div class="topic-number">01</div><div><h2 id="group-training">后训练与强化学习</h2><p>从 SFT、GRPO、PPO 到 On-Policy Distillation，聚焦训练信号、稳定性、多样性与大规模系统实现。</p></div><span class="group-count"></span></div><div class="grid"></div></section>
+    <section class="topic-group" data-group="agentic" aria-labelledby="group-agentic"><div class="topic-heading"><div class="topic-number">02</div><div><h2 id="group-agentic">Agentic RL 与系统工程</h2><p>面向长程任务、工具调用与 Data Agent，讨论信用分配、训练系统、Harness 和可靠执行。</p></div><span class="group-count"></span></div><div class="grid"></div></section>
+    <section class="topic-group" data-group="skills" aria-labelledby="group-skills"><div class="topic-heading"><div class="topic-number">03</div><div><h2 id="group-skills">Agent 能力与技能学习</h2><p>关注 Agent 如何从轨迹经验中提炼、内化并复用技能，连接上下文学习与参数化能力。</p></div><span class="group-count"></span></div><div class="grid"></div></section>
+    <section class="topic-group" data-group="evolution" aria-labelledby="group-evolution"><div class="topic-heading"><div class="topic-number">04</div><div><h2 id="group-evolution">自进化与 AI 科研</h2><p>从 scaffold 改进、元进化到递归自我改进，讨论智能系统如何生成经验、比较候选并形成研究闭环。</p></div><span class="group-count"></span></div><div class="grid"></div></section>
 
-      <a class="card" data-topic="training agent" data-search="MiniMax M2.1 Agent 后训练 Forge CISPO SWE AppDev WebExplorer VIBE OctoBench 沙箱 RL" href="./BV1H8iCBEEgT/summary.html">
-        <div class="thumb"><img src="./BV1H8iCBEEgT/frames/frame_0025_00-25-06.jpg" alt="MiniMax M2.1 Forge Agent RL 框架" loading="lazy"><span class="series">QINGKE TALK 101</span><span class="edition">独立总结</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">Agent RL</span><span class="tag">数据合成</span><span class="tag green">系统工程</span></div><h3>MiniMax M2.1：Agent 后训练的数据、系统与评测</h3><p class="desc">从 SWE、AppDev 和 WebExplorer 数据飞轮，到 Forge、CISPO、动态验证与 Agent 评测体系。</p><div class="meta"><strong>61:43</strong><span>·</span><span>工程实践</span><span class="open">打开</span></div></div>
-      </a>
-
-      <a class="card" data-topic="agent training evolution" data-search="Agentic Skill 经验 能力 形成 内化 自进化 ThoughtICR TemplateRL SEED 清华 武锦阳" href="./【MLNLP学术Talk】第93期 | 武锦阳@清华大学 - 从经验到能力：Agentic Skill 的形成、内化与自进化.html">
-        <div class="thumb"><img src="./BV1qa4X6LET8-summary/frames/frame_0009_00-04-02.jpg" alt="Agentic Skill 报告幻灯片" loading="lazy"><span class="series">MLNLP TALK 93</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">Agent 能力</span><span class="tag">后训练</span><span class="tag green">Skill</span></div><h3>Agentic Skill：从经验形成到能力内化与自进化</h3><p class="desc">理解 Skill 如何从轨迹经验中形成，怎样通过训练内化为参数能力，以及自进化闭环需要哪些关键机制。</p><div class="meta"><strong>31:18</strong><span>·</span><span>ThoughtICR / TemplateRL / SEED</span><span class="open">打开</span></div></div>
-      </a>
-
-      <a class="card" data-topic="agent evolution" data-search="Mendel Gödel Machine MGM 自进化 智能体 scaffold 谱系 archive crossover Darwin" href="./Mendel Gödel Machine：让自进化智能体学会比较、继承与进化.html">
-        <div class="thumb"><img src="./BV1p3YJ6VEBb-summary/frames/frame_0007_00-09-09.jpg" alt="Mendel Gödel Machine 报告幻灯片" loading="lazy"><span class="series">MENDEL GÖDEL MACHINE</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">Agent 自进化</span><span class="tag green">Scaffold</span><span class="tag orange">谱系搜索</span></div><h3>Mendel Gödel Machine：自进化智能体的比较、继承与进化</h3><p class="desc">聚焦智能体 scaffold 的开放式改进：如何保存谱系、比较候选、继承有效结构，并通过跨谱系组合持续演化。</p><div class="meta"><strong>56:26</strong><span>·</span><span>3 类进化算子</span><span class="open">打开</span></div></div>
-      </a>
-
-      <a class="card" data-topic="evolution research agent" data-search="AI for AI 进化 自进化 元进化 RSI NatureGym OpenMLE Frontis MA1 递归自我改进 青稞" href="./【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）.html">
-        <div class="thumb"><img src="./BV13ZgA64Ept_summary/frames/frame_0020_00-17-12.jpg" alt="AI for AI 经验内化幻灯片" loading="lazy"><span class="series">QINGKE TALK 146</span><span class="edition">精炼版</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">元进化</span><span class="tag green">RSI</span><span class="tag">AI4AI</span></div><h3>AI for AI：进化、自进化、元进化与 RSI 概念导读</h3><p class="desc">用概念阶梯厘清 Evolution、Self‑Evolution、Meta‑Evolution 与 RSI，并拆解任务工厂、经验回流和改进器评测。</p><div class="meta"><strong>71:34</strong><span>·</span><span>快速建立框架</span><span class="open">打开</span></div></div>
-      </a>
-
-      <a class="card" data-topic="evolution research agent" data-search="AI for AI 进化 自进化 元进化 RSI NatureGym OpenMLE Frontis MA1 递归自我改进 青稞 完整版" href="./bilibili-BV13ZgA64Ept-【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）/完整总结/summary.html">
-        <div class="thumb"><img src="./bilibili-BV13ZgA64Ept-【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）/完整总结/frames/frame_0013_00-18-16.jpg" alt="AI for AI 完整版报告幻灯片" loading="lazy"><span class="series">QINGKE TALK 146</span><span class="edition">完整版</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">元进化</span><span class="tag green">RSI</span><span class="tag orange">深度阅读</span></div><h3>AI for AI：从进化到递归自我改进的系统综述</h3><p class="desc">同一报告的完整技术展开版，保留更丰富的实验数字、方法联系、工程解读和面向算法同学的延伸说明。</p><div class="meta"><strong>71:33</strong><span>·</span><span>完整证据链</span><span class="open">打开</span></div></div>
-      </a>
-
-      <a class="card" data-topic="evolution research" data-search="田渊栋 AI 自进化 RSI 递归自我改进 晚点聊 LateTalk 科研 自动科学家 可解释性" href="./对话田渊栋：AI 自进化如何到来【晚点聊 LateTalk】.html">
-        <div class="thumb"><img src="./BV1XnuH66EzS-summary/frames/frame_0014_00-18-36.jpg" alt="田渊栋谈 AI 自进化访谈画面" loading="lazy"><span class="series">LATETALK · RSI</span></div>
-        <div class="card-body"><div class="tags"><span class="tag green">RSI</span><span class="tag purple">AI 科研</span><span class="tag orange">访谈</span></div><h3>AI 自进化如何到来：研究闭环、人的角色与开放科学</h3><p class="desc">从科研反馈循环、研究品味和新范式出发，讨论 RSI 如何渐进到来，以及人类在自动科研中的长期角色。</p><div class="meta"><strong>84:28</strong><span>·</span><span>长访谈</span><span class="open">打开</span></div></div>
-      </a>
-    </section>
-
-    <div class="empty" id="empty"><strong>没有找到匹配的笔记</strong><br><span>尝试其他关键词或切回“全部”。</span></div>
+    <div class="empty" id="empty"><strong>没有找到匹配的资料</strong><br><span>请尝试其他关键词，或切回“全部”。</span></div>
 
     <section class="about" id="about">
-      <div class="about-title"><span class="section-index">02</span><div><h2>本站说明</h2><p>ABOUT THIS ARCHIVE</p></div></div>
-      <div class="about-copy"><p>本站以“智能何以从训练中生长”为线索，收录大模型研究与工程方向的个人学习笔记，重点覆盖后训练、Agent 系统、自我演化与 AI 科研，并按主题建立可检索、可交叉阅读的知识档案。</p><p>内容以公开课程、技术分享及论文资料为基础，强调方法脉络、关键证据与适用边界。涉及的观点、实验数据与工程结论以原始材料为准，并在相应页面保留来源和不确定性说明。</p></div>
+      <div class="about-title"><span class="section-index">INFO</span><div><h2>本站说明</h2><p>ABOUT THIS LIBRARY</p></div></div>
+      <div class="about-copy"><p>本站以“智能何以生长”为线索，将文档资料与视频资料统一整理为可检索的技术知识库。内容按技术方向分组，而不是按文件来源堆叠，方便围绕同一问题交叉阅读。</p><p>文档资料主要来自技术文章与实践复盘，视频资料主要来自公开演讲、访谈与课程。所有笔记强调方法脉络、关键证据和适用边界；涉及的观点、实验数据与工程结论仍以原始材料为准。</p></div>
     </section>
-
-    <footer class="footer"><span>© 2026 How Intelligence Grows</span><span>Post-training · Agent Systems · Self-Evolution · AI for Research</span></footer>
+    <footer class="footer"><span>© 2026 How Intelligence Grows</span><span>文档资料 · 视频资料 · 按技术方向组织</span></footer>
   </main>
 
   <script>
+    const items = [
+      {topic:'training',material:'video',href:'./BV1RHe26VE4M-summary/summary.html',image:'./BV1RHe26VE4M-summary/frames/frame_0007_00-03-07.jpg',alt:'MiMo 强化学习异步流水线画面',series:'RL POST-TRAINING',tags:['后训练','Agentic RL','系统工程'],title:'MiMo‑V2.6：强化学习后训练的系统方法',desc:'从超大规模 Rollout、动态采样和组内信用分配，深入到异步流水线、沙箱基础设施与训练稳定性。',meta:'高密度技术解析 · 含拓展调研',search:'MiMo V2.6 RL GRPO PPO rollout SFT 沙箱'},
+      {topic:'training',material:'video',href:'./BV1d6356hE41/summary.html',image:'./BV1d6356hE41/frames/frame_0021_00-10-03.jpg',alt:'RL 在当前策略分布附近采样与更新',series:'SFT · RL · OPD',tags:['后训练','OPD','On-policy'],title:'SFT、RL 与 OPD：从训练分布理解后训练方法',desc:'比较三种后训练方法如何重塑模型分布，解释灾难性遗忘、on-policy 泛化和密集 token 监督的利弊。',meta:'28:09 · 方法原理',search:'SFT RL OPD OPSD 蒸馏 分布 灾难性遗忘'},
+      {topic:'training',material:'document',href:'./documents/从 MiMo 后训练直播 Dashboard 了解 LLM 后训练.html',theme:'blue',kicker:'POST-TRAINING OBSERVATORY',symbol:'MiMo<br>DASHBOARD',series:'TRAINING SIGNALS',tags:['后训练','训练看板','可观测性'],title:'透视 MiMo 训练看板：一次大模型后训练如何运转',desc:'通过真实训练 Dashboard 读懂 reward、长度、熵和有效样本等信号，建立后训练运行全景。',meta:'原文导读 · 看板解读',search:'MiMo Dashboard reward entropy pass@k'},
+      {topic:'training',material:'document',href:'./documents/从技术报告看 On-Policy Distillation 的崛起：大模型后训练新范式.html',theme:'violet',kicker:'METHOD REVIEW',symbol:'ON-POLICY<br>DISTILLATION',series:'OPD RISING',tags:['OPD','On-policy','技术报告'],title:'OPD 崛起：大模型后训练为何转向在策略蒸馏',desc:'从分布偏移与 token 级密集监督出发，梳理 OPD 成为后训练新范式的机制、优势与局限。',meta:'方法演进 · 机制对比',search:'On-Policy Distillation OPD 蒸馏'},
+      {topic:'training',material:'document',href:'./documents/On-Policy Distillation（OPD）相关工作整理.html',theme:'teal',kicker:'RESEARCH MAP',symbol:'OPD<br>LANDSCAPE',series:'RELATED WORKS',tags:['OPD','方法谱系','相关工作'],title:'OPD 方法谱系：从基础蒸馏到长程与多教师改进',desc:'系统整理 On-Policy Distillation 相关工作，对齐不同设定的监督信号、采样方式与适用场景。',meta:'文献梳理 · 研究地图',search:'OPD 多教师 长程 相关工作'},
+      {topic:'training',material:'document',href:'./documents/用 RL 做 LLM 后训练：半年踩过的坑与心得.html',theme:'amber',kicker:'ENGINEERING FIELD NOTES',symbol:'RL<br>PRACTICE',series:'SIX-MONTH RETROSPECTIVE',tags:['后训练','实战复盘','稳定性'],title:'LLM 强化学习实战：后训练系统的效率、稳定性与隐性陷阱',desc:'汇总半年 RL 后训练中的训推一致、奖励设计、采样效率与调试经验。',meta:'工程经验 · 半年复盘',search:'LLM RL 踩坑 训推一致'},
+      {topic:'training',material:'document',href:'./documents/LLM 面试官笔记（1）：如何排查 GRPO 训练问题.html',theme:'red',kicker:'DEBUGGING PLAYBOOK',symbol:'GRPO<br>DEBUG',series:'SIGNAL CHAIN',tags:['GRPO','排障','Rollout'],title:'GRPO 训练排障指南：从症状分类到信号链诊断',desc:'先区分策略坍塌与训练崩溃，再沿梯度、奖励、有效样本和输入依赖逐层排查。',meta:'诊断手册 · 信号链',search:'GRPO 策略坍塌 logprob mask rollout'},
+      {topic:'training',material:'document',href:'./documents/LLM 面试官笔记（2）：GRPO 如何监控模型的多样性.html',theme:'cyan',kicker:'DIVERSITY OBSERVABILITY',symbol:'GRPO<br>VARIETY',series:'ENTROPY · PASS@K',tags:['GRPO','多样性','Pass@k'],title:'GRPO 多样性监控：识别策略变窄与模板坍塌',desc:'把多样性拆成题内探索与跨题可区分度，联合 entropy、去重率、Pass@k 和检索准确率观测。',meta:'监控体系 · 策略健康度',search:'entropy pass@k 模板坍塌 跨题检索'},
+
+      {topic:'agentic',material:'video',href:'./BV1H8iCBEEgT/summary.html',image:'./BV1H8iCBEEgT/frames/frame_0025_00-25-06.jpg',alt:'MiniMax M2.1 Forge Agent RL 框架',series:'QINGKE TALK 101',tags:['Agent RL','数据合成','系统工程'],title:'MiniMax M2.1：Agent 后训练的数据、系统与评测',desc:'从 SWE、AppDev 和 WebExplorer 数据飞轮，到 Forge、CISPO、动态验证与 Agent 评测体系。',meta:'61:43 · 工程实践',search:'MiniMax M2.1 Forge CISPO SWE AppDev WebExplorer'},
+      {topic:'agentic',material:'document',href:'./documents/手撕 Agentic-RL：从应用到训练.html',theme:'violet',kicker:'FULL-STACK GUIDE',symbol:'AGENTIC<br>RL',series:'SYSTEM TO TRAINING',tags:['Agentic RL','工具系统','长程任务'],title:'Agentic RL 全栈指南：从工具系统到长程强化学习',desc:'串起 Agent 应用形态、环境与工具、轨迹采集、奖励设计与长程 RL 训练的完整链路。',meta:'全栈框架 · 应用到训练',search:'Agentic RL 工具系统 长程'},
+      {topic:'agentic',material:'document',href:'./documents/PPO 也不适合超长程 RL.html',theme:'red',kicker:'LONG-HORIZON RL',symbol:'BEYOND<br>PPO',series:'WHAT IS STILL MISSING?',tags:['PPO / GRPO','超长程','信用分配'],title:'从 GRPO 到 PPO：超长程 Agent 强化学习仍缺什么',desc:'检视超长轨迹中的异步、compaction 与局部归因问题，说明更换优化器为何仍不足以解决核心矛盾。',meta:'长程 RL · 方法边界',search:'PPO GRPO 超长程 critic compaction'},
+      {topic:'agentic',material:'document',href:'./documents/稀疏奖励下的信用分配失效：长程 Agentic RL 为何重新引入 critic.html',theme:'blue',kicker:'CREDIT ASSIGNMENT',symbol:'CRITIC<br>RETURNS',series:'SPARSE REWARDS',tags:['Critic','稀疏奖励','语义步骤'],title:'长程 Agent 为何训不动：稀疏奖励、信用分配与 Critic 回归',desc:'从终局标量奖励的信号弥散出发，对比生成式 Critic、TRACE、事后归因与 horizon curriculum。',meta:'信用分配 · 新方法对比',search:'稀疏奖励 critic GenAC TRACE hindsight'},
+      {topic:'agentic',material:'document',href:'./documents/历时两个月的 GRPO 训练踩坑实录：63%25 到 96%25 tool selection.html',theme:'amber',kicker:'TRAINING RETROSPECTIVE',symbol:'63% → 96%',series:'TOOL SELECTION',tags:['GRPO','工具选择','实战复盘'],title:'从 63% 到 96%：7B 工具选择模型的 GRPO 训练复盘',desc:'记录两个月内从数据、奖励、格式约束到训练稳定性的连续排障与效果提升。',meta:'指标提升 33pt · 案例研究',search:'GRPO tool selection 63 96 7B'},
+      {topic:'agentic',material:'document',href:'./documents/美团 KDD Cup 2026 冠军方案：Data Agent 的壁垒是 Harness.html',theme:'teal',kicker:'KDD CUP 2026',symbol:'DATA<br>AGENT',series:'HARNESS ENGINEERING',tags:['Data Agent','Harness','DuckDB'],title:'Data Agent 的真正壁垒：拆解 KDD Cup 冠军 Harness',desc:'拆解异构资料理解、统一执行层、结构化工具、失败恢复与可观测性如何组成可靠 Agent 运行时。',meta:'冠军方案 · 系统拆解',search:'美团 KDD Cup 2026 Data Agent Harness DuckDB'},
+
+      {topic:'skills',material:'video',href:'./【MLNLP学术Talk】第93期 | 武锦阳@清华大学 - 从经验到能力：Agentic Skill 的形成、内化与自进化.html',image:'./BV1qa4X6LET8-summary/frames/frame_0009_00-04-02.jpg',alt:'Agentic Skill 报告幻灯片',series:'MLNLP TALK 93',tags:['Agent 能力','后训练','Skill'],title:'Agentic Skill：从经验形成到能力内化与自进化',desc:'理解 Skill 如何从轨迹经验中形成，怎样通过训练内化为参数能力，以及自进化闭环需要哪些关键机制。',meta:'31:18 · ThoughtICR / TemplateRL / SEED',search:'Agentic Skill ThoughtICR TemplateRL SEED 武锦阳'},
+
+      {topic:'evolution',material:'video',href:'./Mendel Gödel Machine：让自进化智能体学会比较、继承与进化.html',image:'./BV1p3YJ6VEBb-summary/frames/frame_0007_00-09-09.jpg',alt:'Mendel Gödel Machine 报告幻灯片',series:'MENDEL GÖDEL MACHINE',tags:['Agent 自进化','Scaffold','谱系搜索'],title:'Mendel Gödel Machine：自进化智能体的比较、继承与进化',desc:'聚焦智能体 scaffold 的开放式改进：如何保存谱系、比较候选、继承有效结构，并通过跨谱系组合持续演化。',meta:'56:26 · 3 类进化算子',search:'Mendel Gödel Machine MGM scaffold archive crossover'},
+      {topic:'evolution',material:'video',href:'./【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）.html',image:'./BV13ZgA64Ept_summary/frames/frame_0020_00-17-12.jpg',alt:'AI for AI 经验内化幻灯片',series:'QINGKE TALK 146',tags:['元进化','RSI','AI4AI'],title:'AI for AI：进化、自进化、元进化与 RSI 概念导读',desc:'用概念阶梯厘清 Evolution、Self‑Evolution、Meta‑Evolution 与 RSI，并拆解任务工厂、经验回流和改进器评测。',meta:'71:34 · 精炼导读',search:'AI for AI 元进化 RSI NatureGym OpenMLE Frontis MA1'},
+      {topic:'evolution',material:'video',href:'./bilibili-BV13ZgA64Ept-【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）/完整总结/summary.html',image:'./bilibili-BV13ZgA64Ept-【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）/完整总结/frames/frame_0013_00-18-16.jpg',alt:'AI for AI 完整版报告幻灯片',series:'QINGKE TALK 146 · FULL',tags:['元进化','RSI','深度阅读'],title:'AI for AI：从进化到递归自我改进的系统综述',desc:'同一报告的完整技术展开版，保留更丰富的实验数字、方法联系、工程解读和算法延伸。',meta:'71:33 · 完整证据链',search:'AI for AI 元进化 RSI 完整版'},
+      {topic:'evolution',material:'video',href:'./对话田渊栋：AI 自进化如何到来【晚点聊 LateTalk】.html',image:'./BV1XnuH66EzS-summary/frames/frame_0014_00-18-36.jpg',alt:'田渊栋谈 AI 自进化访谈画面',series:'LATETALK · RSI',tags:['RSI','AI 科研','访谈'],title:'AI 自进化如何到来：研究闭环、人的角色与开放科学',desc:'从科研反馈循环、研究品味和新范式出发，讨论 RSI 如何渐进到来，以及人类在自动科研中的长期角色。',meta:'84:28 · 长访谈',search:'田渊栋 AI 自进化 RSI LateTalk 自动科学家'}
+    ];
+
+    const esc=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const cardMarkup=item=>{
+      const cover=item.material==='video'
+        ? `<div class="thumb"><img src="${esc(item.image)}" alt="${esc(item.alt)}" loading="lazy"><span class="series">${esc(item.series)}</span><span class="material-badge video">视频资料</span></div>`
+        : `<div class="thumb document-thumb theme-${esc(item.theme)}"><span class="doc-kicker">${esc(item.kicker)}</span><strong class="doc-symbol">${item.symbol}</strong><span class="series">${esc(item.series)}</span><span class="material-badge document">文档资料</span></div>`;
+      const tags=item.tags.map((tag,index)=>`<span class="tag ${index===1?'purple':index===2?'green':''}">${esc(tag)}</span>`).join('');
+      return `<a class="card" data-topic="${item.topic}" data-material="${item.material}" data-search="${esc(item.search)}" href="${esc(item.href)}">${cover}<div class="card-body"><div class="tags">${tags}</div><h3>${esc(item.title)}</h3><p class="desc">${esc(item.desc)}</p><div class="meta"><strong>${esc(item.meta)}</strong><span class="open">打开</span></div></div></a>`;
+    };
+    document.querySelectorAll('.topic-group').forEach(group=>{const topic=group.dataset.group;group.querySelector('.grid').innerHTML=items.filter(item=>item.topic===topic).map(cardMarkup).join('');});
+
     const cards=[...document.querySelectorAll('.card')];
-    const filters=[...document.querySelectorAll('.filter')];
-    const search=document.getElementById('search');
-    const count=document.getElementById('count');
-    const empty=document.getElementById('empty');
-    let active='all';
-    function update(){
-      const query=search.value.trim().toLowerCase();let visible=0;
-      cards.forEach(card=>{const topic=card.dataset.topic||'';const text=(card.dataset.search+' '+card.textContent).toLowerCase();const show=(active==='all'||topic.split(' ').includes(active))&&(!query||text.includes(query));card.hidden=!show;if(show)visible++;});
-      count.textContent=`${visible} 篇`;empty.classList.toggle('show',visible===0);
-    }
-    filters.forEach(button=>button.addEventListener('click',()=>{filters.forEach(x=>x.classList.remove('active'));button.classList.add('active');active=button.dataset.filter;update()}));
-    search.addEventListener('input',update);
-    document.addEventListener('keydown',event=>{if(event.key==='/'&&document.activeElement!==search){event.preventDefault();search.focus()}if(event.key==='Escape'&&document.activeElement===search){search.value='';search.blur();update()}});
+    const topicFilters=[...document.querySelectorAll('[data-filter]')];
+    const materialFilters=[...document.querySelectorAll('[data-material-filter]')];
+    const groups=[...document.querySelectorAll('.topic-group')];
+    const search=document.getElementById('search');const count=document.getElementById('count');const empty=document.getElementById('empty');
+    let activeTopic='all';let activeMaterial='all';
+    function update(){const query=search.value.trim().toLowerCase();let visible=0;cards.forEach(card=>{const text=((card.dataset.search||'')+' '+card.textContent).toLowerCase();const show=(activeTopic==='all'||card.dataset.topic===activeTopic)&&(activeMaterial==='all'||card.dataset.material===activeMaterial)&&(!query||text.includes(query));card.hidden=!show;if(show)visible++;});groups.forEach(group=>{const shown=[...group.querySelectorAll('.card')].filter(card=>!card.hidden).length;group.hidden=shown===0;group.querySelector('.group-count').textContent=`${shown} 篇`;});count.textContent=`${visible} 篇`;empty.classList.toggle('show',visible===0)}
+    topicFilters.forEach(button=>button.addEventListener('click',()=>{topicFilters.forEach(x=>x.classList.remove('active'));button.classList.add('active');activeTopic=button.dataset.filter;update()}));
+    materialFilters.forEach(button=>button.addEventListener('click',()=>{materialFilters.forEach(x=>x.classList.remove('active'));button.classList.add('active');activeMaterial=button.dataset.materialFilter;update()}));
+    search.addEventListener('input',update);document.addEventListener('keydown',event=>{if(event.key==='/'&&document.activeElement!==search){event.preventDefault();search.focus()}if(event.key==='Escape'&&document.activeElement===search){search.value='';search.blur();update()}});update();
   </script>
 </body>
 </html>
