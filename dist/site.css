@@ -81,6 +81,16 @@ body { letter-spacing: .005em; }
   line-height: 1.08;
   letter-spacing: -.045em;
 }
+.hero h1 span {
+  display: block;
+  margin-top: 7px;
+  color: #d8dbea;
+  font-family: var(--sans);
+  font-size: clamp(17px, 1.7vw, 23px);
+  font-weight: 620;
+  line-height: 1.35;
+  letter-spacing: .025em;
+}
 .hero-main > p { max-width: 800px; margin-top: 14px; color: #d1d5e4; font-size: 15px; line-height: 1.75; }
 .hero-topics { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
 .hero-topics span { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, .17); color: #edf3f8; background: rgba(8, 12, 31, .28); font: 700 10px/1 var(--mono); letter-spacing: .04em; }
