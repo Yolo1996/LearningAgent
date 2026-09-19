@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="从分布视角理解大模型后训练中 SFT、RL 与 On-Policy Distillation 的差异、优势、风险与组合方式。">
-  <title>从分布视角看 SFT、RL、OPD 的区别</title>
+  <title>SFT、RL 与 OPD：从训练分布理解后训练方法｜视频学习笔记</title>
   <style>
     :root{--bg:#f2f5f9;--surface:#fff;--soft:#f7f9fc;--ink:#18202d;--muted:#637083;--line:#dce3ec;--navy:#0b1930;--blue:#1769e0;--green:#10845d;--orange:#c46a13;--red:#bf3447;--purple:#7855c7;--lime:#b9f45b;--blue-soft:#eaf2ff;--shadow:0 10px 28px rgba(20,37,63,.07);--sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,Menlo,monospace}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}body{margin:0;color:var(--ink);background:var(--bg);font:14.5px/1.68 var(--sans);-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}button{font:inherit}.progress{position:fixed;z-index:30;left:0;top:0;height:3px;width:0;background:linear-gradient(90deg,var(--lime),#55c5ff,var(--purple))}
@@ -16,17 +16,18 @@
     body.dark{--bg:#0e1420;--surface:#151e2c;--soft:#1a2535;--ink:#e8eef6;--muted:#9bacbf;--line:#29374a;--blue:#68a7ff;--blue-soft:#182d4b;--shadow:0 12px 32px rgba(0,0,0,.22)}body.dark th{color:#cad4e1}body.dark .callout{border-color:#334b6a}body.dark .warn{border-color:#61482e;background:linear-gradient(135deg,#35291e,var(--surface))}
     @media(max-width:1220px){.layout{grid-template-columns:220px minmax(0,1fr)}.rail{display:none}}@media(max-width:820px){.hero-in{padding:42px 20px 34px}.hero-row{display:block}.theme{margin-top:20px}.facts{grid-template-columns:1fr 1fr}.layout{display:block;padding:18px 13px 58px}.nav{position:static;margin-bottom:16px}.nav ol{display:grid;grid-template-columns:1fr 1fr}.chapter{padding:19px 16px}.grid,.methods,.pair{grid-template-columns:1fr}.pipeline{grid-template-columns:1fr}.step:not(:last-child):after{content:"↓";right:auto;left:50%;top:auto;bottom:-20px;transform:translateX(-50%)}.checks{grid-template-columns:1fr}}@media(max-width:480px){.hero h1{font-size:36px}.dek{font-size:15px}.chapter h2{font-size:22px}.nav ol{grid-template-columns:1fr}.facts{gap:7px}.fact{padding:11px}.table-wrap{margin-left:-7px;margin-right:-7px}}@media print{body{background:#fff}.progress,.theme,.back,.nav,.rail{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.hero:after{display:none}.dek,.fact small,.fact span{color:#333}.links a{color:#111;border-color:#aaa}.fact{border-color:#aaa;background:#fff}.fact b{color:#111}.layout{display:block;max-width:none;padding:20px 0}.chapter{box-shadow:none}.card,.method,.step,.callout,figure{break-inside:avoid}}
   </style>
+  <link rel="stylesheet" href="../assets/academic-report.css">
 </head>
-<body><script src="../library-nav.js"></script>
+<body class="academic-report"><script src="../library-nav.js"></script>
   <div class="progress" id="progress"></div>
   <header class="hero"><div class="hero-in">
     <div class="eyebrow">VIDEO SUMMARY · LLM POST-TRAINING</div>
-    <div class="hero-row"><div><h1>从分布视角看 <em>SFT、RL、OPD</em> 的区别</h1><p class="dek">把大模型视为序列概率分布，比较三种后训练方法的数据来源、更新方式、泛化表现与失效模式，并解释为什么 on-policy 可能是减少遗忘的关键。</p></div><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-    <div class="links"><a href="https://www.bilibili.com/video/BV1d6356hE41/">原视频</a><a href="transcript.txt">完整转写</a><a href="visual_notes.md">视觉笔记</a></div>
-    <div class="facts"><div class="fact"><small>时长</small><b>28:09</b><span>完整转写</span></div><div class="fact"><small>核心方法</small><b>3</b><span>SFT · RL · OPD</span></div><div class="fact"><small>代表帧</small><b>57</b><span>全程均匀抽取</span></div><div class="fact"><small>转写模型</small><b>Paraformer-v2</b><span>中文</span></div></div>
+    <div class="hero-row"><div><h1>SFT、RL 与 OPD：<em>从训练分布理解后训练方法</em></h1><p class="dek">以序列概率分布为统一视角，比较三种后训练方法的轨迹来源、监督信号、泛化机制与失效模式，并解释 on-policy 数据为何可能减少能力遗忘。</p></div></div>
+    <div class="links"><a href="https://www.bilibili.com/video/BV1d6356hE41/" target="_blank" rel="noreferrer">观看原始视频 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="facts"><div class="fact"><small>视频时长</small><b>28:09</b><span>方法讲解</span></div><div class="fact"><small>核心方法</small><b>3</b><span>SFT · RL · OPD</span></div><div class="fact"><small>统一视角</small><b>训练分布</b><span>数据从哪里产生</span></div><div class="fact"><small>关键变量</small><b>On-policy</b><span>泛化与遗忘</span></div></div>
   </div></header>
   <div class="layout">
-    <nav class="nav"><div class="label">Reading map</div><ol><li><a href="#s1">核心结论</a></li><li><a href="#s2">分布视角</a></li><li><a href="#s3">三种方法</a></li><li><a href="#s4">实验现象</a></li><li><a href="#s5">为何 on-policy</a></li><li><a href="#s6">训练路线</a></li></ol></nav>
+    <nav class="nav"><div class="label">Reading map</div><ol><li><a href="#s1">核心结论</a></li><li><a href="#s2">分布视角</a></li><li><a href="#s3">三种方法</a></li><li><a href="#s4">实验现象</a></li><li><a href="#s5">On-policy 与实践</a></li></ol></nav>
     <main>
       <section class="chapter" id="s1"><div class="chapter-head"><div class="num">01</div><div><div class="kicker">Executive summary</div><h2>核心结论：差异首先在“训练轨迹从哪里来”</h2></div></div>
         <p class="lead">SFT 用外部示范把模型直接拉向目标数据分布；RL 让模型从自身分布采样，再按结果奖励做局部修正；OPD 则让学生自己采样、教师逐 token 指导。视频认为，后两者泛化更好、遗忘更少的关键，是 on-policy 数据而不只是 KL 方向。</p>
@@ -48,18 +49,16 @@
         <p class="note">数字来自视频展示的实验表。指标定义与实验细节未完整展开，不宜外推为普遍规律。</p>
         <div class="pair"><figure><img src="frames/frame_0037_00-18-05.jpg" alt="不同教师进行 OPD 蒸馏的实验结果"><figcaption>00:18:05 · 学生并未简单复制教师的通用能力水平。</figcaption></figure><figure><img src="frames/frame_0049_00-24-07.jpg" alt="RL 和 OPD 的奖励与熵曲线"><figcaption>00:24:07 · OPD 熵更快下降，既可能带来更确定的行为，也提示训练崩溃风险。</figcaption></figure></div>
       </section>
-      <section class="chapter" id="s5"><div class="chapter-head"><div class="num">05</div><div><div class="kicker">Why on-policy</div><h2>泛化优势来自模型“亲自进入”自己的状态</h2></div></div>
+      <section class="chapter" id="s5"><div class="chapter-head"><div class="num">05</div><div><div class="kicker">Why on-policy · Practice</div><h2>On-policy 泛化机制与实践路线</h2></div></div>
         <p><span class="time">00:21:15</span>视频并不满足于“前向 KL 对反向 KL”的解释，因为许多现代 RL 训练即使去掉 KL 惩罚，仍能较好地抵抗遗忘。更偏好的解释是：RL 与 OPD 都从学生自己生成的轨迹出发，只在当前行为附近选择和修正。</p>
         <div class="pipeline"><div class="step"><small>01</small><b>学生采样</b><span>进入自己真实会到达的状态</span></div><div class="step"><small>02</small><b>暴露错误</b><span>训练分布包含自身偏差</span></div><div class="step"><small>03</small><b>奖励或教师反馈</b><span>在相关状态上提供方向</span></div><div class="step"><small>04</small><b>局部更新</b><span>逐步移动而非硬跳目标分布</span></div></div>
         <div class="grid"><article class="card green"><b>更少遗忘</b><p>更新集中在模型自己的高概率行为附近，较少无差别重写原能力。</p></article><article class="card blue"><b>更强鲁棒性</b><p>训练中已见过自身错误引发的状态，不完全依赖完美教师轨迹。</p></article><article class="card orange"><b>仍非免费午餐</b><p>奖励错误、探索不足或教师偏差仍会把局部更新引向坏区域。</p></article></div>
-      </section>
-      <section class="chapter" id="s6"><div class="chapter-head"><div class="num">06</div><div><div class="kicker">Practical route</div><h2>推荐的组合路线与未解问题</h2></div></div>
+      <div class="chapter-subsection" id="s6"><h3 class="section-divider">推荐的组合路线与未解问题</h3>
         <div class="pipeline"><div class="step"><small>PRETRAIN</small><b>基础模型</b><span>建立广泛语言与知识分布</span></div><div class="step"><small>SFT</small><b>冷启动</b><span>注入格式、任务与基本习惯</span></div><div class="step"><small>RL</small><b>多个专家</b><span>在可验证任务上在线优化</span></div><div class="step"><small>OPD</small><b>能力汇聚</b><span>把专家信号蒸馏到统一模型</span></div></div>
         <h3>方法各自留下的缺口</h3><div class="checks"><div class="check"><b>SFT：分布硬迁移</b><p>需要更好地控制数据距离与既有能力保持。</p></div><div class="check"><b>RL：奖励过于稀疏</b><p>需要可靠、细粒度的长程信用分配。</p></div><div class="check"><b>OPD：密集但有偏</b><p>需要校准教师噪声并防止熵过快坍缩。</p></div><div class="check"><b>未来方向</b><p>保持 on-policy，同时获得准确的 token 级反馈。</p></div></div>
         <div class="callout"><div class="mark">→</div><div><h3>一句话 takeaway</h3><p>“纸上得来终觉浅，绝知此事要躬行”：外部示范能把模型带到起点，真正稳健的能力更依赖模型在自己的状态分布中行动、反馈与修正。</p></div></div>
-        <div class="callout warn"><div class="mark">i</div><div><h3>证据边界</h3><p>本报告基于视频自动转写与画面检查。OPD、OPSD、GRPO 等术语已结合幻灯片校正；实验结论是讲述者对引用博客与论文的解读，并非独立事实核验。</p></div></div>
-      </section>
-    </main>
+        <div class="callout warn"><div class="mark">i</div><div><h3>阅读边界</h3><p>页面呈现的是讲者对相关方法和实验的解释。结论应结合具体模型、数据与训练配置阅读，不宜脱离实验条件外推为普遍规律。</p></div></div>
+      </div></section></main>
     <aside class="rail"><div class="rail-card"><div class="label">Primary verdict</div><h3>on-policy 是主线</h3><p>关键不只是损失函数，而是模型是否在自己会访问的状态上学习。</p></div><div class="rail-card"><div class="label">Reading path</div><h3>01 → 03 → 05</h3><p>先读方法差异，再看实验与泛化解释。</p></div><div class="rail-card"><div class="label">Evidence</div><h3>视频观点</h3><p>数字和机制解释未做外部独立核验。</p></div></aside>
   </div>
   <button class="back" id="back" type="button">↑</button>

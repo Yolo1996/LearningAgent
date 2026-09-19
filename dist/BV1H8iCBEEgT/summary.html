@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="MiniMax M2.1 Agent 后训练经验总结：SWE、AppDev、WebExplorer 数据合成，Forge RL 框架、CISPO 算法与动态评测。">
-  <title>MiniMax M2.1：Agent 后训练的经验与认知</title>
+  <title>MiniMax M2.1：Agent 后训练的数据、系统与评测｜视频学习笔记</title>
   <style>
     :root{--bg:#f2f5f9;--surface:#fff;--soft:#f7f9fc;--ink:#18202d;--muted:#637083;--line:#dce3ec;--navy:#0b1930;--blue:#1769e0;--green:#10845d;--orange:#c46a13;--red:#bf3447;--purple:#7855c7;--lime:#b9f45b;--blue-soft:#eaf2ff;--shadow:0 10px 28px rgba(20,37,63,.07);--sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,Menlo,monospace}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}body{margin:0;color:var(--ink);background:var(--bg);font:14.5px/1.68 var(--sans);-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}button{font:inherit}.progress{position:fixed;z-index:30;left:0;top:0;height:3px;width:0;background:linear-gradient(90deg,var(--lime),#55c5ff,var(--purple))}
@@ -15,17 +15,18 @@
     body.dark{--bg:#0e1420;--surface:#151e2c;--soft:#1a2535;--ink:#e8eef6;--muted:#9bacbf;--line:#29374a;--blue:#68a7ff;--blue-soft:#182d4b;--shadow:0 12px 32px rgba(0,0,0,.22)}body.dark th{color:#cad4e1}body.dark .callout{border-color:#334b6a}body.dark .warn{border-color:#61482e;background:linear-gradient(135deg,#35291e,var(--surface))}
     @media(max-width:1220px){.layout{grid-template-columns:220px minmax(0,1fr)}.rail{display:none}}@media(max-width:820px){.hero-in{padding:42px 20px 34px}.hero-row{display:block}.theme{margin-top:20px}.facts{grid-template-columns:1fr 1fr}.layout{display:block;padding:18px 13px 58px}.nav{position:static;margin-bottom:16px}.nav ol{display:grid;grid-template-columns:1fr 1fr}.chapter{padding:19px 16px}.grid,.grid.two,.pair{grid-template-columns:1fr}.pipeline{grid-template-columns:1fr}.step:not(:last-child):after{content:"↓";right:auto;left:50%;top:auto;bottom:-20px;transform:translateX(-50%)}}@media(max-width:480px){.hero h1{font-size:36px}.dek{font-size:15px}.chapter h2{font-size:22px}.nav ol{grid-template-columns:1fr}.facts{gap:7px}.fact{padding:11px}.table-wrap{margin-left:-7px;margin-right:-7px}}@media print{body{background:#fff}.progress,.theme,.back,.nav,.rail{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.hero:after{display:none}.dek,.fact small,.fact span{color:#333}.links a{color:#111;border-color:#aaa}.fact{border-color:#aaa;background:#fff}.fact b{color:#111}.layout{display:block;max-width:none;padding:20px 0}.chapter{box-shadow:none}.card,.step,.callout,figure{break-inside:avoid}}
   </style>
+  <link rel="stylesheet" href="../assets/academic-report.css">
 </head>
-<body><script src="../library-nav.js"></script>
+<body class="academic-report"><script src="../library-nav.js"></script>
   <div class="progress" id="progress"></div>
   <header class="hero"><div class="hero-in">
     <div class="eyebrow">QINGKE TALK 101 · AGENT POST-TRAINING</div>
-    <div class="hero-row"><div><h1>MiniMax M2.1：<em>Agent 后训练</em>的经验与认知</h1><p class="dek">一套以数据为中心的 Agent 后训练方法：把 GitHub、全栈开发与长程搜索转成可训练任务，用 Forge 承载任意脚手架 rollout，用 CISPO 稳定 RL，再用动态执行式基准评估真实能力。</p></div><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-    <div class="links"><a href="https://www.bilibili.com/video/BV1H8iCBEEgT/">原视频</a><a href="transcript.txt">完整转写</a><a href="visual_notes.md">视觉笔记</a></div>
-    <div class="facts"><div class="fact"><small>时长</small><b>61:43</b><span>含问答环节</span></div><div class="fact"><small>模型规模*</small><b>230B / 10B</b><span>总参数 / 约激活参数</span></div><div class="fact"><small>技术主线</small><b>数据优先</b><span>环境与奖励先行</span></div><div class="fact"><small>代表帧</small><b>60</b><span>全程均匀抽取</span></div><div class="fact"><small>转写模型</small><b>Paraformer-v2</b><span>中文</span></div></div>
+    <div class="hero-row"><div><h1>MiniMax M2.1：<em>Agent 后训练的数据、系统与评测</em></h1><p class="dek">以数据工程为主线，梳理如何把 GitHub、全栈开发与长程搜索转化为可训练任务，并以 Forge、CISPO 和动态执行式基准构成训练—评测闭环。</p></div></div>
+    <div class="links"><a href="https://www.bilibili.com/video/BV1H8iCBEEgT/" target="_blank" rel="noreferrer">观看原始视频 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="facts"><div class="fact"><small>时长</small><b>61:43</b><span>含问答环节</span></div><div class="fact"><small>模型规模*</small><b>230B / 10B</b><span>总参数 / 约激活参数</span></div><div class="fact"><small>技术主线</small><b>数据优先</b><span>环境与奖励先行</span></div><div class="fact"><small>训练框架</small><b>Forge</b><span>多脚手架 Rollout</span></div><div class="fact"><small>优化方法</small><b>CISPO</b><span>稳定 Agent RL</span></div></div>
   </div></header>
   <div class="layout">
-    <nav class="nav"><div class="label">Reading map</div><ol><li><a href="#s1">核心结论</a></li><li><a href="#s2">SWE 数据</a></li><li><a href="#s3">AppDev</a></li><li><a href="#s4">WebExplorer</a></li><li><a href="#s5">Forge</a></li><li><a href="#s6">CISPO</a></li><li><a href="#s7">评测体系</a></li><li><a href="#s8">问答启示</a></li></ol></nav>
+    <nav class="nav"><div class="label">Reading map</div><ol><li><a href="#s1">核心结论</a></li><li><a href="#s2">SWE 数据</a></li><li><a href="#s3">AppDev</a></li><li><a href="#s4">WebExplorer</a></li><li><a href="#s5">Forge、训练与评测</a></li></ol></nav>
     <main>
       <section class="chapter" id="s1"><div class="chapter-head"><div class="num">01</div><div><div class="kicker">Executive summary</div><h2>核心结论：Agent 后训练首先是一项数据与系统工程</h2></div></div>
         <p class="lead">这场分享把“数据”置于算法之前：先构造可运行环境、可校验任务和真实脚手架轨迹，再谈 SFT、拒绝采样与 RL。模型能力的上限取决于任务覆盖、奖励可信度、轨迹真实性和训练稳定性共同形成的闭环。</p>
@@ -52,28 +53,24 @@
         <div class="pipeline"><div class="step"><small>SEED</small><b>随机实体</b><span>人物、球队、地点等</span></div><div class="step"><small>EXPLORE</small><b>自主浏览</b><span>收集可连接事实</span></div><div class="step"><small>SYNTHESIZE</small><b>生成初题</b><span>答案由完整轨迹支持</span></div><div class="step"><small>EVOLVE</small><b>删 / 换 / 模糊</b><span>移除直接检索入口</span></div><div class="step"><small>FILTER</small><b>拒绝采样</b><span>保留可解且答案唯一的题</span></div></div>
         <p>视频称，问题进化使平均解决轮数由 7.9 增至 9.9。问答进一步强调：模糊化不能保证零错误，因此仍要用前期拒绝采样筛掉不可解或答案不唯一的样本。</p>
       </section>
-      <section class="chapter" id="s5"><div class="chapter-head"><div class="num">05</div><div><div class="kicker">Forge framework</div><h2>对 Agent 内部逻辑做最小假设</h2></div></div>
+      <section class="chapter" id="s5"><div class="chapter-head"><div class="num">05</div><div><div class="kicker">Forge · Training · Evaluation</div><h2>Forge 框架、强化学习训练与真实评测</h2></div></div>
         <p><span class="time">00:25:02</span>Forge 通过四类接口接入任意黑盒 Agent：<code>preprocess</code>、<code>run</code>、<code>postprocess</code>、<code>calculate_reward</code>。即使没有源代码，也可以在沙箱安装程序、替换底层模型服务并记录完整请求日志。</p>
         <figure><img src="frames/frame_0025_00-25-06.jpg" alt="Forge 支持黑盒 Agent 脚手架的 RL 训练架构"><figcaption>00:25:06 · 黑盒脚手架、推理服务、日志存储、轨迹构造与训练算法相互解耦。</figcaption></figure>
         <div class="grid two"><article class="card blue"><b>轨迹重建</b><p>推理服务保存每轮 prompt、response、log-prob；数据协调层选择重要子 Agent 轨迹并忽略无关请求。</p></article><article class="card green"><b>严格前缀合并</b><p>仅合并完全一致的多轮前缀以降低训练复杂度；不能只按第一轮 query 粗略拼接。</p></article><article class="card purple"><b>脚手架无关</b><p>支持不同上下文管理、memory、规则注入以及 multi-agent 工作流。</p></article><article class="card orange"><b>分布覆盖</b><p>多脚手架训练避免模型只适配简单 ReAct，而无法理解真实系统提醒、Skill 与工具约束。</p></article></div>
-      </section>
-      <section class="chapter" id="s6"><div class="chapter-head"><div class="num">06</div><div><div class="kicker">RL scaling · CISPO</div><h2>稳定训练的三个关键修复</h2></div></div>
+      <div class="chapter-subsection" id="s6"><h3 class="section-divider">稳定训练的三个关键修复</h3>
         <p><span class="time">00:29:01</span>视频延续 MiniMax M1 提出的 CISPO，并针对 Agent 多轮工具调用带来的更极端 off-policy 轨迹加入过滤策略。</p>
         <div class="grid"><article class="card purple"><b>重要性权重截断</b><p>不是把越界 token 完全 mask，而是截断重要性采样权重，保留梯度同时控制方差。</p></article><article class="card blue"><b>FP32 LM Head</b><p>提高训练与推理概率一致性。演讲者称这一精度修复解决了大模型 reward 不涨的问题。</p></article><article class="card orange"><b>异常轨迹过滤</b><p>利用 TIS、MIS、重复度、困惑度等统计量过滤被工具噪声放大的离群轨迹。</p></article></div>
         <figure><img src="frames/frame_0030_00-30-20.jpg" alt="CISPO 的重要性采样截断、FP32 输出头和轨迹过滤"><figcaption>00:30:20 · CISPO 的工程重点：保留 token 梯度、修复数值精度、剔除异常 Agent 轨迹。</figcaption></figure>
         <div class="callout"><div class="mark">↗</div><div><h3>算法选择与模型架构相对解耦</h3><p>问答中认为，CISPO、GRPO 等上层策略优化方法对 MoE 与 Dense 的适配差异不大；MoE 仍可能需要处理路由稳定性等更底层问题。</p></div></div>
-      </section>
-      <section class="chapter" id="s7"><div class="chapter-head"><div class="num">07</div><div><div class="kicker">Evaluation</div><h2>评测必须进入真实运行状态</h2></div></div>
+      </div><div class="chapter-subsection" id="s7"><h3 class="section-divider">评测必须进入真实运行状态</h3>
         <p>分享介绍三个自建基准，分别覆盖开放式应用开发、代码审阅与 Agent 运行过程中的分散指令遵循。</p>
         <div class="table-wrap"><table><thead><tr><th>基准</th><th>评估对象</th><th>验证方式</th><th>解决的盲区</th></tr></thead><tbody><tr><td>VIBE</td><td>前端 / 后端 / Android / iOS 开发</td><td>编译执行 → 界面交互 → 视觉基础质量</td><td>静态截图看不出交互与业务缺陷</td></tr><tr><td>SWE-Review</td><td>多语言代码缺陷审阅</td><td>同时考察缺陷召回与幻觉率</td><td>提出很多“问题”不代表审阅正确</td></tr><tr><td>OctoBench</td><td>Agent 场景指令遵循</td><td>checklist / rubric + LLM-as-a-Judge</td><td>指令散落在 system、skill、memory、tool schema/result</td></tr></tbody></table></div>
         <div class="pair"><figure><img src="frames/frame_0035_00-35-33.jpg" alt="VIBE 全栈开发评测的执行交互与视觉维度"><figcaption>00:35:33 · VIBE：从能否构建，到交互逻辑，再到基础视觉质量。</figcaption></figure><figure><img src="frames/frame_0038_00-38-42.jpg" alt="SWE-Review 与 OctoBench 的评估范围"><figcaption>00:38:42 · Agent 的指令来源已扩展到整条运行轨迹。</figcaption></figure></div>
         <p class="note">演讲中的榜单成绩和外部模型对比均为讲述者 / MiniMax 自述，本报告未进行独立复测。</p>
-      </section>
-      <section class="chapter" id="s8"><div class="chapter-head"><div class="num">08</div><div><div class="kicker">Q&amp;A takeaways</div><h2>问答环节补充的工程经验</h2></div></div>
+      </div><div class="chapter-subsection" id="s8"><h3 class="section-divider">问答环节补充的工程经验</h3>
         <div class="checks"><div class="check"><b>数据配比从 scaling 结论导出</b><p>各方向先独立扩量，观察何时饱和；最终混合比例由有效数据量自然形成。</p></div><div class="check"><b>难度用当前策略的 pass rate 衡量</b><p>在 SFT 后模型上跑 RL 样本，得到更贴近当前 policy 的难度估计。</p></div><div class="check"><b>奖励首先要防 hack</b><p>清理未来 commit、答案泄漏和可绕过验证器的捷径。</p></div><div class="check"><b>长上下文问题与训练分布相关</b><p>训练数据过短时，长上下文容易重复循环；可补齐分布并在 rollout 时过滤重复轨迹。</p></div><div class="check"><b>沙箱是大规模基础设施</b><p>演讲者称基于 Docker + Kubernetes，最大同时运行量约 10 万；同时启动量较小。</p></div><div class="check"><b>结果与轨迹可以双重校验</b><p>除最终答案外，可用规则或 rubric 过滤工具失败多、路径质量差的轨迹。</p></div></div>
-        <div class="callout warn"><div class="mark">i</div><div><h3>证据与转写边界</h3><p>本报告基于公开视频自动转写与逐帧检查。Forge、CISPO、VIBE、SWE-Review、OctoBench 等术语已结合幻灯片校正；模型规模、数据量、并发量和榜单比较均按演讲者表述呈现，未做外部独立核验。</p></div></div>
-      </section>
-    </main>
+        <div class="callout warn"><div class="mark">i</div><div><h3>阅读边界</h3><p>模型规模、数据量、并发量与榜单对比均按演讲者公开表述呈现；这些数字服务于理解方法与系统规模，不代表独立复现或对其他模型配置的直接承诺。</p></div></div>
+      </div></section></main>
     <aside class="rail"><div class="rail-card"><div class="label">Primary verdict</div><h3>数据与验证优先</h3><p>没有可执行环境和可信奖励，Agent RL 只会放大噪声。</p></div><div class="rail-card"><div class="label">Reading path</div><h3>01 → 02 → 05 → 06</h3><p>先看数据飞轮，再理解训练基础设施。</p></div><div class="rail-card"><div class="label">Evidence</div><h3>视频自述</h3><p>规模、成绩与外部比较未独立核验。</p></div></aside>
   </div>
   <button class="back" id="back" type="button">↑</button>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="青稞 Talk 146 期：AI for AI、进化、自进化、元进化与递归自我改进（RSI）的高密度技术总结。">
-  <title>AI for AI：从进化、自进化与元进化，迈向递归自我改进</title>
+  <title>AI for AI：从进化到递归自我改进的系统综述｜视频学习笔记</title>
   <style>
     :root {
       --bg: #f2f5f9;
@@ -244,18 +244,17 @@
       a { color:#111; text-decoration:underline; }
     }
   </style>
+  <link rel="stylesheet" href="../../assets/academic-report.css">
 </head>
-<body><script src="../../library-nav.js"></script>
+<body class="academic-report"><script src="../../library-nav.js"></script>
   <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
   <header class="hero">
     <div class="hero-inner">
       <div class="eyebrow">Qingke Talk 146 · AI for AI</div>
-      <h1>从“会改”走向“更会改”：<br>进化、自进化、元进化与 RSI</h1>
+      <h1>AI for AI：从进化到递归自我改进的系统综述</h1>
       <p class="hero-subtitle">面向算法与 Agent 工程师的高密度导读：厘清四组容易混淆的概念，拆解任务工厂、训练—搜索闭环、Evolutionary RL 与经验记忆，并给出判断递归自我改进是否成立的工程尺度。</p>
       <div class="hero-actions">
-        <a class="source-link" href="https://www.bilibili.com/video/BV13ZgA64Ept/" target="_blank" rel="noreferrer">↗ 原始视频 · 1时11分</a>
-        <a class="source-link" href="transcript.txt">时间戳转写</a>
-        <a class="source-link" href="visual_notes.md">画面核对记录</a>
+        <a class="source-link" href="https://www.bilibili.com/video/BV13ZgA64Ept/" target="_blank" rel="noreferrer">观看原始视频 ↗</a>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题">◐ 切换主题</button>
       </div>
       <div class="hero-metrics" aria-label="报告关键数据">
@@ -277,10 +276,7 @@
         <li><a href="#s2">02 · 概念边界</a></li>
         <li><a href="#s3">03 · RSI 与经验落盘</a></li>
         <li><a href="#s4">04 · 任务工厂</a></li>
-        <li><a href="#s5">05 · 训练—搜索闭环</a></li>
-        <li><a href="#s6">06 · Evolutionary RL</a></li>
-        <li><a href="#s7">07 · 结果与问答</a></li>
-        <li><a href="#s8">08 · 落地路线与边界</a></li>
+        <li><a href="#s5">05 · 训练、实验与落地</a></li>
       </ol>
     </nav>
 
@@ -378,7 +374,7 @@
       </section>
 
       <section class="chapter" id="s5">
-        <h2><span class="chapter-number">05</span>Frontis‑MA1 / OpenMLE：训练与搜索共用一套动作语义</h2>
+        <h2><span class="chapter-number">05</span>训练、实验与落地：从 Frontis‑MA1 到研究边界</h2>
         <p class="lead">路线被概括为三步：让经验<strong>可获得、可使用、可内化</strong>。统一任务环境提供执行反馈；测试时 Memory 与长程搜索复用经验；有效轨迹再通过 SFT / RL 写入模型参数。</p>
         <h3>5.1 四个原子操作</h3>
         <div class="operator-grid">
@@ -402,10 +398,9 @@
           <div class="step"><h3>测试时继续搜索</h3><p>模型在统一操作空间内利用 Memory 与长程搜索，产出新的候选、改进边和失败证据。</p></div>
           <div class="step"><h3>重新编译轨迹</h3><p>把新搜索经验筛选、归档并回流参数训练，使能力和测试时机制形成双落点。</p></div>
         </div>
-      </section>
 
-      <section class="chapter" id="s6">
-        <h2><span class="chapter-number">06</span>Evolutionary RL 与经验记忆</h2>
+        <div class="chapter-subsection" id="s6">
+        <h3 class="section-divider">Evolutionary RL 与经验记忆</h3>
         <h3>6.1 异质指标先映射成统一奖励</h3>
         <div class="split">
           <div class="compact-card"><h4>为什么需要归一化</h4><p>不同 MLE 任务的指标尺度、方向和难度不同，原始分数不能直接进入同一个 RL 目标。</p></div>
@@ -431,10 +426,10 @@
         </div>
         <figure><img src="frames/frame_0028_00-41-06.jpg" alt="OpenMLE-Evo 的经验卡、父节点选择与记忆注入流程"><figcaption>00:41:06 · OpenMLE‑Evo 把有关进化的经验积累到测试时搜索。</figcaption></figure>
         <div class="callout warn"><span class="callout-title">记忆治理不能省略</span>经验库会膨胀、冲突并产生错误检索。元进化的目标之一，就是让系统学习哪些经验值得保留、如何合并修订，以及何时淘汰。</div>
-      </section>
 
-      <section class="chapter" id="s7">
-        <h2><span class="chapter-number">07</span>实验结果怎么读，以及问答中的工程判断</h2>
+        </div>
+        <div class="chapter-subsection" id="s7">
+        <h3 class="section-divider">实验结果怎么读，以及问答中的工程判断</h3>
         <h3>7.1 报告展示的结果</h3>
         <div class="fact-strip">
           <div class="fact"><span class="fact-label">Model</span><b>Frontis‑MA1 35B</b><small>配合 OpenMLE‑Evo‑Max</small></div>
@@ -456,10 +451,10 @@
           <div class="qa"><b>如何缓解 Reward Hacking？</b><p>增加真实、复杂、跨轮次任务与综合指标；主观 Rubric 仍只能缓解而非根治。</p></div>
           <div class="qa"><b>小团队怎样 Scaling？</b><p>先覆盖一个高价值垂域，再向相邻分布扩散；关键是循环中有经验沉淀和学习。</p></div>
         </div>
-      </section>
 
-      <section class="chapter" id="s8">
-        <h2><span class="chapter-number">08</span>落地路线、改进器评测与不确定性</h2>
+        </div>
+        <div class="chapter-subsection" id="s8">
+        <h3 class="section-divider">落地路线、改进器评测与研究边界</h3>
         <blockquote>可验证任务 × 统一执行闭环 × 经验双落点 × 改进器评测</blockquote>
         <div class="steps">
           <div class="step"><h3>选择窄而可验证的任务</h3><p>先找一个结果可自动校验、价值明确的垂直问题，不急着追求“通用自进化”。</p></div>
@@ -471,13 +466,15 @@
           <div class="step"><h3>用连续代际验证 RSI</h3><p>先证明“会改”，再证明“更会改”，最后检验升级后的改进器能否持续接管并复利。</p></div>
         </div>
         <figure><img src="frames/frame_0031_00-45-40.jpg" alt="报告总结从会改走向更会改的路径和迈向 RSI 的展望"><figcaption>00:45:40 · 总结页：可验证任务、统一执行闭环、经验双落点与改进器评测。</figcaption></figure>
-        <h3>资料边界</h3>
+        <h3>研究边界</h3>
         <ul class="footer-note">
           <li>本文忠实总结视频内容，不构成对论文、公司声明或实验结果的独立事实核查。</li>
-          <li>自动转写中的英文专名与版本号已依据幻灯片校正，但近期项目与性能数字仍应以论文或项目主页为准。</li>
+          <li>近期项目、模型版本与性能数字变化较快，应以论文、代码仓库或项目主页的最新信息为准。</li>
           <li>RSI 在学界没有统一边界；本文采用的是讲者在报告中的分析框架。</li>
-          <li>可继续查看<a href="transcript.txt">完整时间戳转写</a>与<a href="visual_notes.md">视觉核对记录</a>。</li>
+          <li>本页用于建立方法框架与工程判断，不替代对原始论文、评测设置和开源实现的审阅。</li>
         </ul>
+
+        </div>
       </section>
     </main>
 

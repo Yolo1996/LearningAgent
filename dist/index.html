@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="大模型研究笔记：系统整理后训练、智能体、自我演化与 AI 科研方向的图文学习资料。">
-  <meta name="theme-color" content="#f2f5f9">
+  <meta name="theme-color" content="#0b1930">
   <title>大模型研究笔记 · LLM Research Notes</title>
   <style>
     :root{--bg:#f3f6fa;--surface:#fff;--surface-2:#f8fafc;--ink:#172132;--muted:#657287;--line:#dde5ef;--navy:#0b1930;--blue:#1769e0;--blue-soft:#eaf2ff;--purple:#7954c8;--lime:#b9f45b;--green:#16825e;--orange:#c36918;--shadow:0 14px 38px rgba(23,40,70,.09);--sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,Menlo,monospace}
@@ -27,9 +27,10 @@
     @media(max-width:420px){.hero h1{font-size:34px}.stats{grid-template-columns:1fr 1fr}.stat{padding:11px}.stat b{font-size:19px}.thumb{height:164px}}
     @media print{body{background:#fff}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.hero:after,.toolbar{display:none}.hero p,.stat small,.stat span{color:#333}.stat{border-color:#aaa;background:#fff}.stat b{color:#111}.shell{max-width:none;padding:20px 0}.grid{grid-template-columns:1fr 1fr}.card{break-inside:avoid;box-shadow:none}.thumb{height:125px}.footer{display:none}}
   </style>
-  <link rel="stylesheet" href="./site.css?v=20260919-2">
+  <link rel="stylesheet" href="./assets/academic-report.css?v=20260919-3">
+  <link rel="stylesheet" href="./site.css?v=20260919-3">
 </head>
-<body>
+<body class="academic-index">
   <header class="hero">
     <div class="hero-in">
       <div class="site-nav">
@@ -73,42 +74,42 @@
     <section class="grid" id="grid" aria-label="学习笔记列表">
       <a class="card" data-topic="training agent" data-search="MiMo V2.6 强化学习 后训练 RL GRPO PPO Agentic Rollout SFT 沙箱" href="./BV1RHe26VE4M-summary/summary.html">
         <div class="thumb"><img src="./BV1RHe26VE4M-summary/frames/frame_0007_00-03-07.jpg" alt="MiMo 强化学习异步流水线画面" loading="lazy"><span class="series">RL POST-TRAINING</span><span class="edition">技术增强版</span></div>
-        <div class="card-body"><div class="tags"><span class="tag">后训练</span><span class="tag purple">Agentic RL</span><span class="tag green">系统工程</span></div><h3>MiMo‑V2.6 强化学习训练：后训练技术导读</h3><p class="desc">从超大规模 Rollout、动态采样和组内信用分配，深入到异步流水线、沙箱基础设施与训练稳定性。</p><div class="meta"><strong>高密度技术解析</strong><span>·</span><span>含拓展调研</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag">后训练</span><span class="tag purple">Agentic RL</span><span class="tag green">系统工程</span></div><h3>MiMo‑V2.6：强化学习后训练的系统方法</h3><p class="desc">从超大规模 Rollout、动态采样和组内信用分配，深入到异步流水线、沙箱基础设施与训练稳定性。</p><div class="meta"><strong>高密度技术解析</strong><span>·</span><span>含拓展调研</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="training" data-search="SFT RL OPD OPSD on-policy 蒸馏 分布 后训练 灾难性遗忘 李小羊" href="./BV1d6356hE41/summary.html">
         <div class="thumb"><img src="./BV1d6356hE41/frames/frame_0021_00-10-03.jpg" alt="RL 在当前策略分布附近采样与更新" loading="lazy"><span class="series">SFT · RL · OPD</span><span class="edition">独立总结</span></div>
-        <div class="card-body"><div class="tags"><span class="tag">后训练</span><span class="tag purple">OPD</span><span class="tag green">On-policy</span></div><h3>从分布视角看 SFT、RL、OPD 的区别</h3><p class="desc">比较三种后训练方法如何重塑模型分布，解释灾难性遗忘、on-policy 泛化和密集 token 监督的利弊。</p><div class="meta"><strong>28:09</strong><span>·</span><span>方法原理</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag">后训练</span><span class="tag purple">OPD</span><span class="tag green">On-policy</span></div><h3>SFT、RL 与 OPD：从训练分布理解后训练方法</h3><p class="desc">比较三种后训练方法如何重塑模型分布，解释灾难性遗忘、on-policy 泛化和密集 token 监督的利弊。</p><div class="meta"><strong>28:09</strong><span>·</span><span>方法原理</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="training agent" data-search="MiniMax M2.1 Agent 后训练 Forge CISPO SWE AppDev WebExplorer VIBE OctoBench 沙箱 RL" href="./BV1H8iCBEEgT/summary.html">
         <div class="thumb"><img src="./BV1H8iCBEEgT/frames/frame_0025_00-25-06.jpg" alt="MiniMax M2.1 Forge Agent RL 框架" loading="lazy"><span class="series">QINGKE TALK 101</span><span class="edition">独立总结</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">Agent RL</span><span class="tag">数据合成</span><span class="tag green">系统工程</span></div><h3>MiniMax M2.1：Agent 后训练的经验与认知</h3><p class="desc">从 SWE、AppDev 和 WebExplorer 数据飞轮，到 Forge、CISPO、动态验证与 Agent 评测体系。</p><div class="meta"><strong>61:43</strong><span>·</span><span>工程实践</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag purple">Agent RL</span><span class="tag">数据合成</span><span class="tag green">系统工程</span></div><h3>MiniMax M2.1：Agent 后训练的数据、系统与评测</h3><p class="desc">从 SWE、AppDev 和 WebExplorer 数据飞轮，到 Forge、CISPO、动态验证与 Agent 评测体系。</p><div class="meta"><strong>61:43</strong><span>·</span><span>工程实践</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="agent training evolution" data-search="Agentic Skill 经验 能力 形成 内化 自进化 ThoughtICR TemplateRL SEED 清华 武锦阳" href="./【MLNLP学术Talk】第93期 | 武锦阳@清华大学 - 从经验到能力：Agentic Skill 的形成、内化与自进化.html">
         <div class="thumb"><img src="./BV1qa4X6LET8-summary/frames/frame_0009_00-04-02.jpg" alt="Agentic Skill 报告幻灯片" loading="lazy"><span class="series">MLNLP TALK 93</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">Agent 能力</span><span class="tag">后训练</span><span class="tag green">Skill</span></div><h3>从经验到能力：Agentic Skill 的形成、内化与自进化</h3><p class="desc">理解 Skill 如何从轨迹经验中形成，怎样通过训练内化为参数能力，以及自进化闭环需要哪些关键机制。</p><div class="meta"><strong>31:18</strong><span>·</span><span>ThoughtICR / TemplateRL / SEED</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag purple">Agent 能力</span><span class="tag">后训练</span><span class="tag green">Skill</span></div><h3>Agentic Skill：从经验形成到能力内化与自进化</h3><p class="desc">理解 Skill 如何从轨迹经验中形成，怎样通过训练内化为参数能力，以及自进化闭环需要哪些关键机制。</p><div class="meta"><strong>31:18</strong><span>·</span><span>ThoughtICR / TemplateRL / SEED</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="agent evolution" data-search="Mendel Gödel Machine MGM 自进化 智能体 scaffold 谱系 archive crossover Darwin" href="./Mendel Gödel Machine：让自进化智能体学会比较、继承与进化.html">
         <div class="thumb"><img src="./BV1p3YJ6VEBb-summary/frames/frame_0007_00-09-09.jpg" alt="Mendel Gödel Machine 报告幻灯片" loading="lazy"><span class="series">MENDEL GÖDEL MACHINE</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">Agent 自进化</span><span class="tag green">Scaffold</span><span class="tag orange">谱系搜索</span></div><h3>Mendel Gödel Machine：比较、继承与进化</h3><p class="desc">聚焦智能体 scaffold 的开放式改进：如何保存谱系、比较候选、继承有效结构，并通过跨谱系组合持续演化。</p><div class="meta"><strong>56:26</strong><span>·</span><span>3 类进化算子</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag purple">Agent 自进化</span><span class="tag green">Scaffold</span><span class="tag orange">谱系搜索</span></div><h3>Mendel Gödel Machine：自进化智能体的比较、继承与进化</h3><p class="desc">聚焦智能体 scaffold 的开放式改进：如何保存谱系、比较候选、继承有效结构，并通过跨谱系组合持续演化。</p><div class="meta"><strong>56:26</strong><span>·</span><span>3 类进化算子</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="evolution research agent" data-search="AI for AI 进化 自进化 元进化 RSI NatureGym OpenMLE Frontis MA1 递归自我改进 青稞" href="./【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）.html">
         <div class="thumb"><img src="./BV13ZgA64Ept_summary/frames/frame_0020_00-17-12.jpg" alt="AI for AI 经验内化幻灯片" loading="lazy"><span class="series">QINGKE TALK 146</span><span class="edition">精炼版</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">元进化</span><span class="tag green">RSI</span><span class="tag">AI4AI</span></div><h3>AI for AI：从进化、自进化到递归自我改进</h3><p class="desc">用概念阶梯厘清 Evolution、Self‑Evolution、Meta‑Evolution 与 RSI，并拆解任务工厂、经验回流和改进器评测。</p><div class="meta"><strong>71:34</strong><span>·</span><span>快速建立框架</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag purple">元进化</span><span class="tag green">RSI</span><span class="tag">AI4AI</span></div><h3>AI for AI：进化、自进化、元进化与 RSI 概念导读</h3><p class="desc">用概念阶梯厘清 Evolution、Self‑Evolution、Meta‑Evolution 与 RSI，并拆解任务工厂、经验回流和改进器评测。</p><div class="meta"><strong>71:34</strong><span>·</span><span>快速建立框架</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="evolution research agent" data-search="AI for AI 进化 自进化 元进化 RSI NatureGym OpenMLE Frontis MA1 递归自我改进 青稞 完整版" href="./bilibili-BV13ZgA64Ept-【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）/完整总结/summary.html">
         <div class="thumb"><img src="./bilibili-BV13ZgA64Ept-【青稞Talk 146期】AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）/完整总结/frames/frame_0013_00-18-16.jpg" alt="AI for AI 完整版报告幻灯片" loading="lazy"><span class="series">QINGKE TALK 146</span><span class="edition">完整版</span></div>
-        <div class="card-body"><div class="tags"><span class="tag purple">元进化</span><span class="tag green">RSI</span><span class="tag orange">深度阅读</span></div><h3>AI for AI：技术细节完整版</h3><p class="desc">同一报告的完整技术展开版，保留更丰富的实验数字、方法联系、工程解读和面向算法同学的延伸说明。</p><div class="meta"><strong>71:33</strong><span>·</span><span>完整证据链</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag purple">元进化</span><span class="tag green">RSI</span><span class="tag orange">深度阅读</span></div><h3>AI for AI：从进化到递归自我改进的系统综述</h3><p class="desc">同一报告的完整技术展开版，保留更丰富的实验数字、方法联系、工程解读和面向算法同学的延伸说明。</p><div class="meta"><strong>71:33</strong><span>·</span><span>完整证据链</span><span class="open">打开</span></div></div>
       </a>
 
       <a class="card" data-topic="evolution research" data-search="田渊栋 AI 自进化 RSI 递归自我改进 晚点聊 LateTalk 科研 自动科学家 可解释性" href="./对话田渊栋：AI 自进化如何到来【晚点聊 LateTalk】.html">
         <div class="thumb"><img src="./BV1XnuH66EzS-summary/frames/frame_0014_00-18-36.jpg" alt="田渊栋谈 AI 自进化访谈画面" loading="lazy"><span class="series">LATETALK · RSI</span></div>
-        <div class="card-body"><div class="tags"><span class="tag green">RSI</span><span class="tag purple">AI 科研</span><span class="tag orange">访谈</span></div><h3>对话田渊栋：AI 自进化如何到来</h3><p class="desc">从科研反馈循环、研究品味和新范式出发，讨论 RSI 如何渐进到来，以及人类在自动科研中的长期角色。</p><div class="meta"><strong>84:28</strong><span>·</span><span>长访谈</span><span class="open">打开</span></div></div>
+        <div class="card-body"><div class="tags"><span class="tag green">RSI</span><span class="tag purple">AI 科研</span><span class="tag orange">访谈</span></div><h3>AI 自进化如何到来：研究闭环、人的角色与开放科学</h3><p class="desc">从科研反馈循环、研究品味和新范式出发，讨论 RSI 如何渐进到来，以及人类在自动科研中的长期角色。</p><div class="meta"><strong>84:28</strong><span>·</span><span>长访谈</span><span class="open">打开</span></div></div>
       </a>
     </section>
 

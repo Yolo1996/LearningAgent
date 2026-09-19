@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="小米 MiMo-V2.6 强化学习训练直播总结，以及面向算法工程师的 LLM 后训练技术导读。">
-  <title>MiMo‑V2.6 强化学习训练：视频总结与后训练技术导读</title>
+  <title>MiMo‑V2.6：强化学习后训练的系统方法｜视频学习笔记</title>
   <style>
     :root {
       --bg: #f2f5f9;
@@ -749,19 +749,18 @@
       a { color: #111; text-decoration: underline; }
     }
   </style>
+  <link rel="stylesheet" href="../assets/academic-report.css">
 </head>
-<body><script src="../library-nav.js"></script>
+<body class="academic-report"><script src="../library-nav.js"></script>
   <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
 
   <header class="hero" id="top">
     <div class="hero-inner">
       <div class="eyebrow">MiMo‑V2.6 · RL Post‑Training</div>
-      <h1>强化学习训练直播：<br>视频总结与后训练技术导读</h1>
-      <p class="hero-subtitle">面向算法工程师的高密度阅读版：从视频中的成本、Token 与训练流水线出发，逐层拆解 GRPO、动态采样、异步训练、staleness、训练—推理不一致，以及 Agentic RL 的验证器与信用分配。</p>
+      <h1>MiMo‑V2.6：强化学习后训练的系统方法</h1>
+      <p class="hero-subtitle">从训练成本、Token 规模与流水线出发，系统拆解 GRPO、动态采样、异步训练、staleness、训练—推理一致性，以及 Agentic RL 的验证器与信用分配。</p>
       <div class="hero-actions">
-        <a class="source-link" href="https://www.bilibili.com/video/BV1RHe26VE4M/" target="_blank" rel="noreferrer">↗ 原始视频 · 9分22秒</a>
-        <a class="source-link" href="transcript.txt">时间戳转写</a>
-        <a class="source-link" href="visual_notes.md">画面核对记录</a>
+        <a class="source-link" href="https://www.bilibili.com/video/BV1RHe26VE4M/" target="_blank" rel="noreferrer">观看原始视频 ↗</a>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题">◐ 切换主题</button>
       </div>
       <div class="hero-metrics" aria-label="视频关键数据">
@@ -780,15 +779,10 @@
       <div class="toc-title">目录</div>
       <ol>
         <li><a href="#s1">01 · 结论先行</a></li>
-        <li><a href="#s2">02 · 视频展示了什么</a></li>
-        <li><a href="#s3">03 · 后训练全景</a></li>
-        <li><a href="#s4">04 · GRPO 与动态采样</a></li>
-        <li><a href="#s5">05 · 异步与一致性</a></li>
-        <li><a href="#s6">06 · Agentic RL</a></li>
-        <li><a href="#s7">07 · 指标诊断</a></li>
-        <li><a href="#s8">08 · 实训练路线</a></li>
-        <li><a href="#s9">09 · 工具与阅读</a></li>
-        <li><a href="#s10">10 · 资料边界</a></li>
+        <li><a href="#s2">02 · 视频证据与后训练全景</a></li>
+        <li><a href="#s4">03 · 算法与系统</a></li>
+        <li><a href="#s6">04 · Agentic RL 与指标诊断</a></li>
+        <li><a href="#s8">05 · 实践路线与研究边界</a></li>
       </ol>
     </nav>
 
@@ -806,7 +800,7 @@
       </section>
 
       <section class="chapter" id="s2">
-        <h2><span class="chapter-number">02</span>视频展示了什么</h2>
+        <h2><span class="chapter-number">02</span>视频证据与后训练全景</h2>
 
         <h3>2.1 关键数字快照</h3>
         <div class="table-wrap">
@@ -939,10 +933,8 @@
           <figure><img src="frames/frame_0009_00-04-09.jpg" alt="六万多个沙箱和任务构成"><figcaption>00:04:09 · 代码任务占比 67.7%。</figcaption></figure>
           <figure><img src="frames/frame_0015_00-07-16.jpg" alt="RL Scaling 的系统瓶颈"><figcaption>00:07:16 · 主要矛盾从算法转向系统。</figcaption></figure>
         </div>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="chapter-number">03</span>先建立后训练全景</h2>
+        <div class="chapter-subsection" id="s3">
+        <h3 class="section-divider">2.7 后训练方法全景</h3>
         <div class="table-wrap">
           <table>
             <thead><tr><th>阶段</th><th>数据形式</th><th>训练信号</th><th>在线采样</th><th>典型用途</th></tr></thead>
@@ -961,25 +953,23 @@
           <div class="compact-card"><h4>Agentic RL ≈ MDP</h4><p>每一步行动改变后续状态、可观察信息和最终回报，信用分配更困难。</p></div>
         </div>
         <div class="callout info"><span class="callout-title">小米技术路线背景</span><a href="https://mimo.xiaomi.com/papers/mimo-v2-flash.pdf" target="_blank" rel="noreferrer">MiMo‑V2‑Flash 技术报告</a>将后训练拆为通用 SFT、领域教师专项 RL/SFT 与 Multi‑Teacher On‑Policy Distillation，并区分单轮任务和 Agentic RL。</div>
+        </div>
       </section>
 
-        <section class="chapter" id="s4">
-        <h2><span class="chapter-number">04</span>算法核心：GRPO、动态采样与长度偏差</h2>
-        <h3>4.1 GRPO 的基本计算</h3>
+      <section class="chapter" id="s4">
+        <h2><span class="chapter-number">03</span>算法与系统：GRPO、动态采样与异步训练</h2>
+        <h3>3.1 GRPO 的基本计算</h3>
         <div class="formula-stack">
-          <div class="formula-step"><div class="formula-label"><small>STEP 01</small><b>组内采样与评分</b></div><pre><code>yᵢ ~ μ(·|x),   i = 1...G
-Rᵢ = verifier(x, yᵢ)</code></pre></div>
-          <div class="formula-step"><div class="formula-label"><small>STEP 02</small><b>构造相对优势</b></div><pre><code>Aᵢ = (Rᵢ − mean(R₁...Rɢ)) / (std(R₁...Rɢ) + ε)</code></pre></div>
-          <div class="formula-step"><div class="formula-label"><small>STEP 03</small><b>限制策略更新</b></div><pre><code>ρᵢ,ₜ(θ) = πθ(yᵢ,ₜ | x, yᵢ,&lt;ₜ) / μ(yᵢ,ₜ | x, yᵢ,&lt;ₜ)
-
-Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
+          <div class="formula-step"><div class="formula-label"><small>STEP 01</small><b>组内采样与评分</b></div><math display="block" aria-label="组内采样与评分"><mtable columnalign="left"><mtr><mtd><msub><mi>y</mi><mi>i</mi></msub><mo>∼</mo><mi>μ</mi><mo>(</mo><mo>·</mo><mo>|</mo><mi>x</mi><mo>)</mo><mo>,</mo><mspace width="1em"/><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mo>…</mo><mo>,</mo><mi>G</mi></mtd></mtr><mtr><mtd><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>verifier</mi><mo>(</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mi>i</mi></msub><mo>)</mo></mtd></mtr></mtable></math></div>
+          <div class="formula-step"><div class="formula-label"><small>STEP 02</small><b>构造相对优势</b></div><math display="block" aria-label="组内相对优势"><mrow><msub><mi>A</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>−</mo><mi>mean</mi><mo>(</mo><msub><mi>R</mi><mrow><mn>1</mn><mo>:</mo><mi>G</mi></mrow></msub><mo>)</mo></mrow><mrow><mi>std</mi><mo>(</mo><msub><mi>R</mi><mrow><mn>1</mn><mo>:</mo><mi>G</mi></mrow></msub><mo>)</mo><mo>+</mo><mi>ε</mi></mrow></mfrac></mrow></math></div>
+          <div class="formula-step"><div class="formula-label"><small>STEP 03</small><b>限制策略更新</b></div><math display="block" aria-label="重要性采样比率与裁剪后的策略目标"><mtable columnalign="left"><mtr><mtd><msub><mi>ρ</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>(</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mi>θ</mi></msub><mo>(</mo><msub><mi>y</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>|</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mrow><mi>i</mi><mo>,</mo><mo>&lt;</mo><mi>t</mi></mrow></msub><mo>)</mo></mrow><mrow><mi>μ</mi><mo>(</mo><msub><mi>y</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>|</mo><mi>x</mi><mo>,</mo><msub><mi>y</mi><mrow><mi>i</mi><mo>,</mo><mo>&lt;</mo><mi>t</mi></mrow></msub><mo>)</mo></mrow></mfrac></mtd></mtr><mtr><mtd><msub><mi>L</mi><mtext>policy</mtext></msub><mo>=</mo><mo>−</mo><mi>𝔼</mi><mo>[</mo><mi>min</mi><mo>(</mo><mi>ρA</mi><mo>,</mo><mi>clip</mi><mo>(</mo><mi>ρ</mi><mo>,</mo><mn>1</mn><mo>−</mo><msub><mi>ε</mi><mtext>low</mtext></msub><mo>,</mo><mn>1</mn><mo>+</mo><msub><mi>ε</mi><mtext>high</mtext></msub><mo>)</mo><mi>A</mi><mo>)</mo><mo>]</mo></mtd></mtr></mtable></math></div>
         </div>
         <div class="explain-grid">
           <div class="explain-card" data-index="01"><b>组内排序</b><p>Reward 高于组平均的轨迹被提高概率，低于平均的轨迹被降低概率；无需为每个状态单独训练 critic。</p></div>
           <div class="explain-card" data-index="02"><b>受控更新</b><p>Clip 限制单次策略变化。<a href="https://arxiv.org/abs/2402.03300" target="_blank" rel="noreferrer">DeepSeekMath</a> 用 group baseline 取代 PPO critic，以降低显存与系统复杂度。</p></div>
         </div>
 
-        <h3>4.2 动态采样的收益与代价</h3>
+        <h3>3.2 动态采样的收益与代价</h3>
         <div class="keyline"><strong>动态采样解决的是“有样本但没有梯度”。</strong> 当同组 reward 完全相同时，组内方差为零，relative advantage 接近零。<a href="https://arxiv.org/abs/2503.14476" target="_blank" rel="noreferrer">DAPO</a> 通过 oversampling 过滤 accuracy 为 0 或 1 的 Prompt，直到 batch 装满有效组。</div>
         <div class="split">
           <div class="compact-card"><h4>直接收益</h4><ul><li>提高有效 Prompt 数量</li><li>改善梯度信噪比</li><li>稳定 batch 间有效样本规模</li></ul></div>
@@ -987,18 +977,16 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         </div>
         <div class="callout warn"><span class="callout-title">分布漂移风险</span>动态采样会改变训练分布。Reward 上升可能来自模型变强，也可能只是 scheduler 换了一批更适合当前模型的题。</div>
 
-        <h3>4.3 长度增长不等于能力增长</h3>
+        <h3>3.3 长度增长不等于能力增长</h3>
         <div class="logic-chain">
           <div class="logic-node"><b>Reduction 选择</b><span>按 token、sequence 或 batch 聚合，会改变长短回答的训练权重。</span></div>
           <div class="logic-node"><b>DAPO 修正</b><span>使用 token-level policy gradient loss 与 overlong reward shaping。</span></div>
           <div class="logic-node"><b>Dr. GRPO 警告</b><span>长度归一化和组内标准差归一化，可能诱导错误答案变长。</span></div>
         </div>
         <div class="callout danger"><span class="callout-title">不要单看 response length</span>必须联合 held-out accuracy、正确/错误样本长度、reward/token、固定 Token 预算准确率和 truncation rate。</div>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="chapter-number">05</span>系统核心：异步、Staleness 与训练—推理不一致</h2>
-        <h3>5.1 同步训练为什么浪费</h3>
+        <div class="chapter-subsection" id="s5">
+        <h3 class="section-divider">3.4 异步、Staleness 与训练—推理不一致</h3>
+        <h3>3.4.1 同步训练为什么浪费</h3>
         <div class="explain-grid">
           <div class="explain-card" data-index="S"><b>同步系统：语义清晰，长尾阻塞</b><p>整批生成 → 统一评分 → 训练 → 更新权重。Batch 内 policy version 一致，但所有 worker 都必须等待最长轨迹。</p></div>
           <div class="explain-card" data-index="A"><b>异步系统：吞吐更高，语义更难</b><p>Generation 与 training 解耦，减少空转；代价是必须持续处理旧轨迹、部分轨迹与数据完整性。</p></div>
@@ -1019,7 +1007,7 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         <p>同步系统里，第 <code>k</code> 个 step 的轨迹通常都由 <code>θₖ</code> 生成，并在训练完成后统一得到 <code>θₖ₊₁</code>。完全异步时，learner 可能已经更新到 <code>θₖ₊₂</code>，队列里仍有 <code>θₖ</code> 生成的轨迹；因此仪表盘上的 step 更像调度、统计或 checkpoint 边界，而不一定是全系统同时停下再开始的物理边界。</p>
         <div class="keyline"><a href="https://arxiv.org/abs/2505.24298" target="_blank" rel="noreferrer">AReaL</a> 关注生成—训练解耦后的利用率；<a href="https://arxiv.org/abs/2604.26256" target="_blank" rel="noreferrer">DORA</a> 强调三条底线：<strong>轨迹内 policy 一致、数据完整、staleness 有界</strong>。</div>
 
-        <h3>5.2 Staleness 是算法指标</h3>
+        <h3>3.4.2 Staleness 是算法指标</h3>
         <p class="section-intro">轨迹由 policy version <code>k</code> 生成、learner 在训练时已推进到 <code>k+s</code>，其中 <code>s</code> 就是版本延迟。它不是单纯的队列延时，而会直接改变梯度估计。</p>
         <ul class="risk-grid">
           <li>行为策略 <code>μ</code> 与当前策略 <code>πθ</code> 差距扩大</li>
@@ -1030,7 +1018,7 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         <div class="compact-card"><h4>常用控制手段</h4><ul class="dense-list"><li>限制最大 policy lag，调节 rollout / training 资源比例</li><li>丢弃或降权旧样本，截断 importance sampling</li><li>切分 partial rollout，并限制其进入 batch 的占比</li><li>维护多 policy version，确保单条轨迹内部一致</li></ul></div>
         <div class="callout info"><span class="callout-title">MiMo‑V2‑Flash 的系统实现</span>Data Scheduler 按 sequence 细粒度调度；超长轨迹可跨 step 切片，同时限制 staleness 和 partial 样本占比，并使用 staleness-aware truncated importance sampling。</div>
 
-        <h3>5.3 长轨迹如何切片训练</h3>
+        <h3>3.4.3 长轨迹如何切片训练</h3>
         <p class="section-intro">Agent 轨迹可能包含几十轮交互和十几万 Token，难以作为一个计算单元直接完成前向与反向传播。工程上经常把它拆成较短片段，但必须区分<strong>直接裁剪</strong>和<strong>保留关联的切片</strong>。</p>
         <div class="table-wrap">
           <table>
@@ -1063,7 +1051,7 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         <div class="callout good"><span class="callout-title">对终局奖励 GRPO 的稳妥做法</span>若只有任务结束时才知道 reward，通常先完成轨迹并计算组内 advantage，再做训练切片。提前训练未完成的前缀，需要 value、过程奖励或延迟回填等额外机制，不能把未知终局回报简单当成零。</div>
         <div class="callout warn"><span class="callout-title">公开信息边界</span>视频和现有材料表明系统会处理 partial rollout、跨 step 切片与 staleness；具体片段边界、回报回填方式和训练 mask 仍应以正式开源实现为准。</div>
 
-        <h3>5.4 相同权重也可能不是同一策略</h3>
+        <h3>3.4.4 相同权重也可能不是同一策略</h3>
         <div class="table-wrap"><table><thead><tr><th>不一致来源</th><th>后果</th></tr></thead><tbody>
           <tr><td>FP8 rollout / BF16 training</td><td>相同权重产生不同 logits 与 token probabilities</td></tr>
           <tr><td>SGLang/vLLM / Megatron/FSDP</td><td>Kernel、算子顺序或数值精度不同</td></tr>
@@ -1073,13 +1061,14 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
           <tr><td>多轮上下文拼接差异</td><td>Rollout 与训练看到不同 history</td></tr>
         </tbody></table></div>
         <p class="section-intro"><a href="https://openreview.net/forum?id=8MHqvb4lK9" target="_blank" rel="noreferrer">On the Rollout-Training Mismatch</a> 将“同权重、不同执行语义”视为隐式 off-policy，并用 truncated importance sampling 修正：</p>
-        <pre class="formula"><code>wₜ = clip(πtrain(yₜ|hₜ) / μrollout(yₜ|hₜ), lower, upper)</code></pre>
+        <div class="math-block" role="math" aria-label="训练策略与生成策略之间的裁剪重要性权重"><math display="block"><mrow><msub><mi>w</mi><mi>t</mi></msub><mo>=</mo><mi>clip</mi><mo>(</mo><mfrac><mrow><msub><mi>π</mi><mtext>train</mtext></msub><mo>(</mo><msub><mi>y</mi><mi>t</mi></msub><mo>|</mo><msub><mi>h</mi><mi>t</mi></msub><mo>)</mo></mrow><mrow><msub><mi>μ</mi><mtext>rollout</mtext></msub><mo>(</mo><msub><mi>y</mi><mi>t</mi></msub><mo>|</mo><msub><mi>h</mi><mi>t</mi></msub><mo>)</mo></mrow></mfrac><mo>,</mo><mi>lower</mi><mo>,</mo><mi>upper</mi><mo>)</mo></mrow></math></div>
         <div class="keyline"><strong>MoE 还多一层路由语义。</strong> 小米在 V2‑Flash 报告中介绍 Rollout Routing Replay：训练时复用 rollout 阶段实际选择的专家，降低相同权重下的路由不一致。</div>
+        </div>
       </section>
 
       <section class="chapter" id="s6">
-        <h2><span class="chapter-number">06</span>Agentic RL：环境、验证器与信用分配</h2>
-        <h3>6.1 为什么它比数学 RLVR 难</h3>
+        <h2><span class="chapter-number">04</span>Agentic RL 与指标诊断</h2>
+        <h3>4.1 为什么它比数学 RLVR 难</h3>
         <p class="section-intro">数学 RLVR 常见形式是“一次生成答案 → exact match”。代码 Agent 则是一个不断改变外部状态的长时序过程：</p>
         <pre><code>读 issue → 搜索代码 → 修改文件 → 运行测试 → 读报错 → 再修改 → 完成</code></pre>
         <div class="explain-grid">
@@ -1088,7 +1077,7 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         </div>
         <div class="callout good"><span class="callout-title">公开实现中的环境设计</span>MiMo‑V2‑Flash 使用真实 GitHub issue 与 unit tests；仓库快照封装为容器并通过 Kubernetes 并行运行。工具保持少量、原子，scaffold 尽量小，让模型自己发现工作流。</div>
 
-        <h3>6.2 三种信用分配粒度</h3>
+        <h3>4.2 三种信用分配粒度</h3>
         <div class="table-wrap"><table><thead><tr><th>粒度</th><th>方法</th><th>优点</th><th>主要问题</th></tr></thead><tbody>
           <tr><td><strong>Trajectory</strong></td><td>最终 reward 广播到整条轨迹</td><td>简单、成本低</td><td>无法定位关键中间步骤</td></tr>
           <tr><td><strong>Turn</strong></td><td>每轮 action / observation 估计 advantage</td><td>更符合多轮 MDP</td><td>需要稳定状态与回报定义</td></tr>
@@ -1096,16 +1085,14 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         </tbody></table></div>
         <div class="keyline"><strong>粒度越细，对环境确定性的要求越高。</strong> <a href="https://arxiv.org/abs/2505.11821" target="_blank" rel="noreferrer">Turn-Level Credit Assignment</a> 表明 turn advantage 可改善多轮工具任务；但若环境无法稳定重放，中间 reward 会混入基础设施噪声。</div>
 
-        <h3>6.3 先审计 Verifier，再调 Optimizer</h3>
+        <h3>4.3 先审计 Verifier，再调 Optimizer</h3>
         <div class="split">
           <div class="compact-card"><h4>常见 Reward Hacking</h4><ul><li>修改或绕过测试</li><li>硬编码样例答案</li><li>利用超时或异常退出</li><li>迎合 rubric 表面词汇</li><li>过拟合单一 LLM judge</li></ul></div>
           <div class="compact-card"><h4>Verifier 防线</h4><ul><li>隐藏测试与 adversarial test</li><li>不同模型或规则交叉验证</li><li>审计高 reward / 低 eval 轨迹</li><li>区分环境异常与任务失败</li><li>隔离 verifier 私有逻辑</li></ul></div>
         </div>
         <div class="callout warn"><span class="callout-title">研究结论</span><a href="https://arxiv.org/abs/2604.15149" target="_blank" rel="noreferrer">LLMs Gaming Verifiers</a> 展示模型如何利用 verifier 漏洞；<a href="https://arxiv.org/abs/2605.12474" target="_blank" rel="noreferrer">Reward Hacking in Rubric-Based RL</a> 进一步说明：更强的 judge 也无法弥补 rubric 本身遗漏的质量维度。</div>
-      </section>
-
-      <section class="chapter" id="s7">
-        <h2><span class="chapter-number">07</span>指标怎么读：从曲线定位问题</h2>
+        <div class="chapter-subsection" id="s7">
+        <h3 class="section-divider">4.4 指标诊断：从曲线定位问题</h3>
         <div class="table-wrap">
           <table>
             <thead><tr><th>指标</th><th>正常含义</th><th>危险信号</th><th>优先排查</th></tr></thead>
@@ -1127,17 +1114,19 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         </div>
         <div class="callout info"><span class="callout-title">跨实现比较要谨慎</span><code>pg_loss</code> 的 reduction、normalization、mask 和 token 权重可能不同；entropy 也不是越高越好，过低代表探索消失，过高可能只是无效随机性。</div>
 
-        <h3>四种典型症状</h3>
+        <h3>4.5 四种典型症状</h3>
         <div class="insight-grid">
           <div class="insight"><b>A · Reward 涨，外部效果不涨</b><p>检查 verifier exploitation、数据泄漏和任务分布变化。优先抽取高 reward / 低 eval 轨迹。</p></div>
           <div class="insight"><b>B · Reward 与长度一起涨</b><p>比较正确与错误样本长度，并在固定 Token 预算下评估 accuracy。</p></div>
           <div class="insight"><b>C · Entropy、Grad Norm、KL 同时异常</b><p>先核对 token ids、mask、position id 和 logprob 一致性，再调学习率。</p></div>
           <div class="insight"><b>D · 某类任务突然全错</b><p>用旧 checkpoint 重放，检查镜像、依赖、网络、工具权限与 hidden tests。</p></div>
         </div>
+        </div>
       </section>
 
       <section class="chapter" id="s8">
-        <h2><span class="chapter-number">08</span>建议的第一次实训练路线</h2>
+        <h2><span class="chapter-number">05</span>实践路线、工具与研究边界</h2>
+        <h3>5.1 建议的第一次实训练路线</h3>
         <p class="lead">先做“小模型 + 单轮可验证 RLVR + 同步 GRPO”，证明数据、奖励和 loss 一致，再逐步增加动态采样、mismatch 修正与多轮 Agent。</p>
         <div class="steps">
           <div class="step"><h3>只采样，不更新</h3><ul class="dense-list"><li>0.5B～3B 模型 + 几千道可验证任务</li><li>跑通 Prompt → G completions → verifier → reward → 日志</li><li>测清 pass@1/pass@G、全对/全错率、长度与截断</li><li>单独记录 verifier 失败率和随机种子方差</li></ul></div>
@@ -1145,11 +1134,9 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
           <div class="step"><h3>四个高信息量消融</h3><ol><li>动态采样关 / 开</li><li>Sample-level / token-level loss</li><li>Group size 4 / 8 / 16</li><li>无修正 / TIS 或 ratio mask</li></ol><p>每次只改变一个变量，并固定 rollout Token 预算。</p></div>
           <div class="step"><h3>进入 Agentic RL</h3><ul class="dense-list"><li>选择有稳定单元测试的代码任务，只开放少量原子工具</li><li>记录每轮 action / observation、工具延迟与 exit code</li><li>固定环境 hash、仓库 commit，跟踪测试增量、超时和 flaky</li><li><strong>前置条件：</strong>环境可重放后，再研究 turn-level credit assignment</li></ul></div>
         </div>
-      </section>
-
-      <section class="chapter" id="s9">
-        <h2><span class="chapter-number">09</span>工具与阅读路线</h2>
-        <h3>9.1 框架选择</h3>
+        <div class="chapter-subsection" id="s9">
+        <h3 class="section-divider">5.2 工具与阅读路线</h3>
+        <h4>框架选择</h4>
         <div class="table-wrap"><table><thead><tr><th>框架</th><th>适合场景</th><th>关注点</th></tr></thead><tbody>
           <tr><td><a href="https://huggingface.co/docs/trl/index" target="_blank" rel="noreferrer">Hugging Face TRL</a></td><td>单机或小规模入门</td><td>SFT、DPO、GRPO 接口直观</td></tr>
           <tr><td><a href="https://github.com/volcengine/verl" target="_blank" rel="noreferrer">verl</a></td><td>研究分布式 RL 数据流</td><td>FSDP/Megatron、vLLM/SGLang、DAPO/DrGRPO</td></tr>
@@ -1158,7 +1145,7 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
         </tbody></table></div>
         <div class="callout good"><span class="callout-title">入门框架的真正标准</span>不是“支持多少算法”，而是能否读取并复算每条 trajectory 的 reward、advantage、old/new logprob、mask 和 policy version。</div>
 
-        <h3>9.2 建议阅读顺序</h3>
+        <h4>建议阅读顺序</h4>
         <ol class="reading-list">
           <li><a href="https://arxiv.org/abs/1707.06347" target="_blank" rel="noreferrer">PPO</a>：Clipped surrogate objective 与 on-policy 更新。</li>
           <li><a href="https://arxiv.org/abs/2402.03300" target="_blank" rel="noreferrer">DeepSeekMath / GRPO</a>：Group baseline 如何取代 critic。</li>
@@ -1171,7 +1158,7 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
           <li><a href="https://arxiv.org/abs/2505.11821" target="_blank" rel="noreferrer">Turn-Level Credit Assignment</a>：多轮 Agent 信用分配。</li>
         </ol>
 
-        <h3>9.3 回看视频时值得追问的十个问题</h3>
+        <h4>回看视频时值得追问的十个问题</h4>
         <ol class="question-list">
           <li>实际使用 GRPO、PPO 还是内部变体？</li>
           <li>Advantage 是 trajectory、turn 还是 token 粒度？</li>
@@ -1184,23 +1171,24 @@ Lpolicy = −E[min(ρA, clip(ρ, 1−εlow, 1+εhigh)A)]</code></pre></div>
           <li>组内信用分配的中间信号来自测试、规则还是 learned judge？</li>
           <li>Reward 增长能否在冻结、不可见的 held-out eval 上复现？</li>
         </ol>
-      </section>
+        </div>
 
-      <section class="chapter" id="s10">
-        <h2><span class="chapter-number">10</span>资料边界与不确定性</h2>
+        <div class="chapter-subsection" id="s10">
+        <h3 class="section-divider">5.3 研究边界与适用范围</h3>
         <ul class="footer-note">
           <li>视频中的成本、Token、奖励和基准分数均为录制时快照，之后可能变化。</li>
           <li>本文忠实总结视频观点，但没有对全部数字作独立事实核验。</li>
           <li>MiMo‑V2.6 的完整实现尚未从当前可访问的公开页面中得到充分披露；V2‑Flash 报告仅用于解释技术背景。</li>
           <li>Agentic In-group Credit Assignment 的完整公式尚未公开，文中已区分公开视频证据与一般 RL 推断。</li>
-          <li>自动转写中的技术术语已依据关键画面校正；可继续查看<a href="transcript.txt">时间戳转写</a>和<a href="visual_notes.md">画面核对记录</a>。</li>
+          <li>算法机制与实现细节应以正式论文、技术报告和开源代码为准；本页用于建立系统化理解，不替代原始研究材料。</li>
         </ul>
+        </div>
       </section>
     </main>
 
     <aside class="rail" aria-label="阅读提示">
       <div class="rail-title">阅读提示</div>
-      <div class="rail-card"><h3>三条阅读路径</h3><ul><li>了解视频：01–02</li><li>理解原理：03–06</li><li>准备实训：07–09</li></ul></div>
+      <div class="rail-card"><h3>三条阅读路径</h3><ul><li>了解证据：01–02</li><li>理解算法：03–04</li><li>准备实训：05</li></ul></div>
       <div class="rail-card"><h3>证据层级</h3><div class="legend">
         <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span><span>视频快照：录制时动态数据</span></div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span><span>官方报告：V2‑Flash 技术披露</span></div>
