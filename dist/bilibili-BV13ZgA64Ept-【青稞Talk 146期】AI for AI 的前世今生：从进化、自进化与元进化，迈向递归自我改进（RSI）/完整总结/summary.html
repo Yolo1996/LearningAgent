@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="青稞 Talk 146 期：AI for AI、进化、自进化、元进化与递归自我改进（RSI）的高密度技术总结。">
+  <title>AI for AI：从进化、自进化与元进化，迈向递归自我改进</title>
+  <style>
+    :root {
+      --bg: #f2f5f9;
+      --surface: #fff;
+      --surface-2: #f7f9fc;
+      --ink: #18202d;
+      --muted: #637083;
+      --line: #dce3ec;
+      --line-strong: #c8d2df;
+      --navy: #0b1930;
+      --navy-2: #102748;
+      --blue: #1769e0;
+      --blue-soft: #e8f1ff;
+      --cyan: #0f8fa6;
+      --green: #10845d;
+      --green-soft: #e7f7f0;
+      --lime: #b9f45b;
+      --orange: #c46a13;
+      --orange-soft: #fff3e5;
+      --red: #bf3447;
+      --red-soft: #fff0f2;
+      --purple: #7855c7;
+      --purple-soft: #f2edff;
+      --shadow: 0 12px 32px rgba(20,38,64,.08);
+      --radius: 14px;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 22px; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.68;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: var(--blue); text-decoration: none; text-underline-offset: 3px; }
+    a:hover { text-decoration: underline; }
+    code { padding: .12em .36em; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-2); font-family: var(--mono); font-size: .9em; }
+    strong { font-weight: 750; }
+
+    .progress-track { position: fixed; inset: 0 0 auto; z-index: 100; height: 3px; }
+    .progress-bar { width: 0; height: 100%; background: linear-gradient(90deg,var(--blue),var(--purple),var(--lime)); transition: width .08s linear; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      color: #f7fbff;
+      background:
+        radial-gradient(circle at 84% 12%, rgba(185,244,91,.18), transparent 25%),
+        radial-gradient(circle at 9% 92%, rgba(120,85,199,.28), transparent 31%),
+        linear-gradient(125deg, var(--navy), #142557 58%, #4b176d);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .12;
+      background-image: linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 1450px; margin: 0 auto; padding: 42px 28px 32px; }
+    .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: #c4cce0; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 32px; height: 2px; background: var(--lime); }
+    h1 { max-width: 1100px; margin: 0; font-size: clamp(30px,4.1vw,53px); line-height: 1.12; letter-spacing: -.035em; }
+    .hero-subtitle { max-width: 980px; margin: 18px 0 0; color: #cbd5e7; font-size: 16px; line-height: 1.7; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .source-link,.theme-toggle { display: inline-flex; align-items: center; min-height: 36px; padding: 7px 12px; border: 1px solid rgba(255,255,255,.18); border-radius: 9px; color: #edf4ff; background: rgba(255,255,255,.08); font: inherit; font-size: 13px; cursor: pointer; }
+    .source-link:hover,.theme-toggle:hover { background: rgba(255,255,255,.14); text-decoration: none; }
+    .hero-metrics { display: grid; grid-template-columns: repeat(6,minmax(125px,1fr)); gap: 10px; margin-top: 30px; }
+    .metric { min-height: 86px; padding: 13px 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; background: rgba(4,18,39,.34); backdrop-filter: blur(5px); }
+    .metric-label { color: #adb9d2; font-size: 11px; letter-spacing: .06em; }
+    .metric-value { margin-top: 4px; color: #fff; font-size: 21px; font-weight: 850; line-height: 1.15; font-variant-numeric: tabular-nums; }
+    .metric-note { margin-top: 4px; color: #adb9d2; font-size: 11px; line-height: 1.35; }
+
+    .layout { display: grid; grid-template-columns: 238px minmax(0,940px) 210px; gap: 22px; max-width: 1450px; margin: 0 auto; padding: 26px 24px 80px; align-items: start; }
+    .toc,.rail { position: sticky; top: 18px; max-height: calc(100vh - 36px); overflow: auto; scrollbar-width: thin; }
+    .toc-title,.rail-title { margin: 0 0 10px; color: var(--muted); font-size: 11px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .toc ol { margin: 0; padding: 0; list-style: none; }
+    .toc li { margin: 2px 0; }
+    .toc a { display: block; padding: 7px 10px; border-left: 2px solid transparent; color: var(--muted); font-size: 13px; line-height: 1.35; }
+    .toc a:hover { color: var(--ink); background: var(--surface); text-decoration: none; }
+    .toc a.active { color: var(--blue); border-left-color: var(--blue); background: var(--blue-soft); font-weight: 750; }
+    .rail-card { padding: 14px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: 0 5px 18px rgba(20,38,64,.04); }
+    .rail-card + .rail-card { margin-top: 12px; }
+    .rail-card h3 { margin: 0 0 8px; padding: 0; border: 0; color: var(--ink); font-size: 13px; }
+    .rail-card h3::before { display: none; }
+    .rail-card p,.rail-card li { color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .rail-card ul { margin: 0; padding-left: 17px; }
+    .legend { display: grid; gap: 7px; }
+    .legend-item { display: grid; grid-template-columns: 10px 1fr; gap: 8px; align-items: start; color: var(--muted); font-size: 12px; }
+    .legend-dot { width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; }
+
+    main { min-width: 0; }
+    .chapter { margin-bottom: 20px; padding: 24px 28px 26px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+    h2 { display: flex; align-items: center; margin: 0 0 20px; padding-bottom: 15px; border-bottom: 1px solid var(--line); font-size: 25px; line-height: 1.25; letter-spacing: -.02em; }
+    h2::after { content: ""; flex: 1; height: 1px; margin-left: 16px; background: linear-gradient(90deg,var(--line-strong),transparent); }
+    .chapter-number { display: inline-flex; align-items: center; justify-content: center; min-width: 31px; height: 24px; margin-right: 8px; padding: 0 8px; border-radius: 7px; color: #fff; background: linear-gradient(135deg,var(--blue),var(--purple)); font-size: 12px; font-weight: 850; vertical-align: 4px; }
+    h3 { display: flex; align-items: center; gap: 9px; margin: 28px 0 11px; color: var(--navy-2); font-size: 18px; line-height: 1.35; }
+    h3::before { content: ""; flex: 0 0 auto; width: 5px; height: 18px; border-radius: 5px; background: linear-gradient(180deg,var(--blue),var(--purple)); }
+    h4 { margin: 20px 0 7px; color: var(--navy-2); font-size: 15px; line-height: 1.42; }
+    p { margin: 8px 0 12px; }
+    ul,ol { margin: 8px 0 14px; padding-left: 22px; }
+    li { margin: 4px 0; }
+
+    .lead { margin: 0; padding: 16px 18px; border-left: 4px solid var(--lime); border-radius: 0 10px 10px 0; background: linear-gradient(90deg,var(--blue-soft),var(--surface-2)); font-size: 17px; font-weight: 650; line-height: 1.68; }
+    .insight-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 14px; }
+    .insight { padding: 14px 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+    .insight b { display: block; margin-bottom: 4px; color: var(--navy-2); font-size: 14px; }
+    .insight p { margin: 0; color: var(--muted); font-size: 13px; }
+    .insight.wide { grid-column: 1/-1; }
+
+    .concept-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 14px 0 17px; }
+    .concept { position: relative; min-height: 150px; padding: 14px 13px 13px; border: 1px solid var(--line); border-top: 4px solid var(--blue); border-radius: 10px; background: var(--surface-2); }
+    .concept:nth-child(2) { border-top-color: var(--cyan); }
+    .concept:nth-child(3) { border-top-color: var(--green); }
+    .concept:nth-child(4) { border-top-color: var(--purple); }
+    .concept:nth-child(5) { border-top-color: var(--orange); }
+    .concept small { display: block; color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .08em; }
+    .concept b { display: block; margin: 5px 0; color: var(--navy-2); font-size: 14px; }
+    .concept p { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+
+    .callout { margin: 14px 0; padding: 13px 15px; border: 1px solid var(--line); border-left-width: 4px; border-radius: 9px; background: var(--surface-2); }
+    .callout.info { border-left-color: var(--blue); background: var(--blue-soft); }
+    .callout.good { border-left-color: var(--green); background: var(--green-soft); }
+    .callout.warn { border-left-color: var(--orange); background: var(--orange-soft); }
+    .callout.danger { border-left-color: var(--red); background: var(--red-soft); }
+    .callout-title { display: block; margin-bottom: 3px; font-weight: 850; }
+    .callout p:last-child { margin-bottom: 0; }
+
+    .table-wrap { margin: 12px 0 16px; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 13px; line-height: 1.48; }
+    th,td { padding: 9px 11px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #415168; background: var(--surface-2); font-size: 12px; font-weight: 850; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: rgba(23,105,224,.035); }
+    td.num { font-variant-numeric: tabular-nums; font-weight: 750; white-space: nowrap; }
+
+    .logic-chain { display: grid; grid-template-columns: repeat(4,1fr); gap: 22px; margin: 14px 0 17px; }
+    .logic-node { position: relative; padding: 14px; border: 1px solid var(--line); border-top: 3px solid var(--purple); border-radius: 10px; background: var(--surface-2); }
+    .logic-node:not(:last-child)::after { content: "→"; position: absolute; right: -17px; top: 40%; color: var(--purple); font-weight: 900; }
+    .logic-node b { display: block; margin-bottom: 4px; color: var(--navy-2); font-size: 13px; }
+    .logic-node span { display: block; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    .fact-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; margin: 14px 0 17px; overflow: hidden; border: 1px solid var(--line); border-radius: 11px; background: var(--line); }
+    .fact { padding: 13px 14px; background: var(--surface-2); }
+    .fact-label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .fact b { display: block; color: var(--navy-2); font-size: 14px; line-height: 1.4; }
+    .fact small { display: block; margin-top: 3px; color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    .compact-card { padding: 14px 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+    .compact-card h4 { margin-top: 0; }
+    .compact-card p:last-child,.compact-card ul:last-child { margin-bottom: 0; }
+    .dense-list { margin: 7px 0 0; padding: 0; list-style: none; }
+    .dense-list li { position: relative; margin: 4px 0; padding-left: 16px; color: var(--muted); font-size: 13px; }
+    .dense-list li::before { content: "•"; position: absolute; left: 2px; color: var(--purple); font-weight: 900; }
+
+    .operator-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin: 14px 0 16px; }
+    .operator { position: relative; min-height: 112px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+    .operator::before { content: attr(data-symbol); display: block; margin-bottom: 8px; color: var(--purple); font: 850 21px/1 var(--mono); }
+    .operator b { display: block; color: var(--navy-2); font-size: 14px; }
+    .operator span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+
+    .steps { counter-reset: phase; display: grid; gap: 10px; margin-top: 12px; }
+    .step { position: relative; padding: 15px 16px 15px 58px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-2); }
+    .step::before { counter-increment: phase; content: counter(phase,decimal-leading-zero); position: absolute; left: 15px; top: 15px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: #fff; background: linear-gradient(135deg,var(--blue),var(--purple)); font: 850 11px/1 var(--mono); }
+    .step h3 { margin: 0 0 5px; padding: 0; border: 0; font-size: 16px; }
+    .step h3::before { display: none; }
+    .step p,.step ul { margin-top: 5px; margin-bottom: 5px; font-size: 13px; }
+
+    .qa-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 9px; margin: 12px 0; }
+    .qa { padding: 13px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+    .qa b { display: block; margin-bottom: 5px; color: var(--navy-2); font-size: 13px; }
+    .qa p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.58; }
+
+    figure { margin: 16px 0 20px; padding: 7px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+    figure img { display: block; width: 100%; height: auto; border-radius: 8px; }
+    figcaption { padding: 7px 5px 2px; color: var(--muted); font-size: 12px; }
+    .figure-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    blockquote { margin: 14px 0; padding: 16px 18px; border-left: 4px solid var(--purple); border-radius: 0 10px 10px 0; color: var(--navy-2); background: var(--purple-soft); font-size: 17px; font-weight: 750; }
+    .footer-note { color: var(--muted); font-size: 13px; }
+
+    .back-top { position: fixed; right: 18px; bottom: 18px; z-index: 20; width: 40px; height: 40px; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--ink); background: var(--surface); box-shadow: var(--shadow); cursor: pointer; opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s ease; }
+    .back-top.visible { opacity: 1; transform: none; pointer-events: auto; }
+
+    body.dark { --bg:#0e1420; --surface:#151e2c; --surface-2:#1a2535; --ink:#e8eef6; --muted:#9bacbf; --line:#29374a; --line-strong:#3a4a60; --blue:#68a7ff; --blue-soft:#182d4b; --green-soft:#15382e; --orange-soft:#3c2b1c; --red-soft:#3f2028; --purple-soft:#2b2344; --shadow:0 12px 34px rgba(0,0,0,.22); }
+    body.dark h3,body.dark h4,body.dark .insight b,body.dark .concept b,body.dark .logic-node b,body.dark .fact b,body.dark .operator b,body.dark .qa b,body.dark blockquote { color:#e8eef6; }
+    body.dark tbody tr:hover { background: rgba(104,167,255,.07); }
+
+    @media (max-width:1220px) {
+      .layout { grid-template-columns: 220px minmax(0,1fr); }
+      .rail { display: none; }
+      .hero-metrics { grid-template-columns: repeat(3,1fr); }
+      .concept-grid { grid-template-columns: repeat(3,1fr); }
+    }
+    @media (max-width:820px) {
+      .hero-inner { padding: 34px 18px 26px; }
+      .layout { display: block; padding: 16px 12px 60px; }
+      .toc { position: static; max-height: none; margin-bottom: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+      .toc ol { display: grid; grid-template-columns: repeat(2,1fr); gap: 3px 8px; }
+      .toc a { border-left: 0; border-radius: 7px; }
+      .toc a.active { border-left: 0; }
+      .chapter { padding: 20px 18px 22px; }
+      .hero-metrics { grid-template-columns: repeat(2,1fr); }
+      .insight-grid,.split,.figure-pair,.qa-grid { grid-template-columns: 1fr; }
+      .concept-grid { grid-template-columns: 1fr 1fr; }
+      .operator-grid { grid-template-columns: 1fr 1fr; }
+      .fact-strip,.logic-chain { grid-template-columns: 1fr; gap: 8px; }
+      .logic-node:not(:last-child)::after { content: "↓"; right: 18px; top: auto; bottom: -17px; }
+    }
+    @media (max-width:480px) {
+      body { font-size: 14px; }
+      h1 { font-size: 29px; }
+      h2 { align-items: flex-start; font-size: 21px; }
+      .hero-metrics,.concept-grid,.operator-grid { grid-template-columns: 1fr 1fr; }
+      .metric { min-height: 78px; padding: 11px; }
+      .metric-value { font-size: 18px; }
+      .toc ol { grid-template-columns: 1fr; }
+      .chapter { padding: 18px 14px 20px; }
+    }
+    @media print {
+      body { color:#111; background:#fff; font-size:11pt; }
+      .hero { color:#111; background:#fff; border-bottom:2px solid #111; }
+      .hero::after,.toc,.rail,.back-top,.theme-toggle,.progress-track { display:none!important; }
+      .hero-subtitle,.metric-label,.metric-note { color:#333; }
+      .metric { color:#111; border-color:#aaa; background:#fff; }
+      .metric-value { color:#111; }
+      .layout { display:block; max-width:none; padding:16px 0; }
+      .chapter { break-inside:avoid; box-shadow:none; border-color:#bbb; }
+      a { color:#111; text-decoration:underline; }
+    }
+  </style>
+</head>
+<body><script src="../../library-nav.js"></script>
+  <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Qingke Talk 146 · AI for AI</div>
+      <h1>从“会改”走向“更会改”：<br>进化、自进化、元进化与 RSI</h1>
+      <p class="hero-subtitle">面向算法与 Agent 工程师的高密度导读：厘清四组容易混淆的概念，拆解任务工厂、训练—搜索闭环、Evolutionary RL 与经验记忆，并给出判断递归自我改进是否成立的工程尺度。</p>
+      <div class="hero-actions">
+        <a class="source-link" href="https://www.bilibili.com/video/BV13ZgA64Ept/" target="_blank" rel="noreferrer">↗ 原始视频 · 1时11分</a>
+        <a class="source-link" href="transcript.txt">时间戳转写</a>
+        <a class="source-link" href="visual_notes.md">画面核对记录</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题">◐ 切换主题</button>
+      </div>
+      <div class="hero-metrics" aria-label="报告关键数据">
+        <div class="metric"><div class="metric-label">视频时长</div><div class="metric-value">71:33</div><div class="metric-note">报告约 47 分钟 + 问答</div></div>
+        <div class="metric"><div class="metric-label">NatureGym</div><div class="metric-value">90</div><div class="metric-note">从约 5,500 篇候选筛出</div></div>
+        <div class="metric"><div class="metric-label">OpenMLE‑Gym</div><div class="metric-value">5,000+</div><div class="metric-note">统一格式训练任务</div></div>
+        <div class="metric"><div class="metric-label">SFT 轨迹</div><div class="metric-value">≈ 26K</div><div class="metric-note">答案、Debug 与改进节点</div></div>
+        <div class="metric"><div class="metric-label">MLE‑Bench Lite</div><div class="metric-value">71.2</div><div class="metric-note">演讲报告 medal avg@3</div></div>
+        <div class="metric"><div class="metric-label">改进原子操作</div><div class="metric-value">4</div><div class="metric-note">Draft / Improve / Debug / Crossover</div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <div class="toc-title">目录</div>
+      <ol>
+        <li><a href="#s1">01 · 结论先行</a></li>
+        <li><a href="#s2">02 · 概念边界</a></li>
+        <li><a href="#s3">03 · RSI 与经验落盘</a></li>
+        <li><a href="#s4">04 · 任务工厂</a></li>
+        <li><a href="#s5">05 · 训练—搜索闭环</a></li>
+        <li><a href="#s6">06 · Evolutionary RL</a></li>
+        <li><a href="#s7">07 · 结果与问答</a></li>
+        <li><a href="#s8">08 · 落地路线与边界</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="chapter-number">01</span>结论先行</h2>
+        <p class="lead">报告的核心不是“让 AI 多循环几轮”，而是把<strong>可执行、可评价的改进轨迹沉淀为可复用经验</strong>。自进化让任务系统越用越强；元进化进一步让改进器本身变强；只有升级后的改进器能接管下一轮并持续产生更强后继，才真正接近递归自我改进（RSI）。</p>
+        <div class="insight-grid">
+          <div class="insight"><b>循环不等于学习</b><p>只有修改—执行—评价，却没有经验回流，等价于反复刷题但不做错题本。</p></div>
+          <div class="insight"><b>Better system ≠ Better improver</b><p>一次找到更好的系统只证明搜索有效，不代表下一轮改进能力变强。</p></div>
+          <div class="insight"><b>任务必须真实可运行</b><p>高价值、可执行、可评价、可追溯，是大规模收集改进轨迹的前提。</p></div>
+          <div class="insight"><b>训练与搜索要说同一种语言</b><p>相同的原子操作让训练经验、模型能力、测试时搜索和新轨迹形成闭环。</p></div>
+          <div class="insight wide"><b>RSI 是固定预算下的持续复利检验</b><p>不仅要比较各代系统的绝对分数，还要看下一代改进器是否在同等资源下改得更快、迁移更稳，并能继续接管后续改进。</p></div>
+        </div>
+        <figure><img src="frames/frame_0002_00-01-31.jpg" alt="报告开场提出 AI for AI、概念边界和工程落地三个问题"><figcaption>00:01:31 · 报告要回答的三个问题：共同闭环、概念边界、工程系统。</figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="chapter-number">02</span>四个层次：谁在改、怎样改、经验落哪、改进器是否升级</h2>
+        <div class="concept-grid">
+          <div class="concept"><small>RELATION</small><b>AI for AI</b><p>回答“谁在改进谁”：AI 实质性参与模型、算法、数据、Agent、评测器或基础设施的构建。</p></div>
+          <div class="concept"><small>UPDATE</small><b>进化</b><p>在单任务内反复提出修改、实现、执行、评价、保留或回滚，产出更好候选解。</p></div>
+          <div class="concept"><small>MEMORY</small><b>自进化</b><p>把任务经验回流到未来系统，沉淀为内容、机制或模型参数。</p></div>
+          <div class="concept"><small>IMPROVER</small><b>元进化</b><p>学习“如何进化”，更新搜索策略、操作集合、经验检索与组织方式。</p></div>
+          <div class="concept"><small>COMPOUNDING</small><b>RSI</b><p>更强改进器接管下一轮并持续产生更强后继；尚未被普遍证明实现。</p></div>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>概念</th><th>判别问题</th><th>反馈最终落点</th></tr></thead><tbody>
+          <tr><td><strong>AI4AI</strong></td><td>AI 是否实质参与另一个 AI 系统的构建或改进？</td><td>模型、算法、训练数据、Agent/Harness、Evaluator、Infrastructure</td></tr>
+          <tr><td><strong>Evolution</strong></td><td>候选是否经过真实执行、评价与筛选？</td><td>更好的当前候选</td></tr>
+          <tr><td><strong>Self‑Evolution</strong></td><td>本轮经验是否进入未来任务系统？</td><td>Skill / Memory、工作流、工具结构、模型参数</td></tr>
+          <tr><td><strong>Meta‑Evolution</strong></td><td>反馈是否更新“下一次怎样改”？</td><td>搜索策略、操作集合、经验检索与更强 Improver</td></tr>
+          <tr><td><strong>RSI</strong></td><td>升级后的 Improver 能否接管下一轮并稳定复利？</td><td>连续的、更强且更高效的后继</td></tr>
+        </tbody></table></div>
+        <figure><img src="frames/frame_0009_00-12-10.jpg" alt="AI4AI 改进对象与 Evolution 最小更新循环"><figcaption>00:12:10 · AI4AI 回答“谁在改进谁”，Evolution 回答“怎样更新”。</figcaption></figure>
+        <div class="logic-chain">
+          <div class="logic-node"><b>提出修改</b><span>AI 生成代码、模型、策略或系统变更。</span></div>
+          <div class="logic-node"><b>真实执行</b><span>在外部环境或沙盒运行候选。</span></div>
+          <div class="logic-node"><b>评价筛选</b><span>用指标、测试或评测器保留/回滚。</span></div>
+          <div class="logic-node"><b>经验回流</b><span>决定只是当前解变好，还是改进机制也升级。</span></div>
+        </div>
+        <div class="callout info"><span class="callout-title">报告最重要的概念分界</span><strong>Better system 不等于 better improver。</strong> 只有反馈开始更新“下一次该怎样改”，才从任务内进化迈向元进化。</div>
+        <figure><img src="frames/frame_0013_00-18-16.jpg" alt="任务进化内循环与元进化外循环的对比"><figcaption>00:18:16 · 自进化让系统变强，元进化让改进器变强。</figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="chapter-number">03</span>RSI 的强判据与经验落盘</h2>
+        <h3>3.1 RSI 不是一次自改，而是可持续复利</h3>
+        <div class="fact-strip">
+          <div class="fact"><span class="fact-label">L0 · Delegation</span><b>自主运行研发环</b><small>能够执行改进流程，但不证明净收益</small></div>
+          <div class="fact"><span class="fact-label">L1 · Net Positive</span><b>比人类闭环更高效</b><small>改进收益开始超过投入</small></div>
+          <div class="fact"><span class="fact-label">L2 · Ignition</span><b>新一代更强改进器</b><small>后继具备更强改进能力</small></div>
+          <div class="fact"><span class="fact-label">L3 · Inflection</span><b>固定投入下收益加速</b><small>接近持续复利的强 RSI 判据</small></div>
+        </div>
+        <blockquote>固定或可比预算下，下一代系统不仅更强，还要能更快、更有效地创造其后继；改进投入应小于后续增益或节省。</blockquote>
+        <figure><img src="frames/frame_0017_00-24-21.jpg" alt="RSI 结果强度分级与固定投入下持续复利示意"><figcaption>00:24:21 · RSI 的关键不是一次自改，而是持续复利；多数系统仍停留在较弱验证层级。</figcaption></figure>
+
+        <h3>3.2 经验的三个落点</h3>
+        <div class="split">
+          <div class="compact-card"><h4>内容与机制资产</h4><ul class="dense-list"><li><strong>内容：</strong>Skill、Memory、知识、操作模板</li><li><strong>机制：</strong>策略、工作流、工具调用结构</li><li><strong>治理：</strong>经验筛选、修订、冲突处理与淘汰</li></ul></div>
+          <div class="compact-card"><h4>参数资产</h4><ul class="dense-list"><li>把稳定产生的高质量轨迹编译为训练数据</li><li>通过 SFT / RL 写入模型参数</li><li>在下一轮测试时搜索中重新产生可验证轨迹</li></ul></div>
+        </div>
+        <div class="callout warn"><span class="callout-title">“刷题不做错题本”问题</span>只有循环、没有经验积累和学习，不能算有效自进化。真正需要记录的是：起始状态、修改动作、执行结果与评价变化。</div>
+
+        <h3>3.3 部署后的三种形态</h3>
+        <div class="insight-grid">
+          <div class="insight"><b>TaskAgent + Memory</b><p>任务 Agent 自己积累可复用的任务经验，改善下一次起点。</p></div>
+          <div class="insight"><b>TaskAgent 内部学习 Improver</b><p>执行任务的同时更新选择操作、检索经验和组织搜索的策略。</p></div>
+          <div class="insight wide"><b>独立 Meta Layer / Agent</b><p>专职改进 TaskAgent，进一步还可能更新自身的改进策略；这是最接近显式元进化的系统形态。</p></div>
+        </div>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="chapter-number">04</span>把高价值问题变成“任务工厂”</h2>
+        <p class="lead">为了规模化收集“怎样改得更好”的轨迹，任务必须同时满足：<strong>高价值、可执行、可评价、可追溯</strong>。MLE 适合作为实验场，因为代码与算法可以真实运行，指标可量化，搜索树与修改日志也易于记录。</p>
+        <div class="logic-chain">
+          <div class="logic-node"><b>高价值</b><span>改进对应真实科学或工程收益。</span></div>
+          <div class="logic-node"><b>可执行</b><span>候选能在统一沙盒真实运行。</span></div>
+          <div class="logic-node"><b>可评价</b><span>指标可量化，方向与边界明确。</span></div>
+          <div class="logic-node"><b>可追溯</b><span>父子节点、修改动作与性能变化完整记录。</span></div>
+        </div>
+        <h3>4.1 NatureGym：从论文到可运行科学任务</h3>
+        <div class="fact-strip">
+          <div class="fact"><span class="fact-label">Collection</span><b>≈ 5,500</b><small>Nature 系列论文候选</small></div>
+          <div class="fact"><span class="fact-label">Three-level filter</span><b>≈ 200</b><small>任务可提取、可评价</small></div>
+          <div class="fact"><span class="fact-label">Construction</span><b>≈ 160</b><small>任务包可以实际运行</small></div>
+          <div class="fact"><span class="fact-label">Calibration</span><b>90</b><small>忠实原文且质量校准</small></div>
+        </div>
+        <figure><img src="frames/frame_0020_00-28-55.jpg" alt="NatureGym 从约 5500 篇论文逐级筛选为 90 个可执行任务"><figcaption>00:28:55 · NatureGym 的五级筛选漏斗：从论文候选到 90 个真实可执行任务。</figcaption></figure>
+        <h3>4.2 OpenMLE‑Gym：扩展任务规模</h3>
+        <div class="split">
+          <div class="compact-card"><h4>来源</h4><p>Kaggle 数据集、竞赛和高质量锚点任务，被统一成可执行任务格式。</p></div>
+          <div class="compact-card"><h4>目标</h4><p>从少量高质量评测扩展到 5,000+ 训练任务，为搜索、SFT 和 RL 持续提供轨迹。</p></div>
+        </div>
+        <div class="callout info"><span class="callout-title">任务工厂的本质</span>不是简单收集更多 Prompt，而是把开放问题转成可以执行、重放、度量、比较并形成搜索树的数据生产系统。</div>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="chapter-number">05</span>Frontis‑MA1 / OpenMLE：训练与搜索共用一套动作语义</h2>
+        <p class="lead">路线被概括为三步：让经验<strong>可获得、可使用、可内化</strong>。统一任务环境提供执行反馈；测试时 Memory 与长程搜索复用经验；有效轨迹再通过 SFT / RL 写入模型参数。</p>
+        <h3>5.1 四个原子操作</h3>
+        <div class="operator-grid">
+          <div class="operator" data-symbol="01"><b>Draft</b><span>从零生成一个可执行的初始方案。</span></div>
+          <div class="operator" data-symbol="↗"><b>Improve</b><span>基于父节点定向提升当前候选。</span></div>
+          <div class="operator" data-symbol="⚙"><b>Debug</b><span>根据执行反馈修复失败候选。</span></div>
+          <div class="operator" data-symbol="×"><b>Crossover</b><span>组合多个候选的互补机制。</span></div>
+        </div>
+        <div class="logic-chain">
+          <div class="logic-node"><b>训练经验</b><span>从搜索树抽取答案、Debug 边和改进节点。</span></div>
+          <div class="logic-node"><b>模型能力</b><span>用 execution-grounded SFT / RL 学习“怎样改”。</span></div>
+          <div class="logic-node"><b>测试时搜索</b><span>在统一操作接口下选择何时改、改哪个候选。</span></div>
+          <div class="logic-node"><b>新轨迹回流</b><span>搜索产生的新证据继续进入训练与记忆。</span></div>
+        </div>
+        <figure><img src="frames/frame_0024_00-35-01.jpg" alt="训练与搜索共享 Draft Improve Debug Crossover 四个原子操作"><figcaption>00:35:01 · 四个原子操作让训练与搜索说同一种语言。</figcaption></figure>
+
+        <h3>5.2 轨迹如何变成模型能力</h3>
+        <div class="steps">
+          <div class="step"><h3>SFT 不只收最终答案</h3><p>从搜索树采集高质量解、父错子对的 Debug 边和其他有效改进节点，形成约 2.6 万条训练数据。</p></div>
+          <div class="step"><h3>执行反馈作为训练依据</h3><p>训练样本保留真实运行结果，而非只模仿文本形式，降低“看起来合理但不可运行”的风险。</p></div>
+          <div class="step"><h3>测试时继续搜索</h3><p>模型在统一操作空间内利用 Memory 与长程搜索，产出新的候选、改进边和失败证据。</p></div>
+          <div class="step"><h3>重新编译轨迹</h3><p>把新搜索经验筛选、归档并回流参数训练，使能力和测试时机制形成双落点。</p></div>
+        </div>
+      </section>
+
+      <section class="chapter" id="s6">
+        <h2><span class="chapter-number">06</span>Evolutionary RL 与经验记忆</h2>
+        <h3>6.1 异质指标先映射成统一奖励</h3>
+        <div class="split">
+          <div class="compact-card"><h4>为什么需要归一化</h4><p>不同 MLE 任务的指标尺度、方向和难度不同，原始分数不能直接进入同一个 RL 目标。</p></div>
+          <div class="compact-card"><h4>怎样构造信号</h4><p>使用排行榜或动态统计确定自适应上下界，把任务表现映射到统一奖励区间，再做组内优势估计。</p></div>
+        </div>
+        <figure><img src="frames/frame_0026_00-38-03.jpg" alt="Evolutionary RL 将不同任务的异质指标映射到统一奖励"><figcaption>00:38:03 · 通过自适应边界把异质指标变成统一奖励信号。</figcaption></figure>
+
+        <h3>6.2 奖励 New Best，而不只是高于平均</h3>
+        <div class="callout good"><span class="callout-title">Upper-tail signal</span>低于当前组中上游水平的候选不予奖励；entropic advantage 放大创造历史最佳候选的信号，目标是推动搜索前沿，而不只是提高组内平均。</div>
+        <div class="fact-strip">
+          <div class="fact"><span class="fact-label">Baseline</span><b>1.58</b><small>未加 entropic weighting 的优势信号</small></div>
+          <div class="fact"><span class="fact-label">Entropic</span><b>6.39</b><small>幻灯片报告约 4× 上尾信号</small></div>
+          <div class="fact"><span class="fact-label">Target</span><b>New Best</b><small>创造历史最佳，而非仅高于平均</small></div>
+          <div class="fact"><span class="fact-label">Caveat</span><b>Speaker claim</b><small>数值属于报告展示，未独立复核</small></div>
+        </div>
+
+        <h3>6.3 经验卡与记忆注入</h3>
+        <div class="logic-chain">
+          <div class="logic-node"><b>记录节点</b><span>方法族、相对父节点提升、排名与执行结果。</span></div>
+          <div class="logic-node"><b>三因子评分</b><span>综合质量、进步与新颖性选择父节点。</span></div>
+          <div class="logic-node"><b>检索相关经验</b><span>汇总祖先与兄弟节点的成功、失败和互补机制。</span></div>
+          <div class="logic-node"><b>生成新候选</b><span>Memory 注入改进操作，再用沙盒验证效果。</span></div>
+        </div>
+        <figure><img src="frames/frame_0028_00-41-06.jpg" alt="OpenMLE-Evo 的经验卡、父节点选择与记忆注入流程"><figcaption>00:41:06 · OpenMLE‑Evo 把有关进化的经验积累到测试时搜索。</figcaption></figure>
+        <div class="callout warn"><span class="callout-title">记忆治理不能省略</span>经验库会膨胀、冲突并产生错误检索。元进化的目标之一，就是让系统学习哪些经验值得保留、如何合并修订，以及何时淘汰。</div>
+      </section>
+
+      <section class="chapter" id="s7">
+        <h2><span class="chapter-number">07</span>实验结果怎么读，以及问答中的工程判断</h2>
+        <h3>7.1 报告展示的结果</h3>
+        <div class="fact-strip">
+          <div class="fact"><span class="fact-label">Model</span><b>Frontis‑MA1 35B</b><small>配合 OpenMLE‑Evo‑Max</small></div>
+          <div class="fact"><span class="fact-label">MLE‑Bench Lite</span><b>71.2</b><small>Medal avg@3，演讲报告值</small></div>
+          <div class="fact"><span class="fact-label">NatureBench · All S</span><b>30%</b><small>相关组合展示结果</small></div>
+          <div class="fact"><span class="fact-label">NatureBench · All M</span><b>70%</b><small>相关组合展示结果</small></div>
+        </div>
+        <figure><img src="frames/frame_0029_00-42-37.jpg" alt="Frontis-MA1 与其他模型在 MLE-Bench Lite 上的结果和参数规模关系"><figcaption>00:42:37 · MLE‑Bench Lite 主结果：幻灯片将 35B 组合置于性能—规模的帕累托前沿附近。</figcaption></figure>
+        <div class="callout danger"><span class="callout-title">证据边界</span>上述性能数字来自讲者与幻灯片的实验报告，本页面没有独立复现或核验；不应把“报告展示”表述成外部事实确认。</div>
+
+        <h3>7.2 问答环节的八个判断</h3>
+        <div class="qa-grid">
+          <div class="qa"><b>元进化是否等于 Coding Agent？</b><p>不等于。代码只是当前最可执行的改进载体，未来还可能进入硬件与物理世界。</p></div>
+          <div class="qa"><b>经验冲突与膨胀怎么办？</b><p>规则可暂时处理合并和淘汰；更长期的目标是让系统学习经验治理本身。</p></div>
+          <div class="qa"><b>学术界算力有限还能研究吗？</b><p>从高价值、可检验的垂直任务切入，重点比较不同预算下的改进效率。</p></div>
+          <div class="qa"><b>只有树搜索算元进化吗？</b><p>不算。搜索只是进化；学习父节点—动作—子节点—效果，才可能进入元进化。</p></div>
+          <div class="qa"><b>垂直模型与 Harness 能做 RSI 吗？</b><p>能形成经验—训练—再生成经验的闭环，但仍不自动证明已达到 RSI。</p></div>
+          <div class="qa"><b>怎样评估“越改越好”？</b><p>在持续任务序列中比较各代系统、改进增量，以及同预算下是否改得更快。</p></div>
+          <div class="qa"><b>如何缓解 Reward Hacking？</b><p>增加真实、复杂、跨轮次任务与综合指标；主观 Rubric 仍只能缓解而非根治。</p></div>
+          <div class="qa"><b>小团队怎样 Scaling？</b><p>先覆盖一个高价值垂域，再向相邻分布扩散；关键是循环中有经验沉淀和学习。</p></div>
+        </div>
+      </section>
+
+      <section class="chapter" id="s8">
+        <h2><span class="chapter-number">08</span>落地路线、改进器评测与不确定性</h2>
+        <blockquote>可验证任务 × 统一执行闭环 × 经验双落点 × 改进器评测</blockquote>
+        <div class="steps">
+          <div class="step"><h3>选择窄而可验证的任务</h3><p>先找一个结果可自动校验、价值明确的垂直问题，不急着追求“通用自进化”。</p></div>
+          <div class="step"><h3>记录完整改进四元组</h3><p>保存起始状态、修改动作、执行结果、评价变化，并关联环境版本与失败证据。</p></div>
+          <div class="step"><h3>分开任务经验与改进经验</h3><p>前者告诉系统怎样做题；后者描述怎样改进做题方法、怎样选择操作与父节点。</p></div>
+          <div class="step"><h3>治理经验库</h3><p>为经验维护版本、来源、适用范围、失败记录、冲突关系和淘汰机制。</p></div>
+          <div class="step"><h3>统一训练与测试动作语义</h3><p>让参数训练与测试时搜索共用原子操作，减少轨迹到模型能力的转换损耗。</p></div>
+          <div class="step"><h3>单独评测 Improver</h3><p>除最终任务分数，还要衡量单位预算改进幅度、New Best 比例、迁移与 Reward Hacking。</p></div>
+          <div class="step"><h3>用连续代际验证 RSI</h3><p>先证明“会改”，再证明“更会改”，最后检验升级后的改进器能否持续接管并复利。</p></div>
+        </div>
+        <figure><img src="frames/frame_0031_00-45-40.jpg" alt="报告总结从会改走向更会改的路径和迈向 RSI 的展望"><figcaption>00:45:40 · 总结页：可验证任务、统一执行闭环、经验双落点与改进器评测。</figcaption></figure>
+        <h3>资料边界</h3>
+        <ul class="footer-note">
+          <li>本文忠实总结视频内容，不构成对论文、公司声明或实验结果的独立事实核查。</li>
+          <li>自动转写中的英文专名与版本号已依据幻灯片校正，但近期项目与性能数字仍应以论文或项目主页为准。</li>
+          <li>RSI 在学界没有统一边界；本文采用的是讲者在报告中的分析框架。</li>
+          <li>可继续查看<a href="transcript.txt">完整时间戳转写</a>与<a href="visual_notes.md">视觉核对记录</a>。</li>
+        </ul>
+      </section>
+    </main>
+
+    <aside class="rail" aria-label="阅读提示">
+      <div class="rail-title">阅读提示</div>
+      <div class="rail-card"><h3>三条阅读路径</h3><ul><li>厘清概念：01–03</li><li>理解系统：04–06</li><li>评估与落地：07–08</li></ul></div>
+      <div class="rail-card"><h3>证据层级</h3><div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span><span>视频框架：讲者定义与论证</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span><span>幻灯片结果：报告值，未独立核验</span></div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span><span>工程启示：基于报告的结构化提炼</span></div>
+      </div></div>
+      <div class="rail-card"><h3>核心判断</h3><p>循环长度不是关键。真正的分水岭，是经验是否沉淀，以及反馈是否开始更新“下一次怎样改”。</p></div>
+    </aside>
+  </div>
+
+  <button class="back-top" id="backTop" type="button" aria-label="返回顶部">↑</button>
+  <script>
+    (() => {
+      const body = document.body;
+      const bar = document.getElementById('progressBar');
+      const backTop = document.getElementById('backTop');
+      const toggle = document.getElementById('themeToggle');
+      const links = [...document.querySelectorAll('.toc a')];
+      const sections = links.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+      if (localStorage.getItem('rsi-theme') === 'dark') body.classList.add('dark');
+      toggle.addEventListener('click', () => {
+        body.classList.toggle('dark');
+        localStorage.setItem('rsi-theme', body.classList.contains('dark') ? 'dark' : 'light');
+      });
+      backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      const update = () => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        bar.style.width = `${max > 0 ? (scrollY / max) * 100 : 0}%`;
+        backTop.classList.toggle('visible', scrollY > 700);
+        let active = sections[0];
+        for (const section of sections) if (section.getBoundingClientRect().top <= 110) active = section;
+        links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === `#${active.id}`));
+      };
+      addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update);
+      update();
+    })();
+  </script>
+</body>
+</html>
