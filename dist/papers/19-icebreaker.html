@@ -1,19 +1,291 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="description" content="IceBreaker for Conversational Agents: Breaking the First-Message Barrier with Personalized Starters 中文长篇精读：问题、方法、流程、实验与研究边界"><title>IceBreaker：在用户没有明确意图时，用个性化开场完成“共鸣—互动”两阶段握手｜论文长篇精读</title><style>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="IceBreaker for Conversational Agents: Breaking the First-Message Barrier with Personalized Starters 中文长篇精读：问题、方法、流程、实验与研究边界">
+<title>IceBreaker：在用户没有明确意图时，用个性化开场完成“共鸣—互动”两阶段握手｜论文长篇精读</title>
+<style>
 :root{--bg:#eef3f9;--surface:#fff;--surface2:#f7f9fc;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--navy:#08172d;--blue:#2468e8;--purple:#7b55d9;--lime:#baf35b;--green:#0c8a62;--orange:#c46a13;--red:#c43d54;--shadow:0 13px 34px rgba(21,39,66,.08);--sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,monospace}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.72 var(--sans);-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;z-index:99;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--lime))}.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(186,243,91,.19),transparent 26%),radial-gradient(circle at 8% 90%,rgba(123,85,217,.31),transparent 32%),linear-gradient(125deg,var(--navy),#142959 58%,#48166b)}.hero:after{content:"";position:absolute;inset:0;opacity:.11;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:44px 44px}.hero-in{position:relative;z-index:1;max-width:1460px;margin:auto;padding:42px 28px 32px}.eyebrow{display:flex;align-items:center;gap:10px;color:#c6d0e5;font-size:12px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.eyebrow:before{content:"";width:34px;height:2px;background:var(--lime)}h1{max-width:1160px;margin:13px 0 0;font-size:clamp(29px,3.8vw,51px);line-height:1.12;letter-spacing:-.035em}.subtitle{max-width:1060px;margin:14px 0 0;color:#d1daeb;font-size:17px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.action,.theme{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid rgba(255,255,255,.19);border-radius:9px;color:#f2f6ff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.action:hover,.theme:hover{background:rgba(255,255,255,.14);text-decoration:none}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:28px}.metric{min-height:86px;padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(3,16,38,.34);backdrop-filter:blur(5px)}.metric small{color:#aebbd3;font-size:11px;letter-spacing:.06em}.metric b{display:block;margin-top:4px;color:#fff;font-size:18px;line-height:1.2}.metric span{display:block;margin-top:5px;color:#aebbd3;font-size:11px;line-height:1.35}.layout{display:grid;grid-template-columns:235px minmax(0,960px) 210px;gap:22px;max-width:1460px;margin:auto;padding:26px 24px 80px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 10px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.toc ol{margin:0;padding:0;list-style:none}.toc li{margin:2px 0}.toc a{display:block;padding:7px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.35}.toc a:hover{color:var(--ink);background:var(--surface);text-decoration:none}.toc a.active{color:var(--blue);border-left-color:var(--blue);background:#e8f1ff;font-weight:750}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);box-shadow:0 5px 18px rgba(20,38,64,.04)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 8px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12px;line-height:1.55}.rail-card ul{margin:0;padding-left:17px}.chapter{margin-bottom:20px;padding:24px 28px 27px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}h2{display:flex;align-items:center;margin:0 0 19px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.25;letter-spacing:-.02em}h2:after{content:"";flex:1;height:1px;margin-left:16px;background:linear-gradient(90deg,#c9d4e1,transparent)}.num{display:inline-flex;align-items:center;justify-content:center;min-width:31px;height:24px;margin-right:8px;padding:0 8px;border-radius:7px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:12px;font-weight:850}.lead{margin:0;padding:17px 19px;border-left:4px solid var(--lime);border-radius:0 10px 10px 0;background:linear-gradient(90deg,#eaf2ff,var(--surface2));font-size:17px;font-weight:650}.correction{margin:14px 0 0;padding:11px 13px;border-left:4px solid var(--orange);border-radius:0 8px 8px 0;background:#fff3e5;color:#8a4a0c;font-size:13px}.dense-list{margin:8px 0 0;padding:0;list-style:none}.dense-list li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-size:13.5px}.dense-list li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini{padding:14px 15px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,var(--surface2),var(--surface))}.mini h3{margin:0 0 7px;color:#17325a;font-size:15px}.mini p{margin:0;color:#425168;font-size:13px}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;counter-reset:f}.flow div{position:relative;padding:42px 14px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);font-size:13px;font-weight:650;counter-increment:f}.flow div:before{content:counter(f,decimal-leading-zero);position:absolute;left:14px;top:11px;color:var(--purple);font:850 11px var(--mono)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-17px;top:40%;z-index:2;color:var(--blue);font-weight:900}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;background:var(--surface);font-size:13px;line-height:1.48}th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#415168;background:var(--surface2);font-size:12px;white-space:nowrap}tr:last-child td{border-bottom:0}.verdict{margin:0;padding:16px 18px;border-left:4px solid var(--purple);border-radius:0 10px 10px 0;background:#f2edff;font-size:16px;font-weight:700}.source-note{color:var(--muted);font-size:12px}.back{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s}.back.show{opacity:1;pointer-events:auto}body.dark{--bg:#0d1420;--surface:#151e2c;--surface2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2a394c;--blue:#6aa8ff;--shadow:0 13px 34px rgba(0,0,0,.24)}body.dark .toc a.active{background:#182d4b}body.dark .lead{background:linear-gradient(90deg,#182d4b,var(--surface2))}body.dark .mini h3{color:#e8eef6}body.dark .verdict{background:#2b2344}body.dark .correction{background:#3b2a1a;color:#ffcc8d}@media(max-width:1230px){.layout{grid-template-columns:220px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){.hero-in{padding:34px 18px 26px}.layout{display:block;padding:16px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.toc ol{display:grid;grid-template-columns:repeat(2,1fr)}.chapter{padding:20px 18px}.metrics{grid-template-columns:repeat(2,1fr)}.card-grid,.flow{grid-template-columns:1fr}.flow div:not(:last-child):after{display:none}}@media print{body{background:#fff;color:#111;font-size:11pt}.hero{background:#fff;color:#111;border-bottom:2px solid #111}.hero:after,.toc,.rail,.back,.theme,.progress{display:none!important}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.chapter{break-inside:avoid}a{color:#111;text-decoration:underline}}
 
 .section-intro{margin:-5px 0 18px;color:var(--muted);font-size:13px}.prose{font-size:15px;line-height:1.84}.prose p{margin:0 0 13px}.prose p:last-child{margin-bottom:0}.subhead{display:flex;align-items:center;gap:9px;margin:24px 0 11px;font-size:16px}.subhead:before{content:"";width:5px;height:18px;border-radius:3px;background:linear-gradient(var(--blue),var(--purple))}.figure{margin:18px 0 4px;padding:18px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#f8fbff,#f2f5fb);overflow:hidden}.figure-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:16px}.figure-kicker{color:var(--purple);font:850 10px var(--mono);letter-spacing:.12em}.figure-title{margin:3px 0 0;font-size:16px;line-height:1.35}.figure-note{max-width:310px;color:var(--muted);font-size:11px;text-align:right}.architecture{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;align-items:stretch}.arch-step{position:relative;min-height:152px;padding:15px 14px 13px;border:1px solid #cedaea;border-radius:11px;background:rgba(255,255,255,.85)}.arch-step:not(:last-child):after{content:"→";position:absolute;z-index:2;right:-18px;top:50%;width:24px;height:24px;margin-top:-12px;border:1px solid #c9d7ea;border-radius:50%;color:var(--blue);background:#fff;text-align:center;font-weight:900;line-height:21px}.arch-no{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font:800 11px var(--mono)}.arch-step h4{margin:11px 0 6px;font-size:14px}.arch-step p{margin:0;color:#485970;font-size:12px;line-height:1.55}.loopbar{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:11px;padding:8px;border-radius:8px;color:#385175;background:#e7effa;font-size:11px;font-weight:750}.loopbar:before,.loopbar:after{content:"";flex:1;height:1px;background:#9fb4d0}.causal-map{display:grid;gap:8px}.causal-row{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr;align-items:center}.causal-box{height:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:12px;line-height:1.55}.causal-box b{display:block;margin-bottom:4px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.causal-box.problem b{color:var(--red)}.causal-box.intervention b{color:var(--blue)}.causal-box.effect b{color:var(--green)}.causal-arrow{color:var(--purple);text-align:center;font-size:18px;font-weight:900}.walkthrough{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;counter-reset:walk}.walk{position:relative;min-height:118px;padding:15px 15px 14px 51px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);counter-increment:walk}.walk:before{content:counter(walk,decimal-leading-zero);position:absolute;left:14px;top:14px;color:var(--purple);font:850 14px var(--mono)}.walk h3{margin:0 0 6px;font-size:15px}.walk p{margin:0;color:#485970;font-size:13px}.compare{display:grid;grid-template-columns:150px 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}.compare>div{padding:12px 13px;border-bottom:1px solid var(--line)}.compare>div:nth-last-child(-n+2){border-bottom:0}.compare .label{color:#284c7a;background:#edf4ff;font-size:12px;font-weight:800}.compare .desc{background:var(--surface);font-size:13px}.evidence-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:13px}.evidence{position:relative;min-height:150px;padding:15px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(150deg,#fff,#f5f8fd);overflow:hidden}.evidence:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(var(--blue),var(--purple))}.evidence small{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.evidence strong{display:block;margin:8px 0;color:#17345e;font-size:16px;line-height:1.35}.evidence p{margin:0;color:#536279;font-size:12px;line-height:1.55}.reading-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.reading-card{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}.reading-card .read-no{color:var(--purple);font:850 11px var(--mono)}.reading-card p{margin:7px 0 0;font-size:13px}.callout{margin-top:15px;padding:14px 16px;border:1px dashed #9bb1cc;border-radius:10px;color:#40546f;background:#f7faff;font-size:13px}.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;color:var(--muted);font-size:10px}.legend span:before{content:"";display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;background:var(--blue)}.legend span:nth-child(2):before{background:var(--purple)}.legend span:nth-child(3):before{background:var(--green)}body.dark .figure{background:linear-gradient(145deg,#172334,#121b29)}body.dark .arch-step,body.dark .causal-box,body.dark .evidence{background:#192536;border-color:var(--line)}body.dark .arch-step p,body.dark .walk p,body.dark .evidence p{color:#aebdd0}body.dark .arch-step:not(:last-child):after{background:#172334;border-color:#3b4d65}body.dark .loopbar{color:#b8cae3;background:#21344e}body.dark .compare .label{color:#bcd4f7;background:#1d314a}body.dark .compare .desc{background:#172230}body.dark .evidence strong{color:#dbeaff}body.dark .callout{color:#bfd0e5;background:#172333;border-color:#4b6482}@media(max-width:980px){.architecture{grid-template-columns:repeat(2,1fr)}.arch-step:nth-child(2):after{display:none}.evidence-board,.reading-grid{grid-template-columns:1fr}.causal-row{grid-template-columns:1fr}.causal-arrow{transform:rotate(90deg);height:28px;line-height:28px}.figure-note{display:none}}@media(max-width:820px){.architecture,.walkthrough{grid-template-columns:1fr}.arch-step:not(:last-child):after{display:none}.compare{grid-template-columns:1fr}.compare>div{border-bottom:1px solid var(--line)!important}.compare>div:last-child{border-bottom:0!important}.figure{padding:14px}.chapter{border-radius:11px}h2{font-size:21px}}@media print{.architecture{grid-template-columns:repeat(4,1fr)}.evidence-board,.reading-grid{grid-template-columns:repeat(3,1fr)}.figure{background:#fff}.chapter{break-inside:auto}.figure,.evidence,.walk,.mini{break-inside:avoid}}
-</style></head><body><div class="progress"><span id="progress"></span></div>
-<header class="hero"><div class="hero-in"><div class="eyebrow">DEEP PAPER READING · SELF-EVOLUTION / LONG-HORIZON AGENTS</div><h1>IceBreaker for Conversational Agents: Breaking the First-Message Barrier with Personalized Starters</h1><p class="subtitle">IceBreaker：在用户没有明确意图时，用个性化开场完成“共鸣—互动”两阶段握手 · 从研究动机到实验边界的完整拆解</p><div class="actions"><a class="action" href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">阅读原论文 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div><div class="metrics"><div class="metric"><small>论文类型</small><b>Conversational Recommendation</b><span>研究形态</span></div><div class="metric"><small>演化对象</small><b>对话开场策略</b><span>被持续优化的部分</span></div><div class="metric"><small>核心机制</small><b>兴趣蒸馏 + 偏好对齐</b><span>主要技术路线</span></div><div class="metric"><small>证据</small><b>超大规模线上 A/B</b><span>主要验证范围</span></div><div class="metric"><small>首版日期</small><b>2026-04-20</b><span>已核验</span></div><div class="metric"><small>编号</small><b>19/26</b><span>arXiv:2604.18375 / ACL 2026 Industry</span></div></div></div></header>
-<div class="layout"><nav class="toc" aria-label="文章目录"><div class="side-title">深读目录</div><ol><li><a href="#s1">01 · 核心结论</a></li><li><a href="#s2">02 · 为什么重要</a></li><li><a href="#s3">03 · 方法全景</a></li><li><a href="#s4">04 · 轨迹拆解</a></li><li><a href="#s5">05 · 范式对照</a></li><li><a href="#s6">06 · 实验与证据</a></li><li><a href="#s7">07 · 创新与边界</a></li><li><a href="#s8">08 · 阅读抓手</a></li><li><a href="#s9">09 · 研究启示</a></li></ol></nav><main>
-<section class="chapter" id="s1"><h2><span class="num">01</span>核心结论</h2><p class="lead">会话开始前没有即时上下文，用户又可能只有模糊需求；IceBreaker 从历史 session summary 中提炼可触发共鸣的兴趣，再生成能引发回复的个性化 starter，并通过偏好对齐和自强化持续优化。</p><p class="source-note">原清单时间：2026-08-19　·　核验后首版日期：2026-04-20　·　来源：<a href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">arXiv:2604.18375 / ACL 2026 Industry</a></p><div class="callout"><strong>阅读定位：</strong>这不是只复述摘要的速览。下面会把论文的因果假设、组件协作方式、一条完整运行轨迹、实验能证明与不能证明的内容分别拆开。</div></section>
-<section class="chapter" id="s2"><h2><span class="num">02</span>为什么这个问题重要</h2><p class="section-intro">先理解旧范式为什么会在真实长程任务中失效，再看作者的解法是否击中了主要瓶颈。</p><div class="prose"><p>对话系统通常假设用户先发问，但真实产品中很多用户只有模糊需求，打开页面后并不知道如何开始。此时没有当前轮 Context，系统必须从历史中选择一个既相关、又不会显得突兀的入口。</p><p>IceBreaker 不直接从用户画像生成一句话，而是拆成两步：先确定此刻最可能产生共鸣的 trigger interest，再把它转化为容易回应的 starter。这个分解让“主题相关性”和“互动意愿”分别得到优化。</p></div><h3 class="subhead">论文识别出的具体断点</h3><ul class="dense-list"><li>多数主动 Agent 研究发生在会话已开始之后，忽视首条消息冷启动。</li><li>历史兴趣很多，但不是每个兴趣都适合作为当下开场触发点。</li><li>“相关”不等于“愿意回复”，开场需要同时优化互动性。</li></ul><figure class="figure" aria-label="问题到效果的因果链"><div class="figure-head"><div><div class="figure-kicker">CAUSAL LOGIC</div><h3 class="figure-title">这篇论文试图改变哪条因果链</h3></div><div class="figure-note">把“痛点—干预—预期作用”并排，便于判断方法是否对症。</div></div><div class="causal-map"><div class="causal-row"><div class="causal-box problem"><b>Failure mode</b>多数主动 Agent 研究发生在会话已开始之后，忽视首条消息冷启动。</div><div class="causal-arrow">→</div><div class="causal-box intervention"><b>Intervention</b><strong>Session Summaries</strong><br>把历史会话压缩为稳定、隐私边界清晰的兴趣证据。</div><div class="causal-arrow">→</div><div class="causal-box effect"><b>Expected effect</b>提出 Conversation Starter Generation 这一独立问题。</div></div><div class="causal-row"><div class="causal-box problem"><b>Failure mode</b>历史兴趣很多，但不是每个兴趣都适合作为当下开场触发点。</div><div class="causal-arrow">→</div><div class="causal-box intervention"><b>Intervention</b><strong>Resonance-aware Distillation</strong><br>从长期兴趣中筛选更可能引发当下共鸣的 trigger interest。</div><div class="causal-arrow">→</div><div class="causal-box effect"><b>Expected effect</b>把冷启动拆为共鸣识别和互动生成，避免直接从画像到文案。</div></div><div class="causal-row"><div class="causal-box problem"><b>Failure mode</b>“相关”不等于“愿意回复”，开场需要同时优化互动性。</div><div class="causal-arrow">→</div><div class="causal-box intervention"><b>Intervention</b><strong>Starter Generation</strong><br>将兴趣转化为低门槛、可回应的对话开场。</div><div class="causal-arrow">→</div><div class="causal-box effect"><b>Expected effect</b>有真实线上 A/B 与生产部署证据。</div></div></div><div class="legend"><span>失败来源</span><span>系统干预</span><span>预期收益</span></div></figure></section>
-<section class="chapter" id="s3"><h2><span class="num">03</span>方法全景</h2><p class="section-intro">下面先看系统部件，再看部件之间的信息流。两者缺一不可：组件列表告诉你“有什么”，闭环图告诉你“为什么能工作”。</p><div class="card-grid"><article class="mini"><h3>Session Summaries</h3><p>把历史会话压缩为稳定、隐私边界清晰的兴趣证据。</p></article><article class="mini"><h3>Resonance-aware Distillation</h3><p>从长期兴趣中筛选更可能引发当下共鸣的 trigger interest。</p></article><article class="mini"><h3>Starter Generation</h3><p>将兴趣转化为低门槛、可回应的对话开场。</p></article><article class="mini"><h3>Preference Alignment</h3><p>用个性化偏好信号约束风格和主题。</p></article><article class="mini"><h3>Self-reinforced Loop</h3><p>利用真实互动反馈继续优化开场策略。</p></article><article class="mini"><h3>Two-step Handshake</h3><p>先 evoke resonance，再 stimulate interaction。</p></article></div><figure class="figure" aria-label="方法闭环图"><div class="figure-head"><div><div class="figure-kicker">SYSTEM MAP</div><h3 class="figure-title">从输入到改进：方法的完整运行链</h3></div><div class="figure-note">箭头表示一次轨迹内的信息流；底部回路表示经验会进入下一轮。</div></div><div class="architecture"><div class="arch-step"><span class="arch-no">01</span><h4>历史压缩</h4><p>把多个会话整理为稳定兴趣与近期事件的 summary。</p></div><div class="arch-step"><span class="arch-no">02</span><h4>共鸣筛选</h4><p>从大量兴趣中选出当前时机最适合触发的一个。</p></div><div class="arch-step"><span class="arch-no">03</span><h4>开场生成</h4><p>生成具体、自然、低回答门槛的 starter。</p></div><div class="arch-step"><span class="arch-no">04</span><h4>线上强化</h4><p>用点击、回复和活跃反馈更新偏好对齐与生成策略。</p></div></div><div class="loopbar">评估信号 / 经验证状态 / 可复用经验回写，驱动下一轮</div></figure><h3 class="subhead">核心闭环的抽象表达</h3><div class="flow"><div>从历史提炼触发兴趣</div><div>生成低摩擦个性化开场</div><div>用点击与活跃反馈强化策略</div></div></section>
-<section class="chapter" id="s4"><h2><span class="num">04</span>一条轨迹怎样跑完</h2><p class="section-intro">把方法落到一次真实运行：每一步消费什么信息、产生什么中间状态，以及这些状态如何影响下一步。</p><div class="walkthrough"><article class="walk"><h3>历史压缩</h3><p>把多个会话整理为稳定兴趣与近期事件的 summary。</p></article><article class="walk"><h3>共鸣筛选</h3><p>从大量兴趣中选出当前时机最适合触发的一个。</p></article><article class="walk"><h3>开场生成</h3><p>生成具体、自然、低回答门槛的 starter。</p></article><article class="walk"><h3>线上强化</h3><p>用点击、回复和活跃反馈更新偏好对齐与生成策略。</p></article></div><div class="callout"><strong>关键观察：</strong>这类工作真正的创新通常不只是多调用一次模型，而是改变“什么能被持久化、谁有权更新它、更新何时被接受”这三条系统规则。</div></section>
-<section class="chapter" id="s5"><h2><span class="num">05</span>与既有范式差在哪</h2><p class="section-intro">同一个任务可以用提示词、静态工作流或可演化系统解决。差异不在名称，而在反馈进入系统后究竟改变了什么。</p><div class="compare"><div class="label">静态推荐问题</div><div class="desc">覆盖广但与个人无关。</div><div class="label">画像直出文案</div><div class="desc">个性化但可能选错时机或过度冒犯。</div><div class="label">IceBreaker</div><div class="desc">先选共鸣点，再优化互动表达。</div></div><h3 class="subhead">论文的结构性创新</h3><ul class="dense-list"><li>提出 Conversation Starter Generation 这一独立问题。</li><li>把冷启动拆为共鸣识别和互动生成，避免直接从画像到文案。</li><li>有真实线上 A/B 与生产部署证据。</li></ul></section>
-<section class="chapter" id="s6"><h2><span class="num">06</span>实验究竟证明了什么</h2><p class="section-intro">先抓住最能支撑论文主张的三块证据，再回到完整表格核对设置、结果与解释，避免只看一个最高分。</p><div class="evidence-board"><article class="evidence"><small>Evidence 01 · 线上指标</small><strong>用户活跃天数 +0.184%</strong><p>大规模产品上小幅但可观的长期指标增益</p></article><article class="evidence"><small>Evidence 02 · 线上指标</small><strong>点击率 +9.425%</strong><p>直接互动显著提升</p></article><article class="evidence"><small>Evidence 03 · 落地</small><strong>已在生产部署</strong><p>ACL 2026 Industry Track 实证</p></article></div><div class="table-wrap"><table><thead><tr><th>设置 / 维度</th><th>结果</th><th>如何解读</th></tr></thead><tbody><tr><td><strong>线上指标</strong></td><td>用户活跃天数 +0.184%</td><td>大规模产品上小幅但可观的长期指标增益</td></tr><tr><td><strong>线上指标</strong></td><td>点击率 +9.425%</td><td>直接互动显著提升</td></tr><tr><td><strong>落地</strong></td><td>已在生产部署</td><td>ACL 2026 Industry Track 实证</td></tr><tr><td><strong>论文定位</strong></td><td>对话启动，不是会话中回复生成</td><td>目标边界清晰</td></tr></tbody></table></div><p class="source-note">数值以论文摘要/正文公开口径为准；“论文报告”表示尚未经过独立复现。不同论文的模型、预算、环境和评价协议不同，不应把表中数值直接跨论文排位。</p></section>
-<section class="chapter" id="s7"><h2><span class="num">07</span>创新、边界与失败模式</h2><div class="card-grid"><article class="mini"><h3>最值得保留的贡献</h3><ul class="dense-list"><li>提出 Conversation Starter Generation 这一独立问题。</li><li>把冷启动拆为共鸣识别和互动生成，避免直接从画像到文案。</li><li>有真实线上 A/B 与生产部署证据。</li></ul></article><article class="mini"><h3>证据没有覆盖的部分</h3><ul class="dense-list"><li>CTR 提升可能包含新鲜感效应，需要长期留存和负反馈验证。</li><li>Session summary 会丢失时间性、敏感度与当前情境。</li><li>自强化可能追逐短期点击，牺牲长期满意度或多样性。</li></ul></article></div><div class="callout"><strong>判断标准：</strong>性能上涨只能说明“在当前协议里有效”。若评估器可被利用、成本没有对齐、任务分布固定或记忆持续时间有限，就还不能外推为开放世界中的稳定自进化。</div></section>
-<section class="chapter" id="s8"><h2><span class="num">08</span>阅读与复现抓手</h2><p class="section-intro">这三点适合在读原文、看附录或准备复现时逐项核对，也是区分机制收益与工程堆料的最快路径。</p><div class="reading-grid"><article class="reading-card"><span class="read-no">READ 01</span><p>CTR +9.425% 与活跃天数 +0.184%说明浅层和长期指标量级不同。</p></article><article class="reading-card"><span class="read-no">READ 02</span><p>必须关注新鲜感衰减与负反馈，而不只看点击。</p></article><article class="reading-card"><span class="read-no">READ 03</span><p>这是启动阶段方法，不应与会话中的主动追问混为一谈。</p></article></div><h3 class="subhead">复现时优先固定的变量</h3><ul class="dense-list"><li>明确区分基础模型能力、推理预算与系统编排带来的收益；至少报告一次等成本对比。</li><li>保存每轮中间状态、失败轨迹和评估器输出，以便判断提升来自真正学习还是筛选偏差。</li><li>对记忆、技能、环境或 Harness 的关键模块做消融，并测试跨任务/跨轮次迁移而非只看同分布平均分。</li></ul></section>
-<section class="chapter" id="s9"><h2><span class="num">09</span>对你的研究启示</h2><ul class="dense-list"><li>与你个性化选品的结构类比很强：先提炼“当前可触发机会”，再生成具体 sourcing query。</li><li>店铺长期画像不能直接等于本次推荐意图，需要 opportunity-aware trigger 层。</li><li>线上指标应区分点击/铺货与 7 日盈利，避免自强化只追求浅层转化。</li></ul><h3 class="subhead">综合判断</h3><p class="verdict">它不是典型自进化论文，但提供了一个很好的两阶段个性化范式：先决定“此刻为什么打动这个用户”，再决定“具体说什么”。这比把画像直接塞进 Prompt 更可靠。</p></section>
-</main><aside class="rail"><div class="side-title">阅读提示</div><div class="rail-card"><h3>三遍阅读法</h3><ul><li>第一遍：结论 + 方法全景</li><li>第二遍：轨迹 + 实验证据</li><li>第三遍：边界 + 复现抓手</li></ul></div><div class="rail-card"><h3>图形怎么读</h3><p>系统图讲信息流；因果图讲“问题—干预—效果”；证据卡讲主张由哪些实验支撑。三者分别回答怎么做、为何有效、是否可信。</p></div><div class="rail-card"><h3>证据边界</h3><p>页面区分论文声明与结构化解读。arXiv 预印本不等于同行评审结论，关键数值应结合最新版本与代码复现。</p></div></aside></div>
-<button class="back" id="back" type="button" aria-label="返回顶部">↑</button><script>(()=>{const b=document.body,p=document.getElementById('progress'),t=document.getElementById('theme'),u=document.getElementById('back'),links=[...document.querySelectorAll('.toc a')],secs=links.map(x=>document.querySelector(x.getAttribute('href')));if(localStorage.getItem('paper-brief-theme')==='dark')b.classList.add('dark');t.onclick=()=>{b.classList.toggle('dark');localStorage.setItem('paper-brief-theme',b.classList.contains('dark')?'dark':'light')};u.onclick=()=>scrollTo({top:0,behavior:'smooth'});const update=()=>{const m=document.documentElement.scrollHeight-innerHeight;p.style.width=(m>0?scrollY/m*100:0)+'%';u.classList.toggle('show',scrollY>650);let a=secs[0];for(const s of secs)if(s.getBoundingClientRect().top<=110)a=s;links.forEach(x=>x.classList.toggle('active',x.getAttribute('href')==='#'+a.id))};addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update()})();</script><script src="../library-nav.js?v=20260920-1" data-material-type="paper"></script></body></html>
+
+
+/* publication layout */
+:root{--bg:#f2f0eb;--surface:#fffefb;--surface2:#f7f6f2;--ink:#17202d;--muted:#667085;--line:#dedbd3;--blue:#255fbd;--purple:#7554b8;--shadow:0 16px 44px rgba(39,44,51,.07)}
+body{font-size:16px;line-height:1.86;background:linear-gradient(180deg,#efede7 0,#f5f3ee 380px,var(--bg) 100%)}
+.hero-in{padding-top:52px;padding-bottom:36px}.subtitle{font-size:18px;line-height:1.65}.layout{grid-template-columns:220px minmax(0,900px) 200px;gap:30px;padding-top:34px}.chapter{margin-bottom:30px;padding:36px 42px 40px;border-radius:18px;box-shadow:0 12px 36px rgba(39,44,51,.055)}
+h2{margin-bottom:25px;padding-bottom:18px;font-size:26px}.section-intro{margin:-7px 0 22px;font-size:14px;line-height:1.75}.prose{font-size:16px;line-height:1.95}.prose p{text-indent:2em;text-align:justify}.prose p:first-child{margin-top:0}.bridge{margin-top:34px;padding-top:26px;border-top:1px solid var(--line)}
+.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict){line-height:1.92}.lead{padding:20px 22px;font-size:17px;line-height:1.78}.mini,.walk,.reading-card,.evidence{border-radius:12px}.mini p,.walk p,.reading-card p,.evidence p{line-height:1.7}.callout{line-height:1.75}.toc a{padding-top:9px;padding-bottom:9px}.figure-badge{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid rgba(186,243,91,.45);border-radius:9px;color:#e9ffc6;background:rgba(186,243,91,.09);font-size:13px;font-weight:700}
+.paper-figure{margin:28px 0 10px;border:1px solid var(--line);border-radius:16px;background:#fbfaf7;overflow:hidden;box-shadow:0 14px 34px rgba(25,35,50,.07)}.paper-figure .paper-figure-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);color:var(--muted);background:#f3f1ec;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.paper-figure .paper-figure-head span:first-child{color:var(--purple)}.paper-figure>a{display:block;padding:20px;background:#fff;text-align:center}.paper-figure img{display:block;width:100%;height:auto;max-height:720px;margin:auto;object-fit:contain}.paper-figure figcaption{padding:18px 22px 20px;border-top:1px solid var(--line)}.paper-figure figcaption strong{display:block;margin-bottom:8px;font-size:15px;line-height:1.55}.paper-figure figcaption p{margin:0;color:#475467;font-size:13px;line-height:1.75;text-indent:0}.paper-figure .figure-reading{margin-top:11px;padding:11px 13px;border-left:3px solid var(--blue);background:#eef4fb}.paper-figure .figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:12px;color:var(--muted);font-size:11px}.paper-figure .figure-source a{white-space:nowrap}
+.rail-card{box-shadow:none}.rail-card p,.rail-card li{line-height:1.7}body.dark{--surface:#151e2c;--surface2:#1a2535;--line:#2f3b4a}body.dark .paper-figure{background:#141d2a}body.dark .paper-figure .paper-figure-head{background:#1b2635}body.dark .paper-figure>a{background:#eef1f4}body.dark .paper-figure figcaption p{color:#b9c5d3}body.dark .paper-figure .figure-reading{background:#192c43}
+@media(max-width:1230px){.layout{grid-template-columns:210px minmax(0,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding-top:38px}.chapter{padding:25px 20px 29px;margin-bottom:18px}.toc ol{grid-template-columns:1fr}.paper-figure>a{padding:10px}.paper-figure figcaption{padding:15px 16px}.paper-figure .figure-source{display:block}.paper-figure .figure-source a{display:block;margin-top:5px}.bridge{margin-top:27px;padding-top:21px}}@media print{.paper-figure{box-shadow:none;break-inside:avoid}.paper-figure>a{padding:8px}.paper-figure img{max-height:620px}.figure-badge{display:none}}
+
+
+/* publication baseline */
+main,.chapter,.table-wrap{min-width:0}.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict){max-width:760px;margin-bottom:14px;font-size:15.5px;line-height:1.88;text-indent:2em;text-align:justify}.prose{max-width:760px}.table-wrap{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}.table-wrap table{min-width:680px}.table-wrap caption{padding:0 0 9px;color:var(--muted);font-size:11px;line-height:1.55;text-align:left;caption-side:top}.paper-figure .paper-figure-head{text-transform:none;letter-spacing:.04em}.paper-figure figcaption strong{font-size:16px}.paper-figure .figure-reading b{color:#284c7a}.source-note{line-height:1.7}body.dark .paper-figure .figure-reading b{color:#a9ccff}body.dark .mini p{color:#b8c5d6}
+@media(max-width:820px){.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict),.prose{max-width:none}.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict){font-size:15px;line-height:1.82}.table-wrap table{min-width:650px}}
+
+
+/* 2026-09 deep-reading upgrade */
+.card-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));align-items:stretch}.mini{min-height:0;padding:12px 14px}.walkthrough{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.walk{min-height:0;padding:13px 13px 13px 45px}.dense-list{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.dense-list li{margin:0;padding:10px 8px 10px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}.dense-list li:last-child{border-bottom:0}.evidence-board{align-items:start}.evidence{min-height:0}.deep-evidence{margin-top:30px;padding-top:4px}.deep-evidence>p{max-width:780px;margin:0 0 15px;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.evidence-table{margin:18px 0 25px}.evidence-table table{min-width:760px}.evidence-table caption{padding:0 0 10px;color:var(--ink);font-size:14px;font-weight:800}.table-source{margin:-16px 0 24px;color:var(--muted);font-size:11px;line-height:1.6}.supplement-figure{margin-top:23px}.supplement-figure .original-label{color:var(--muted);font-size:11px}.subtitle{max-width:1160px}.subtitle .paper-name{display:block;color:#e9eef8;font-size:14px;font-weight:650}.subtitle .reading-scope{display:block;margin-top:5px;color:#becae0;font-size:16px}.index-source-title{display:block;margin-top:6px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.45}
+@media(max-width:1050px){.card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.walkthrough{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:820px){.card-grid,.walkthrough{grid-template-columns:1fr}.deep-evidence>p{max-width:none;font-size:15px;line-height:1.84}.evidence-table table{min-width:700px}}
+/* 2026-09 typography and semantic-color polish */
+:root{
+  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --tint-blue:#edf4fd;--tint-purple:#f4effb;--tint-green:#edf7f2;--tint-amber:#fff5e8;
+  --border-blue:#cbdcf1;--border-purple:#ddd0ef;--border-green:#cce4d9;--border-amber:#efd8b8;
+  --tone-blue:#356db2;--tone-purple:#7654ad;--tone-green:#287a60;--tone-amber:#ad6727;
+}
+body,button,input,select,textarea{font-family:var(--sans);font-kerning:normal;text-rendering:optimizeLegibility}
+h1,h2,h3,h4,strong,b,.metric b{font-family:var(--sans)}
+.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict),.prose,.prose p,.longform,.longform p{font-size:16px}
+.section-intro,.chapter-kicker{font-size:14px}.mini p,.walk p,.reading-card p,.evidence p,.issue-card p,.scope-item span,.analysis-note p,.case-row p,.paper-figure figcaption p{font-size:14px;line-height:1.72}
+.dense-list li,.compare .desc,.callout{font-size:14px;line-height:1.72}table{font-size:13.5px;line-height:1.6}th{font-size:13px}.rail-card p,.rail-card li{font-size:12.5px}.source-note,.table-source{font-size:12px}
+main>.chapter{--chapter-accent:var(--tone-blue);--chapter-tint:var(--tint-blue);border-top:3px solid var(--chapter-accent);background:linear-gradient(180deg,var(--chapter-tint) 0,var(--surface) 150px)}
+main>.chapter:nth-of-type(2){--chapter-accent:var(--tone-purple);--chapter-tint:var(--tint-purple)}
+main>.chapter:nth-of-type(3){--chapter-accent:var(--tone-green);--chapter-tint:var(--tint-green)}
+main>.chapter:nth-of-type(4){--chapter-accent:var(--tone-amber);--chapter-tint:var(--tint-amber)}
+main>.chapter:nth-of-type(5){--chapter-accent:var(--tone-blue);--chapter-tint:var(--tint-blue)}
+.chapter h2{color:#1c2d43}.chapter h2:after{background:linear-gradient(90deg,var(--chapter-accent),transparent)}.chapter .num{background:var(--chapter-accent)}
+.lead,.thesis-line{border-left-color:var(--chapter-accent);background:linear-gradient(90deg,var(--chapter-tint),rgba(255,255,255,.34))}
+.card-grid,.walkthrough,.evidence-board,.reading-grid,.issue-grid,.study-scope{gap:12px}
+.mini,.walk,.reading-card,.evidence,.issue-card,.scope-item{border-width:1px;border-style:solid;box-shadow:0 4px 14px rgba(37,54,76,.035)}
+.card-grid .mini:nth-child(4n+1),.walkthrough .walk:nth-child(4n+1),.reading-grid .reading-card:nth-child(4n+1),.issue-grid .issue-card:nth-child(4n+1){border-color:var(--border-blue);background:var(--tint-blue)}
+.card-grid .mini:nth-child(4n+2),.walkthrough .walk:nth-child(4n+2),.reading-grid .reading-card:nth-child(4n+2),.issue-grid .issue-card:nth-child(4n+2){border-color:var(--border-purple);background:var(--tint-purple)}
+.card-grid .mini:nth-child(4n+3),.walkthrough .walk:nth-child(4n+3),.reading-grid .reading-card:nth-child(4n+3),.issue-grid .issue-card:nth-child(4n+3){border-color:var(--border-green);background:var(--tint-green)}
+.card-grid .mini:nth-child(4n),.walkthrough .walk:nth-child(4n),.reading-grid .reading-card:nth-child(4n),.issue-grid .issue-card:nth-child(4n){border-color:var(--border-amber);background:var(--tint-amber)}
+.mini h3,.walk h3,.issue-card h3{color:#263b55}.walk{border-left-width:3px}.walkthrough .walk:nth-child(4n+1){border-left-color:var(--tone-blue)}.walkthrough .walk:nth-child(4n+2){border-left-color:var(--tone-purple)}.walkthrough .walk:nth-child(4n+3){border-left-color:var(--tone-green)}.walkthrough .walk:nth-child(4n){border-left-color:var(--tone-amber)}
+.walkthrough .walk:nth-child(4n+1):before,.reading-grid .reading-card:nth-child(4n+1) .read-no{color:var(--tone-blue)}.walkthrough .walk:nth-child(4n+2):before,.reading-grid .reading-card:nth-child(4n+2) .read-no{color:var(--tone-purple)}.walkthrough .walk:nth-child(4n+3):before,.reading-grid .reading-card:nth-child(4n+3) .read-no{color:var(--tone-green)}.walkthrough .walk:nth-child(4n):before,.reading-grid .reading-card:nth-child(4n) .read-no{color:var(--tone-amber)}
+.evidence-board .evidence:nth-child(3n+1){border-color:var(--border-blue);background:var(--tint-blue)}.evidence-board .evidence:nth-child(3n+1):before{background:var(--tone-blue)}
+.evidence-board .evidence:nth-child(3n+2){border-color:var(--border-purple);background:var(--tint-purple)}.evidence-board .evidence:nth-child(3n+2):before{background:var(--tone-purple)}
+.evidence-board .evidence:nth-child(3n){border-color:var(--border-green);background:var(--tint-green)}.evidence-board .evidence:nth-child(3n):before{background:var(--tone-green)}
+.dense-list{border:0}.dense-list li{margin:6px 0;border:1px solid var(--border-blue);border-radius:9px;background:var(--tint-blue)}.dense-list li:nth-child(even){border-color:var(--border-purple);background:var(--tint-purple)}.dense-list li:last-child{border-bottom:1px solid var(--border-blue)}.dense-list li:nth-child(even):last-child{border-bottom-color:var(--border-purple)}
+.callout{border:1px solid var(--border-blue);border-left:4px solid var(--tone-blue);background:var(--tint-blue);color:#344f70}.correction{border-color:var(--tone-amber);background:var(--tint-amber)}.verdict{border-color:var(--tone-purple);background:var(--tint-purple)}
+.analysis-note{border-color:var(--tone-blue);background:var(--tint-blue)}.analysis-note.warning{border-color:var(--tone-amber);background:var(--tint-amber)}
+.study-scope .scope-item:nth-child(1){border-top-color:var(--tone-blue);background:var(--tint-blue)}.study-scope .scope-item:nth-child(2){border-top-color:var(--tone-purple);background:var(--tint-purple)}.study-scope .scope-item:nth-child(3){border-top-color:var(--tone-green);background:var(--tint-green)}
+.table-wrap{border-color:var(--border-blue);box-shadow:0 5px 16px rgba(37,54,76,.035)}th{background:var(--tint-blue);color:#324b6a}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:hover td{background:var(--tint-amber)}
+.paper-figure figcaption{background:linear-gradient(180deg,#fff,var(--tint-blue))}.paper-figure .figure-reading{border-left-color:var(--tone-blue);background:var(--tint-blue)}
+.paper{--paper-accent:var(--tone-blue);--paper-tint:var(--tint-blue);border-top:3px solid var(--paper-accent);background:linear-gradient(160deg,var(--paper-tint),var(--surface) 42%)}
+.paper:nth-child(4n+2){--paper-accent:var(--tone-purple);--paper-tint:var(--tint-purple)}.paper:nth-child(4n+3){--paper-accent:var(--tone-green);--paper-tint:var(--tint-green)}.paper:nth-child(4n){--paper-accent:var(--tone-amber);--paper-tint:var(--tint-amber)}
+.paper .kicker{color:var(--paper-accent)}.paper .tags span{color:var(--paper-accent);background:var(--paper-tint);border:1px solid color-mix(in srgb,var(--paper-accent) 24%,transparent)}
+body.dark{--tint-blue:#182a40;--tint-purple:#29223d;--tint-green:#192f29;--tint-amber:#35291d;--border-blue:#2d4a68;--border-purple:#4b3d64;--border-green:#2d5549;--border-amber:#5e4930;--tone-blue:#7db0ef;--tone-purple:#b89ae3;--tone-green:#72b99f;--tone-amber:#e0aa6f}
+body.dark main>.chapter{background:linear-gradient(180deg,var(--chapter-tint) 0,var(--surface) 150px)}body.dark .chapter h2,body.dark .mini h3,body.dark .walk h3,body.dark .issue-card h3{color:var(--ink)}body.dark .mini p,body.dark .walk p,body.dark .reading-card p,body.dark .evidence p,body.dark .issue-card p,body.dark .scope-item span,body.dark .analysis-note p,body.dark .case-row p{color:#c0cbd9}
+body.dark .dense-list li,body.dark .analysis-note,body.dark .analysis-note.warning,body.dark .callout,body.dark .verdict,body.dark .study-scope .scope-item{background:var(--chapter-tint);color:#d5deea}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark tbody tr:hover td{background:var(--tint-amber)}body.dark .paper-figure figcaption{background:linear-gradient(180deg,#151e2c,var(--tint-blue))}
+@media(max-width:820px){.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict),.prose,.prose p,.longform,.longform p{font-size:15px}.mini p,.walk p,.reading-card p,.evidence p,.issue-card p,.scope-item span,.analysis-note p,.case-row p,.paper-figure figcaption p,.dense-list li,.callout{font-size:13.5px}}
+@media print{main>.chapter,.paper{border-top-color:#777;background:#fff}.mini,.walk,.reading-card,.evidence,.issue-card,.scope-item,.dense-list li,.callout,.analysis-note,.verdict,.correction,.paper-figure figcaption,th,tbody tr:nth-child(even) td{color:#111;background:#fff;border-color:#aaa;box-shadow:none}}
+/* prose-before-visual-blocks */
+.block-intro{max-width:790px;margin:0 0 19px;color:#34445a;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.section-intro+.block-intro{margin-top:-7px}.subhead+.block-intro{margin-top:-2px}.block-intro+div,.block-intro+ul{margin-top:0}body.dark .block-intro{color:#c5d0dd}@media(max-width:820px){.block-intro{max-width:none;margin-bottom:16px;font-size:15px;line-height:1.84}}@media print{.block-intro{color:#222}}
+</style>
+</head>
+<body>
+<div class="progress"><span id="progress"></span></div>
+<header class="hero"><div class="hero-in">
+<div class="eyebrow">PAPER REVIEW · SELF-EVOLUTION / LONG-HORIZON AGENTS</div>
+<h1>IceBreaker：在用户没有明确意图时，用个性化开场完成“共鸣—互动”两阶段握手</h1>
+<p class="subtitle"><span class="paper-name">原论文：IceBreaker for Conversational Agents: Breaking the First-Message Barrier with Personalized Starters</span><span class="reading-scope">问题、机制、实验、消融与适用边界的完整解读</span></p>
+<div class="actions">
+<a class="action" href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">阅读原论文 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button>
+</div>
+<div class="metrics">
+<div class="metric">
+<small>论文类型</small><b>Conversational Recommendation</b><span>研究形态</span>
+</div>
+<div class="metric">
+<small>演化对象</small><b>对话开场策略</b><span>被持续优化的部分</span>
+</div>
+<div class="metric">
+<small>核心机制</small><b>兴趣蒸馏 + 偏好对齐</b><span>主要技术路线</span>
+</div>
+<div class="metric">
+<small>证据</small><b>超大规模线上 A/B</b><span>主要验证范围</span>
+</div>
+<div class="metric">
+<small>首版日期</small><b>2026-04-20</b><span>论文公开版本</span>
+</div>
+<div class="metric">
+<small>论文标识</small><b>arXiv:2604.18375</b><span>ACL 2026 Industry</span>
+</div>
+</div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="side-title">文章目录</div>
+<ol>
+<li><a href="#s1">01 · 核心问题与结论</a></li>
+<li><a href="#s2">02 · 机制与运行轨迹</a></li>
+<li><a href="#s3">03 · 范式对照</a></li>
+<li><a href="#s4">04 · 实验与证据</a></li>
+<li><a href="#s5">05 · 边界与启示</a></li>
+</ol></nav><main>
+<section class="chapter" id="s1"><h2>
+<span class="num">01</span>先抓住结论：论文在解决什么矛盾</h2>
+<p class="lead">会话开始前没有即时上下文，用户又可能只有模糊需求；IceBreaker 从历史 session summary 中提炼可触发共鸣的兴趣，再生成能引发回复的个性化 starter，并通过偏好对齐和自强化持续优化。</p>
+<p class="source-note">论文首版日期：2026-04-20　·　来源：<a href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">arXiv:2604.18375 / ACL 2026 Industry</a></p>
+<div class="callout">
+<strong>阅读定位：</strong>这不是只复述摘要的速览。下面会把论文的因果假设、组件协作方式、一条完整运行轨迹、实验能证明与不能证明的内容分别拆开。</div>
+<h3 class="subhead bridge">问题从何而来：旧范式为何会失效</h3>
+<p class="section-intro">先理解旧范式为什么会在真实长程任务中失效，再看作者的解法是否击中了主要瓶颈。</p>
+<div class="prose">
+<p>对话系统通常假设用户先发问，但真实产品中很多用户只有模糊需求，打开页面后并不知道如何开始。此时没有当前轮 Context，系统必须从历史中选择一个既相关、又不会显得突兀的入口。</p>
+<p>IceBreaker 不直接从用户画像生成一句话，而是拆成两步：先确定此刻最可能产生共鸣的 trigger interest，再把它转化为容易回应的 starter。这个分解让“主题相关性”和“互动意愿”分别得到优化。</p>
+</div>
+<h3 class="subhead">论文识别出的具体断点</h3>
+<p class="block-intro" data-role="block-intro-list-1">下面将问题拆成可观测的失效信号。阅读时要区分表面症状与真正的归因线索：只有当这些断点能在轨迹或日志中被定位，后续改进才有明确对象。</p>
+<ul class="dense-list">
+<li>多数主动 Agent 研究发生在会话已开始之后，忽视首条消息冷启动。</li>
+<li>历史兴趣很多，但不是每个兴趣都适合作为当下开场触发点。</li>
+<li>“相关”不等于“愿意回复”，开场需要同时优化互动性。</li>
+</ul></section>
+<section class="chapter" id="s2"><h2>
+<span class="num">02</span>机制全景：系统怎样形成闭环</h2>
+<p class="section-intro">下面先看系统部件，再看部件之间的信息流。两者缺一不可：组件列表告诉你“有什么”，闭环图告诉你“为什么能工作”。</p>
+<p class="block-intro" data-role="block-intro-components">下面的 6 个概念不是并列标签，而是论文用来划分系统职责的连续视角。阅读时可从“Session Summaries”开始，追踪信息经过中间组件后如何抵达“Two-step Handshake”；重点不是记住名称，而是确认每一步消费什么证据、改变什么状态，并向下一步交付什么。</p>
+<div class="card-grid">
+<article class="mini"><h3>Session Summaries</h3>
+<p>把历史会话压缩为稳定、隐私边界清晰的兴趣证据。</p></article><article class="mini"><h3>Resonance-aware Distillation</h3>
+<p>从长期兴趣中筛选更可能引发当下共鸣的 trigger interest。</p></article><article class="mini"><h3>Starter Generation</h3>
+<p>将兴趣转化为低门槛、可回应的对话开场。</p></article><article class="mini"><h3>Preference Alignment</h3>
+<p>用个性化偏好信号约束风格和主题。</p></article><article class="mini"><h3>Self-reinforced Loop</h3>
+<p>利用真实互动反馈继续优化开场策略。</p></article><article class="mini"><h3>Two-step Handshake</h3>
+<p>先 evoke resonance，再 stimulate interaction。</p></article>
+</div>
+<figure class="paper-figure"><div class="paper-figure-head">
+<span>研究框架</span><span>方法与系统</span>
+</div>
+<a href="assets/paper-figures/19-19-icebreaker-paper-figure.png" target="_blank"><img src="assets/paper-figures/19-19-icebreaker-paper-figure.png" alt="IceBreaker 总体架构" loading="lazy" decoding="async"></a><figcaption><strong>IceBreaker 总体架构</strong><p>共鸣感知兴趣蒸馏先从会话摘要中筛出有触发潜力的兴趣，随后生成少量以互动为目标的个性化开场，并用偏好信号持续对齐。</p>
+<p class="figure-reading"><b>阅读要点：</b>图中两阶段不是普通的“检索后生成”：第一阶段优化是否值得开口，第二阶段优化怎样让用户愿意回应，分别解决相关性与互动性。</p>
+<div class="figure-source">
+<span>来源：原论文</span><a href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">查看原文 ↗</a>
+</div></figcaption></figure><h3 class="subhead bridge">沿一条轨迹读懂系统的运行顺序</h3>
+<p class="section-intro">把方法落到一次真实运行：每一步消费什么信息、产生什么中间状态，以及这些状态如何影响下一步。</p>
+<p class="block-intro" data-role="block-intro-walkthrough">模块说明回答“系统里有什么”，运行轨迹进一步回答“这些模块在什么时候被调用”。下面从“历史压缩”走到“线上强化”，可以看到状态如何在一次任务中被收集、加工和重新写回；这也是判断方法是否形成可执行闭环的直接方式。</p>
+<div class="walkthrough">
+<article class="walk"><h3>历史压缩</h3>
+<p>把多个会话整理为稳定兴趣与近期事件的 summary。</p></article><article class="walk"><h3>共鸣筛选</h3>
+<p>从大量兴趣中选出当前时机最适合触发的一个。</p></article><article class="walk"><h3>开场生成</h3>
+<p>生成具体、自然、低回答门槛的 starter。</p></article><article class="walk"><h3>线上强化</h3>
+<p>用点击、回复和活跃反馈更新偏好对齐与生成策略。</p></article>
+</div>
+<div class="callout">
+<strong>关键观察：</strong>这类工作真正的创新通常不只是多调用一次模型，而是改变“什么能被持久化、谁有权更新它、更新何时被接受”这三条系统规则。</div></section>
+<section class="chapter" id="s3"><h2>
+<span class="num">03</span>和相邻范式相比，变化发生在哪里</h2>
+<p class="section-intro">同一个任务可以用提示词、静态工作流或可演化系统解决。差异不在名称，而在反馈进入系统后究竟改变了什么。</p>
+<div class="compare">
+<div class="label">静态推荐问题</div>
+<div class="desc">覆盖广但与个人无关。</div>
+<div class="label">画像直出文案</div>
+<div class="desc">个性化但可能选错时机或过度冒犯。</div>
+<div class="label">IceBreaker</div>
+<div class="desc">先选共鸣点，再优化互动表达。</div>
+</div>
+<h3 class="subhead">论文的结构性创新</h3>
+<p class="block-intro" data-role="block-intro-list-2">这些创新点的价值不在名称新颖，而在是否改变了信息流、更新权限或验证方式。下面各项对应不同层面的结构变化，可以与前一节的基线逐项对照。</p>
+<ul class="dense-list">
+<li>提出 Conversation Starter Generation 这一独立问题。</li>
+<li>把冷启动拆为共鸣识别和互动生成，避免直接从画像到文案。</li>
+<li>有真实线上 A/B 与生产部署证据。</li>
+</ul></section>
+<section class="chapter" id="s4"><h2>
+<span class="num">04</span>证据怎么读：收益、代价与可比范围</h2>
+<p class="section-intro">先抓住最能支撑论文主张的三块证据，再回到完整表格核对设置、结果与解释，避免只看一个最高分。</p>
+<p class="block-intro" data-role="block-intro-evidence">下面三块证据不是彼此孤立的结论，而是依次回答评测对象是什么、性能变化发生在哪里，以及结果能被解释到什么范围。先用概览建立证据地图，再回到后续表格核对数据集、基线、预算与指标方向，可以避免只凭最高分判断方法有效。</p>
+<div class="evidence-board">
+<article class="evidence"><small>Evidence 01 · 线上指标</small><strong>用户活跃天数 +0.184%</strong><p>大规模产品上小幅但可观的长期指标增益</p></article><article class="evidence"><small>Evidence 02 · 线上指标</small><strong>点击率 +9.425%</strong><p>直接互动显著提升</p></article><article class="evidence"><small>Evidence 03 · 落地</small><strong>已在生产部署</strong><p>ACL 2026 Industry Track 实证</p></article>
+</div>
+<div class="table-wrap"><table>
+<caption>原文设置、结果与解读边界</caption>
+<thead><tr>
+<th>设置 / 维度</th>
+<th>结果</th>
+<th>如何解读</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>线上指标</strong></td>
+<td>用户活跃天数 +0.184%</td>
+<td>大规模产品上小幅但可观的长期指标增益</td>
+</tr>
+<tr>
+<td><strong>线上指标</strong></td>
+<td>点击率 +9.425%</td>
+<td>直接互动显著提升</td>
+</tr>
+<tr>
+<td><strong>落地</strong></td>
+<td>已在生产部署</td>
+<td>ACL 2026 Industry Track 实证</td>
+</tr>
+<tr>
+<td><strong>论文定位</strong></td>
+<td>对话启动，不是会话中回复生成</td>
+<td>目标边界清晰</td>
+</tr>
+</tbody>
+</table></div>
+<div class="deep-evidence"><h3 class="subhead bridge">从实验协议到因果解释</h3><p>IceBreaker 同时优化个性化效用与表达多样性。离线表中，Qwen2.5-7B 的 R-User/R-Score 相对 Prompt Engineering 提升到 +0.82/+0.74，同时 Lexical/Semantic 多样性为 27.74/5.01；相比 SFT+DPO 的 13.75/2.64，明显减轻了偏好优化导致的措辞收缩。</p><p>Doubao1.5-Lite 上也出现相同趋势：完整系统效用 +0.89/+0.80，多样性 28.83/5.28。跨 Backbone 一致性比单一最高分更重要，因为它说明兴趣蒸馏和排序训练并非只适配某个生成模型。</p><h3 class="subhead bridge">主结果、消融与成本</h3><p>线上结果以千分比报告，换算后用户活跃天数约 +0.184%、平均会话数 +0.159%、CTR +9.425%、会话启动率 +0.127%。CTR 提升最大，但长期活跃增幅较小，说明“愿意点开”与“持续使用”仍是两层不同目标。</p><p>负样本消融显示只追求 Utility 会显著损伤多样性，只追求 Diversity 又降低相关性；分层负采样在效用与多样性之间取得更稳平衡。这个结果支持把功能性噪声、兴趣不匹配和表达重复分开处理。</p><p>论文目标仅是首条开场语，不覆盖会话中的持续回复质量。外推到完整对话 Agent 时，还需测用户打断、负反馈、敏感兴趣暴露和长期重复率，避免短期点击优化形成骚扰式个性化。</p><div class="table-wrap evidence-table"><table><caption>不同 Backbone 的离线结果（原论文 S3.T1）</caption><tbody><tr><th rowspan="2">方法</th><th colspan="2">Utility</th><th colspan="2">Diversity</th></tr><tr><th>R-User ↑</th><th>R-Score ↑</th><th>Lexical ↑</th><th>Semantic ↑</th></tr><tr><td colspan="5">Qwen2.5-7B</td></tr><tr><td>PE</td><td>–</td><td>–</td><td>29.03</td><td>6.11</td></tr><tr><td>PE + RID</td><td>+0.69</td><td>+0.32</td><td>24.12</td><td>4.99</td></tr><tr><td>SFT</td><td>+0.73</td><td>+0.39</td><td>26.46</td><td>5.17</td></tr><tr><td>SFT + DPO</td><td>+0.75</td><td>+0.42</td><td>13.75</td><td>2.64</td></tr><tr><td>IceBreaker</td><td>+0.82</td><td>+0.74</td><td>27.74</td><td>5.01</td></tr><tr><td colspan="5">Doubao1.5-Lite</td></tr><tr><td>PE</td><td>+0.56</td><td>+0.08</td><td>29.45</td><td>6.23</td></tr><tr><td>PE + RID</td><td>+0.71</td><td>+0.38</td><td>25.13</td><td>4.86</td></tr><tr><td>SFT</td><td>+0.78</td><td>+0.44</td><td>28.97</td><td>5.59</td></tr><tr><td>SFT + DPO</td><td>+0.79</td><td>+0.52</td><td>12.94</td><td>2.37</td></tr><tr><td>IceBreaker</td><td>+0.89</td><td>+0.80</td><td>28.83</td><td>5.28</td></tr></tbody></table></div><p class="table-source">数据来源：原论文公开表格。保留方法名、指标、单位与方向；原始说明：Table 1: Main offline results across backbones (↑ indicates higher is better). Utility reflects relative improvement over PE. The best and second-best results are indicated in bold and underlined , respectively.</p><div class="table-wrap evidence-table"><table><caption>线上 A/B 测试（原论文 S3.T2）</caption><tbody><tr><th>方法</th><th>Active ↑</th><th>Avg.S. ↑</th><th>CTR ↑</th><th>CSR ↑</th></tr><tr><th>PE</th><th>-0.01</th><th>-0.26</th><th>-16.16*</th><th>-0.17</th></tr><tr><td>SFT</td><td>+0.20</td><td>+0.33</td><td>+6.97*</td><td>-0.05</td></tr><tr><td>SFT + DPO</td><td>+1.16</td><td>+0.42*</td><td>+56.41*</td><td>+0.68</td></tr><tr><td>IceBreaker</td><td>+1.84 *</td><td>+1.59 *</td><td>+94.25 *</td><td>+1.27 *</td></tr></tbody></table></div><p class="table-source">数据来源：原论文公开表格。保留方法名、指标、单位与方向；原始说明：Table 2: Main online A/B test results (relative lifts ‰ over the deployed baseline). We report user active days (Active), average sessions per user (Avg.S.), click-through rate (CTR), and conversation start rate (CSR). The best results are bolded and * indicates p{&lt;}0.05.</p><div class="table-wrap evidence-table"><table><caption>分层负样本策略消融（原论文 A3.T9）</caption><tbody><tr><th rowspan="2">Negative Sampling</th><th colspan="2">Utility</th><th colspan="2">Diversity</th></tr><tr><th>R-User ↑</th><th>R-Score ↑</th><th>Lexical ↑</th><th>Semantic ↑</th></tr><tr><td>Utility-Only</td><td>+0.85</td><td>+0.36</td><td>15.18</td><td>2.94</td></tr><tr><td>Diversity-Only</td><td>+0.58</td><td>+0.08</td><td>33.34</td><td>6.50</td></tr><tr><td>Joint-failure</td><td>+0.72</td><td>+0.20</td><td>21.3</td><td>4.59</td></tr><tr><td>Hierarchical</td><td>+0.84</td><td>+0.35</td><td>28.83</td><td>5.28</td></tr></tbody></table></div><p class="table-source">数据来源：原论文公开表格。保留方法名、指标、单位与方向；原始说明：Table 9: Ablation study of hierarchical negative sampling strategies in the PMA stage. All results are evaluated using the same ranking model and compared against the PE baseline. The best result is shown in bold and the second best is underlined .</p><figure class="paper-figure supplement-figure"><div class="paper-figure-head"><span>实验与分析</span><span>Figure 3</span></div><a href="assets/paper-figures/19-evidence-1.svg" target="_blank"><img src="assets/paper-figures/19-evidence-1.svg" alt="IceBreaker：在用户没有明确意图时，用个性化开场完成“共鸣—互动”两阶段握手的实验或消融证据" loading="lazy" decoding="async"></a><figcaption><strong>论文实验图 · Figure 3</strong><p>IceBreaker 同时优化个性化效用与表达多样性。离线表中，Qwen2.5-7B 的 R-User/R-Score 相对 Prompt Engineering 提升到 +0.82/+0.74，同时 Lexical/Semantic 多样性为 27.74/5.01；相比 SFT+DPO 的 13.75/2.64，明显减轻了偏好优化导致的措辞收缩。</p><p class="original-label">图中坐标、图例、误差范围与数值均保留论文原始口径。</p><div class="figure-source"><span>来源：原论文</span><a href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure><figure class="paper-figure supplement-figure"><div class="paper-figure-head"><span>实验与分析</span><span>Figure 1</span></div><a href="assets/paper-figures/19-evidence-2.png" target="_blank"><img src="assets/paper-figures/19-evidence-2.png" alt="IceBreaker：在用户没有明确意图时，用个性化开场完成“共鸣—互动”两阶段握手的实验或消融证据" loading="lazy" decoding="async"></a><figcaption><strong>论文实验图 · Figure 1</strong><p>Doubao1.5-Lite 上也出现相同趋势：完整系统效用 +0.89/+0.80，多样性 28.83/5.28。跨 Backbone 一致性比单一最高分更重要，因为它说明兴趣蒸馏和排序训练并非只适配某个生成模型。</p><p class="original-label">图中坐标、图例、误差范围与数值均保留论文原始口径。</p><div class="figure-source"><span>来源：原论文</span><a href="https://arxiv.org/abs/2604.18375" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure></div>
+<p class="source-note">数值以论文摘要/正文公开口径为准；“论文报告”表示尚未经过独立复现。不同论文的模型、预算、环境和评价协议不同，不应把表中数值直接跨论文排位。</p></section>
+<section class="chapter" id="s5"><h2>
+<span class="num">05</span>边界、复现抓手与可迁移启示</h2>
+<p class="block-intro" data-role="block-intro-boundary">这里把“最值得保留的贡献”和“证据没有覆盖的部分”放在同一行讨论，是为了避免把局部有效直接写成普遍规律。前者回答论文真正增加了什么，后者限定结论能够迁移到哪些模型、任务和预算；只有同时阅读，才能形成完整判断。</p>
+<div class="card-grid">
+<article class="mini"><h3>最值得保留的贡献</h3>
+<ul class="dense-list">
+<li>提出 Conversation Starter Generation 这一独立问题。</li>
+<li>把冷启动拆为共鸣识别和互动生成，避免直接从画像到文案。</li>
+<li>有真实线上 A/B 与生产部署证据。</li>
+</ul></article><article class="mini"><h3>证据没有覆盖的部分</h3>
+<ul class="dense-list">
+<li>CTR 提升可能包含新鲜感效应，需要长期留存和负反馈验证。</li>
+<li>Session summary 会丢失时间性、敏感度与当前情境。</li>
+<li>自强化可能追逐短期点击，牺牲长期满意度或多样性。</li>
+</ul></article>
+</div>
+<div class="callout">
+<strong>判断标准：</strong>性能上涨只能说明“在当前协议里有效”。若评估器可被利用、成本没有对齐、任务分布固定或记忆持续时间有限，就还不能外推为开放世界中的稳定自进化。</div>
+<h3 class="subhead bridge">复现时最值得核对的证据与变量</h3>
+<p class="section-intro">这三点适合在读原文、看附录或准备复现时逐项核对，也是区分机制收益与工程堆料的最快路径。</p>
+<p class="block-intro" data-role="block-intro-reading">这组阅读线索把本节结论转成三个可核对的问题：核心判断在什么条件下成立，哪些变量可能混入收益，以及复现时仍缺少什么证据。它们不是额外结论，而是帮助读者在原文、附录和实验记录中快速定位证据缺口。</p>
+<div class="reading-grid">
+<article class="reading-card"><span class="read-no">READ 01</span><p>CTR +9.425% 与活跃天数 +0.184%说明浅层和长期指标量级不同。</p></article><article class="reading-card"><span class="read-no">READ 02</span><p>必须关注新鲜感衰减与负反馈，而不只看点击。</p></article><article class="reading-card"><span class="read-no">READ 03</span><p>这是启动阶段方法，不应与会话中的主动追问混为一谈。</p></article>
+</div>
+<h3 class="subhead">复现时优先固定的变量</h3>
+<p class="block-intro" data-role="block-intro-list-3">复现实验最容易把模型能力、推理预算与系统设计混在一起。下面列出的变量应在比较前锁定并完整记录，否则性能差异很难归因于论文提出的机制。</p>
+<ul class="dense-list">
+<li>明确区分基础模型能力、推理预算与系统编排带来的收益；至少报告一次等成本对比。</li>
+<li>保存每轮中间状态、失败轨迹和评估器输出，以便判断提升来自真正学习还是筛选偏差。</li>
+<li>对记忆、技能、环境或 Harness 的关键模块做消融，并测试跨任务/跨轮次迁移而非只看同分布平均分。</li>
+</ul>
+<h3 class="subhead bridge">把论文结论迁移到自己的研究中</h3>
+<p class="block-intro" data-role="block-intro-list-4">迁移不是照搬原系统，而是先判断自己的任务是否具备相同的反馈、状态和成本条件。下面的检查项把论文结论改写为工程决策，帮助确定哪些设计可直接复用、哪些仍需重新验证。</p>
+<ul class="dense-list">
+<li>这一结构可类比个性化选品：先提炼“当前可触发机会”，再生成具体 sourcing query。</li>
+<li>店铺长期画像不能直接等于本次推荐意图，需要 opportunity-aware trigger 层。</li>
+<li>线上指标应区分点击/铺货与 7 日盈利，避免自强化只追求浅层转化。</li>
+</ul>
+<h3 class="subhead">综合判断</h3>
+<p class="verdict">它不是典型自进化论文，但提供了一个很好的两阶段个性化范式：先决定“此刻为什么打动这个用户”，再决定“具体说什么”。这比把画像直接塞进 Prompt 更可靠。</p></section>
+</main><aside class="rail"><div class="side-title">阅读提示</div>
+<div class="rail-card">
+<h3>三遍阅读法</h3>
+<ul>
+<li>第一遍：结论 + 方法全景</li>
+<li>第二遍：轨迹 + 实验证据</li>
+<li>第三遍：边界 + 复现抓手</li>
+</ul>
+</div>
+<div class="rail-card">
+<h3>图表阅读</h3>
+<p>先结合研究图理解变量、组件与信息流，再用证据表核对评测口径。不同预算、模型或数据集下的结果不宜直接横向排名。</p>
+</div>
+<div class="rail-card">
+<h3>证据边界</h3>
+<p>本文区分论文报告与结构化解读。arXiv 预印本不等于同行评审结论，关键数值应结合最新版本与代码复现。</p>
+</div></aside>
+</div>
+<button class="back" id="back" type="button" aria-label="返回顶部">↑</button><script>(()=>{const b=document.body,p=document.getElementById('progress'),t=document.getElementById('theme'),u=document.getElementById('back'),links=[...document.querySelectorAll('.toc a')],secs=links.map(x=>document.querySelector(x.getAttribute('href')));if(localStorage.getItem('paper-brief-theme')==='dark')b.classList.add('dark');t.onclick=()=>{b.classList.toggle('dark');localStorage.setItem('paper-brief-theme',b.classList.contains('dark')?'dark':'light')};u.onclick=()=>scrollTo({top:0,behavior:'smooth'});const update=()=>{const m=document.documentElement.scrollHeight-innerHeight;p.style.width=(m>0?scrollY/m*100:0)+'%';u.classList.toggle('show',scrollY>650);let a=secs[0];for(const s of secs)if(s.getBoundingClientRect().top<=110)a=s;links.forEach(x=>x.classList.toggle('active',x.getAttribute('href')==='#'+a.id))};addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update()})();</script>
+</body>
+</html>
