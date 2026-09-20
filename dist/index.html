@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b1930">
   <title>智能何以生长</title>
   <link rel="stylesheet" href="./assets/academic-report.css?v=20260920-1">
-  <link rel="stylesheet" href="./site.css?v=20260920-3">
+  <link rel="stylesheet" href="./site.css?v=20260920-4">
 </head>
 <body class="academic-index">
   <header class="hero">
@@ -40,13 +40,13 @@
     </div>
 
     <div class="library-controls" aria-label="资料筛选">
-      <div class="filter-block"><span class="filter-label">技术方向</span><div class="filters" id="topic-filters">
-        <button class="filter active" type="button" data-filter="all">全部</button><button class="filter" type="button" data-filter="posttraining">LLM 后训练</button><button class="filter" type="button" data-filter="agentic">Agentic RL</button><button class="filter" type="button" data-filter="harness">Harness</button><button class="filter" type="button" data-filter="knowledge">Skill · Memory · Context</button><button class="filter" type="button" data-filter="evolution">自进化与 AI4AI</button><button class="filter" type="button" data-filter="benchmark">Benchmark</button><button class="filter" type="button" data-filter="business">产业与商业</button>
+      <div class="filter-block topic-filter-block"><span class="filter-label">技术方向</span><div class="filters" id="topic-filters">
+        <button class="filter active" type="button" data-filter="all">全部</button><button class="filter" type="button" data-filter="posttraining">后训练</button><button class="filter" type="button" data-filter="agentic">Agentic RL</button><button class="filter" type="button" data-filter="harness">Harness</button><button class="filter" type="button" data-filter="knowledge">Skill · Memory · Context</button><button class="filter" type="button" data-filter="evolution">自进化</button><button class="filter" type="button" data-filter="benchmark">Benchmark</button><button class="filter" type="button" data-filter="business">商业分析</button>
       </div></div>
       <div class="filter-block"><span class="filter-label">资料类型</span><div class="filters" id="material-filters">
         <button class="filter active" type="button" data-material-filter="all">全部类型</button><button class="filter" type="button" data-material-filter="document">文档资料</button><button class="filter" type="button" data-material-filter="video">视频资料</button><button class="filter" type="button" data-material-filter="paper">论文资料</button>
       </div></div>
-      <label class="search"><span hidden>搜索资料</span><input id="search" type="search" placeholder="搜索标题、方法或技术名词…" autocomplete="off"></label>
+      <label class="search filter-block"><span class="filter-label">关键词搜索</span><span class="search-field"><input id="search" type="search" placeholder="搜索标题、方法或技术名词…" autocomplete="off"></span></label>
     </div>
 
     <section class="topic-group" data-group="posttraining" aria-labelledby="group-posttraining"><div class="topic-heading"><div class="topic-number">01</div><div><h2 id="group-posttraining">LLM 后训练基础</h2><p>SFT、PPO、GRPO、OPD、蒸馏与奖励设计，以及训练稳定性、数据效率和可观测性。</p></div><span class="group-count"></span></div><div class="grid"></div></section>
