@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b1930">
   <title>智能何以生长</title>
   <link rel="stylesheet" href="./assets/academic-report.css?v=20260920-1">
-  <link rel="stylesheet" href="./site.css?v=20260920-1">
+  <link rel="stylesheet" href="./site.css?v=20260920-2">
 </head>
 <body class="academic-index">
   <header class="hero">
@@ -117,11 +117,15 @@
     ];
 
     const esc=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const paperCoverPath=item=>{
+      const filename=item.href.split('/').pop().replace(/\.html$/, '');
+      return `./papers/assets/paper-figures/${filename.slice(0,2)}-${filename}-paper-figure.png`;
+    };
     const cardMarkup=item=>{
       const cover=item.material==='video'
         ? `<div class="thumb"><img src="${esc(item.image)}" alt="${esc(item.alt)}" loading="lazy"><span class="series">${esc(item.series)}</span><span class="material-badge video">视频资料</span></div>`
         : item.material==='paper'
-          ? `<div class="thumb document-thumb paper-thumb"><span class="doc-kicker">${esc(item.kicker)}</span><strong class="doc-symbol">${item.symbol}</strong><span class="series">${esc(item.series)}</span><span class="material-badge paper">论文资料</span></div>`
+          ? `<div class="thumb paper-cover"><img src="${esc(paperCoverPath(item))}" alt="${esc(item.title)}论文配图" loading="lazy"><span class="series">${esc(item.series)}</span><span class="material-badge paper">论文资料</span></div>`
           : `<div class="thumb document-thumb theme-${esc(item.theme)}"><span class="doc-kicker">${esc(item.kicker)}</span><strong class="doc-symbol">${item.symbol}</strong><span class="series">${esc(item.series)}</span><span class="material-badge document">文档资料</span></div>`;
       const tags=item.tags.map((tag,index)=>`<span class="tag ${index===1?'purple':index===2?'green':''}">${esc(tag)}</span>`).join('');
       return `<a class="card" data-topic="${item.topic}" data-material="${item.material}" data-search="${esc(item.search)}" href="${esc(item.href)}">${cover}<div class="card-body"><div class="tags">${tags}</div><h3>${esc(item.title)}</h3><p class="desc">${esc(item.desc)}</p><div class="meta"><strong>${esc(item.meta)}</strong><span class="open">打开</span></div></div></a>`;

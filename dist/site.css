@@ -225,6 +225,8 @@ body.academic-index input { font: inherit; }
 .card:hover { transform: translateY(-3px); border-color: #b9c8d8; box-shadow: var(--shadow); }
 .thumb { height: 198px; background: #182b43; }
 .thumb::after { height: 48%; background: linear-gradient(transparent, rgba(9, 24, 42, .74)); }
+.paper-cover { background: #f7f8fb; }
+.paper-cover img { object-fit: contain; padding: 10px; background: #fff; }
 .series { left: 16px; bottom: 14px; border-radius: 3px; font-size: 9px; }
 .edition { right: 14px; top: 14px; border-radius: 3px; color: #17334f; background: #c9e4ab; }
 .card-body { flex: 0 1 auto; padding: 16px 19px 13px; }
