@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="RSIAgent 中文深度解读：它如何把 training-free self-evolution 从利用既有 Experience 推进到主动选择 Experience，以及为何 Autonomous Exploration 尚不等于 Autonomous Experimentation。">
+  <title>RSIAgent：从学习 Experience 到主动选择 Experience｜论文精读</title>
+  <style>
+    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
+    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(114,84,181,.28),transparent 29%),radial-gradient(circle at 8% 100%,rgba(57,132,93,.2),transparent 30%),linear-gradient(125deg,#10223c,#183b52 56%,#49305f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}
+    .chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:820px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:820px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .cards,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--at)}.boundary article:last-child:nth-child(odd){grid-column:1/-1}
+    .shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.shift article:nth-child(2){border-color:#c9deb3;background:var(--gt)}.shift article:nth-child(3){border-color:#d7caec;background:var(--pt)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--paper);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}.thesis-line{margin:18px 0;padding:17px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center;font-size:18px;font-weight:780;line-height:1.55}.thesis-line span{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}.cycle{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:18px 0}.cycle div{position:relative;display:grid;min-height:92px;padding:11px 9px;place-items:center;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:750;line-height:1.45}.cycle div:nth-child(2),.cycle div:nth-child(5){border-color:#d7caec;background:var(--pt)}.cycle div:nth-child(3),.cycle div:nth-child(6){border-color:#c9deb3;background:var(--gt)}.cycle div:nth-child(4){border-color:#ead5b4;background:var(--at)}.cycle div:not(:last-child):after{content:"→";position:absolute;right:-11px;z-index:2;color:var(--muted);font-size:16px}.research-table{min-width:1120px}.research-table td:first-child{font-weight:780;white-space:nowrap}.research-table td{min-width:135px}.experiment-ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:18px 0}.experiment-ladder div{position:relative;padding:12px 10px 12px 38px;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);color:#415267;font-size:13px;line-height:1.55}.experiment-ladder div:nth-child(2),.experiment-ladder div:nth-child(6){border-color:#d7caec;background:var(--pt)}.experiment-ladder div:nth-child(3),.experiment-ladder div:nth-child(7){border-color:#c9deb3;background:var(--gt)}.experiment-ladder div:nth-child(4),.experiment-ladder div:nth-child(8){border-color:#ead5b4;background:var(--at)}.experiment-ladder b{position:absolute;left:10px;top:11px;display:grid;width:20px;height:20px;place-items:center;border-radius:50%;color:#fff;background:var(--blue);font-size:10px}.knowledge-schema{margin:16px 0;padding:15px;border:1px solid #d7caec;border-radius:11px;background:var(--pt);color:#42516a;font-size:13px;line-height:1.75;white-space:pre-wrap;text-align:left}
+    .paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.analysis,.warning,.verdict{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.verdict{border-color:var(--purple);color:#55426f;background:var(--pt)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:18px 0}.flow div{display:grid;place-items:center;min-height:82px;padding:12px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt);text-align:center;font-size:14px;font-weight:750;line-height:1.45}.flow div:nth-of-type(2){border-color:#d7caec;background:var(--pt)}.flow div:nth-of-type(3){border-color:#c9deb3;background:var(--gt)}.flow span{align-self:center;color:var(--muted);font-size:20px;font-weight:800}
+    .rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
+    body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
+    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}.cycle{grid-template-columns:repeat(3,minmax(0,1fr))}.cycle div:nth-child(3):after{display:none}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.cycle,.experiment-ladder{grid-template-columns:1fr}.shift article+article:before{content:"↓";left:calc(50% - 12px);top:-18px}.cycle div:not(:last-child):after{content:"↓";right:auto;bottom:-17px}.cycle div:nth-child(3):after{display:block}.flow{grid-template-columns:1fr}.flow span{transform:rotate(90deg)}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article,.experiment-ladder div{break-inside:avoid;background:#fff}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero">
+    <div class="hero-in">
+      <div class="eyebrow">PAPER REVIEW · arXiv:2609.15364v1</div>
+      <h1>RSIAgent：从学习 Experience 到主动选择 Experience</h1>
+      <p class="subtitle"><span class="paper-name">RSIAgent: Autonomous Exploration for Recursive Self-improvement in New Environments</span>Sibo Zhu、Shicheng Fan、Xinyue Wang、Wenyi Wu、Kun Zhou、Biwei Huang · Aether AI / UC San Diego / UIC · 2026-09-14</p>
+      <div class="actions">
+        <a class="action" href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">查看论文原文 ↗</a>
+        <a class="action" href="assets/33-rsiagent/paper.pdf" target="_blank">本地 PDF ↗</a>
+        <button class="theme" id="theme" type="button">◐ 切换主题</button>
+      </div>
+      <div class="metrics">
+        <div class="metric"><small>适应方式</small><b>不更新参数</b><span>探索、验证、写入外部持久记忆</span></div>
+        <div class="metric"><small>探索结构</small><b>Broad → Deep</b><span>并行覆盖后，顺序追击难点</span></div>
+        <div class="metric"><small>主模型配置</small><b>GLM-5.3 + Kimi-K3</b><span>Actor / Verifier / Curriculum 分工</span></div>
+        <div class="metric"><small>OSWorld 2.0</small><b>78.98 Partial</b><span>基线 71.97；82 个离线任务</span></div>
+        <div class="metric"><small>ALE Near-term</small><b>84.82 Partial</b><span>基线 83.75；67 个任务</span></div>
+        <div class="metric"><small>阶段消融</small><b>74.54%</b><span>4 个选定任务的 Full RSI 均值</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航">
+      <p class="side-title">阅读导航</p>
+      <ol>
+        <li><a href="#s1">01 Experience 成为控制变量</a></li>
+        <li><a href="#s2">02 主动获得环境经验</a></li>
+        <li><a href="#s3">03 主结果如何解读</a></li>
+        <li><a href="#s4">04 研究坐标与机制证据</a></li>
+        <li><a href="#s5">05 从探索走向实验</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>最大贡献：Experience 本身第一次成为可控制变量</h2>
+        <p class="lead">RSIAgent 最值得关注的不是 Curriculum + Actor + Verifier 这个多 Agent 架构，而是它把 training-free self-evolution 从“怎样利用已有 Experience”推进到“怎样主动决定下一步需要获得什么 Experience”。</p>
+        <p>大量自进化方法从一条已经存在的轨迹出发：执行成功或失败之后，系统再做 Reflection、Skill Extraction 或 Patch Validation。这里的隐藏前提是，学习材料由外部任务分布提供；Agent 可以改变自己如何解释 Experience，却不能控制 Experience 从哪里来。陌生软件环境中的真正瓶颈往往更早——它甚至不知道自己缺少哪条环境规则，也未必会自然遇到能暴露该缺口的任务。</p>
+        <p>RSIAgent 的概念移动，是让当前知识状态反过来改变未来经验分布。Curriculum 读取目标、记忆与历史探索结果，主动产生 prerequisite、variant、failure-driven practice 与 stress test；BRS 用并行任务扩大覆盖，DRS 再围绕 hard case、hidden constraint 与 boundary condition 顺序追击。换言之，Agent 不只从数据中学习，也开始参与选择自己的学习数据。</p>
+        <div class="shift" aria-label="从经验利用到自主实验的研究推进">
+          <article><small>既有范式</small><h3>Experience Utilization</h3><p>Trajectory 由外部给定；系统负责反思、提炼或修补 Skill。</p></article>
+          <article><small>RSIAgent 的推进</small><h3>Experience Acquisition</h3><p>根据当前知识缺口，主动选择下一条 Practice Experience。</p></article>
+          <article><small>尚未完成的下一步</small><h3>Autonomous Experimentation</h3><p>显式提出假设，用受控实验与聚合证据确定策略及适用边界。</p></article>
+        </div>
+        <div class="thesis-line">Learning from Experience → Choosing Experience → Designing Experiments<span>论文完成了中间这一步；最后一步仍是开放问题。</span></div>
+        <div class="analysis"><strong>去品牌化后的本质：</strong>在可重置、可操作、可观察的数字环境中，RSIAgent 把原本由外部任务分布决定的 <em>P(Experience)</em> 部分交给 Agent 控制：当前记忆生成下一轮练习，环境反馈形成新经验，新经验再改变未来课程。代价是额外探索计算、验证可靠性与长期知识治理风险。</div>
+        <p>这里的“recursive self-improvement”也应精确理解。论文没有更新模型权重，也没有让改进算法自身跨代进化；递归发生在 <strong>Memory → Curriculum → Experience → Memory</strong> 的闭环中。更准确的名字是“Recursive Context / Experience Improvement”：学到了什么，会改变下一步去学什么。</p>
+        <p class="source-note">论文依据：§1–3、Appendix A–B。这里对“Experience Utilization → Acquisition → Experimentation”的分层属于编辑性综合，用来区分论文已实现的能力与自然延伸。</p>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>方法：主动获得环境经验，而不只是修补任务步骤</h2>
+        <p class="lead">多 Agent 分工只是实现手段；真正的自治性来自闭环：当前 Memory 决定 Curriculum，Curriculum 改变下一轮 Experience，新的 Experience 又重写 Memory。</p>
+        <div class="cycle" aria-label="RSIAgent 的递归经验获取循环">
+          <div>Current<br>Memory</div><div>Knowledge<br>Gap</div><div>Curriculum<br>Practice</div><div>Actor<br>Execution</div><div>Verifier<br>Evidence</div><div>Memory<br>Reconciliation</div>
+        </div>
+        <p>三类角色构成这个闭环。Curriculum 选择下一项练习；Actor 以代码控制环境，并拥有最终的记忆写权限；Verifier 与 Actor 的私有 reasoning 和 memory 隔离，直接检查执行结果、界面状态与交付物证据。收到 PASS、FAIL 或未解决的验证结果后，Actor 蒸馏程序、约束和失败教训，再与旧记忆协调冲突。</p>
+        <p>这种记忆比单任务 Skill 更偏向 environment-centric knowledge。目标不是只保存“遇到 X 就依次执行 A、B、C”，而是尽量积累 <strong>Condition × Action → Consequence</strong>：某个操作依赖什么前提、在哪些版本或状态下成立、失败会留下什么信号、哪些程序和检查可以跨任务复用。理论上，一条环境规则可以服务多个下游任务；但论文尚未系统证明这种抽象优于 task-specific procedure。</p>
+        <div class="cards">
+          <article class="card"><h3>Skill-centric</h3><p>Task A → Procedure A。复用依赖新任务与旧任务足够相似，重点是“步骤怎么做”。</p></article>
+          <article class="card"><h3>Environment-centric</h3><p>Condition × Action → Consequence。复用依赖共享环境机制，重点是“世界在什么条件下怎样响应”。</p></article>
+        </div>
+        <p class="block-intro">Broad → Deep 是这个闭环最简洁、也最可迁移的设计：先建立世界地图，再主动寻找地图边界。两阶段并不是两个独立模块，而是让后续精细探索拥有更可靠的先验。</p>
+        <h3 class="subhead">Broad Recursive Self-exploration（BRS）</h3>
+        <p>BRS 在每一轮提出多个互补项目，并行执行以覆盖工具、工作流与失败模式。所有并行项目从同一份不可变记忆快照开始；完成后再按顺序把各自经验写入最新 canonical memory。主配置的名义预算是 8 个项目、最多 4 个并发，但预算在整轮结束后检查，实际项目数可能超过 8。</p>
+        <h3 class="subhead">Deep Recursive Self-exploration（DRS）</h3>
+        <p>DRS 从目标任务出发顺序探索：每次执行和核验都会立即进入记忆，Curriculum 再根据当前失败、未确定规则或已通过但仍脆弱的环节选择下一项练习。成功后可以继续生成 contrastive exercise，失败后也可以生成区分 competing explanations 的练习；成功本身不必停止，只有课程代理认为继续练习的预期价值已经很低时才冻结记忆。</p>
+        <div class="warning"><strong>重要边界：</strong>“对比练习”已经接近假设辨别，但系统仍没有显式表示假设、控制变量、处理组/对照组、重复试验与证据聚合。因此，DRS 是 hypothesis-aware exploration 的雏形，还不是严格的 autonomous experimentation。</div>
+        <figure class="paper-figure">
+          <div class="figure-head"><span>论文原图 · Figure 2</span><span>框架与数据流</span></div>
+          <a href="assets/paper-figures/33-rsiagent/figure2-framework.png" target="_blank"><img src="assets/paper-figures/33-rsiagent/figure2-framework.png" alt="RSIAgent 在 FreeCAD 环境中的广度探索、深度探索和冻结记忆复用流程"></a>
+          <figcaption>
+            <strong>从多方向练习到目标压力测试，再到只读复用</strong>
+            <p>左侧 BRS 并行建立不同技能切片，中间 DRS 用目标失败逐步修正规则，右侧在环境重置后读取冻结记忆完成任务。最终评测禁用 Curriculum 和写回，因此测到的是已学经验的复用，而不是边测边学。</p>
+            <p class="figure-reading"><strong>阅读要点：</strong>“递归”发生在任务选择—执行—验证—记忆更新的闭环里；冻结点把探索阶段与正式评测阶段分开，这是避免直接用测试分数在线优化的关键。</p>
+            <div class="figure-source"><span>来源：论文 Figure 2，第 4 页</span><a href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">原文 ↗</a></div>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>主结果：效用成立，但排行榜叙事需要降温</h2>
+        <p class="lead">在作者自己的 Actor–Verifier Harness 内，加入探索与冻结记忆后，OSWorld 的提升明显、ALE 的提升较小；“超过 GPT-6”只适用于跨系统 Partial 分数，不能当作同预算、同执行框架的受控比较。</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Table 1 中 RSIAgent 自身前后对比（百分点为绝对差）</caption>
+            <thead><tr><th>Benchmark</th><th>任务数</th><th>指标</th><th>w/o RSI</th><th>RSIAgent</th><th>变化</th></tr></thead>
+            <tbody>
+              <tr><td rowspan="2">OSWorld 2.0 · 0808 offline</td><td rowspan="2">82</td><td>Partial ↑</td><td>71.97</td><td class="positive">78.98</td><td>+7.01 pt</td></tr>
+              <tr><td>Binary ↑</td><td>37.80</td><td class="positive">42.68</td><td>+4.88 pt</td></tr>
+              <tr><td rowspan="2">Agents’ Last Exam · Near-term</td><td rowspan="2">67</td><td>Partial ↑</td><td>83.75</td><td class="positive">84.82</td><td>+1.07 pt</td></tr>
+              <tr><td>Binary ↑</td><td>49.25</td><td class="positive">50.75</td><td>+1.50 pt</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>这组数字支持“外部记忆可提高现有 Harness 的任务完成度”，尤其是 OSWorld 的 graded partial credit 与 full-credit 成功率同时上升。但聚合方式并不是对全部任务重新运行 RSI：OSWorld 只有 41 个任务有可报告 RSI 分数，其余保留基线；ALE 由 19 个 RSI 分数与 48 个基线分数组成。新增探索还优先投向尚未满分的任务，因此这更像选择性部署收益，而不是对随机任务分布的无偏平均处理效应。</p>
+        <div class="warning"><strong>排行榜边界：</strong>论文报告 RSIAgent 的 Partial 分数高于 GPT-6 Astra（OSWorld 78.98 vs 72.60；ALE 84.82 vs 82.26），但公开系统保留各自 Harness 与执行预算。ALE 的 Binary 反而是 RSIAgent 50.75、GPT-6 Astra 52.24。可说“在公开榜单口径下 Partial 更高”，不能说“同条件能力全面超过”。</div>
+        <p class="block-intro">论文还在 40 个随机 GameCraft-Bench 任务上测试了另一种环境：同一个起始游戏经反复试玩、诊断和改码后，由外部评测器给出质量分。这里的意义是把“记忆复用”从办公软件扩展到可执行游戏开发，而不是证明跨任意领域通用。</p>
+        <div class="table-wrap">
+          <table>
+            <caption>GameCraft-Bench：不同起始生成器下的 Overall 质量分</caption>
+            <thead><tr><th>起始游戏生成器</th><th>Baseline</th><th>Play2Code</th><th>RSIAgent w/o RSI</th><th>Full RSIAgent</th></tr></thead>
+            <tbody>
+              <tr><td>Codex + GPT-5.5 (high)</td><td>52.77</td><td class="negative">51.05</td><td>57.84</td><td class="positive">61.28</td></tr>
+              <tr><td>Kimi-K2.6</td><td>31.28</td><td>36.02</td><td>42.61</td><td class="positive">46.37</td></tr>
+              <tr><td>GLM-5.3-Flash</td><td>30.55</td><td>38.25</td><td>44.73</td><td class="positive">48.72</td></tr>
+              <tr><td>Qwen3.8-27B</td><td>41.30</td><td>47.67</td><td>53.82</td><td class="positive">57.46</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-note">来源：论文 Table 1、Table 2、Appendix C.3–C.4 与 D。游戏开发每次最多 15 轮、每轮 Actor 最多 26 次工具调用。</p>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>研究坐标：RSIAgent 填补的是 Experience Acquisition</h2>
+        <p class="lead">把近期 self-evolution 工作放在一起看，RSIAgent 的独特位置不是“更会总结 Experience”，而是把 Experience 的来源也纳入闭环；SkillCAT、Branch2Skill 与 SkillHEX 则分别更强调可靠归纳、经验效率和假设检验。</p>
+        <p>比较这些工作时，最有区分力的轴不是是否使用 Skill 或 Memory，而是谁产生学习经验、是否显式提出可证伪假设、用什么方式验证，以及最终沉淀什么 Artifact。下面的表是研究定位图，不是统一实验协议下的性能排名。</p>
+        <div class="table-wrap">
+          <table class="research-table">
+            <caption>Training-free / self-evolution 相邻工作的知识生产位置</caption>
+            <thead><tr><th>工作</th><th>核心问题</th><th>Experience 来源</th><th>主动生成任务</th><th>Hypothesis</th><th>主要验证</th><th>产物</th></tr></thead>
+            <tbody>
+              <tr><td><a href="31-evoskill-gui.html">EvoSkill-GUI</a></td><td>部署中怎样持续修 Skill</td><td>当前执行失败</td><td>否，偏 reactive</td><td>弱 / 隐式</td><td>Critic + 后续执行</td><td>Evolving GUI Skill</td></tr>
+              <tr><td><a href="27-skillcat.html">SkillCAT</a></td><td>怎样避免从轨迹错误归纳</td><td>同任务多条成功/失败轨迹</td><td>否</td><td>对比式、隐式</td><td>来源任务克隆回放与审计</td><td>Validated Skill Patch</td></tr>
+              <tr><td><a href="https://arxiv.org/abs/2608.08677" target="_blank" rel="noreferrer">Branch2Skill</a></td><td>怎样提高 Experience 效率</td><td>固定预算的 MCTS reasoning tree</td><td>Tree Search</td><td>非显式假设</td><td>Elite path vs sibling evidence</td><td>Skill Update</td></tr>
+              <tr><td><a href="https://arxiv.org/abs/2608.05628" target="_blank" rel="noreferrer">SkillHEX</a></td><td>怎样判断 Skill 为什么失败</td><td>Failure + executable tests</td><td>是，诊断测试</td><td><strong>显式可证伪</strong></td><td>Self-verification + evidence tree</td><td>Verified Skill Revision</td></tr>
+              <tr><td><a href="04-skill-self-play.html">Skill Self-Play</a> / <a href="09-sesa.html">SESA</a></td><td>怎样让任务与能力共同演化</td><td>Proposer / Challenger 生成任务</td><td><strong>是</strong></td><td>弱，重难度课程</td><td>Environment / task outcome</td><td>Skill + Policy / Model</td></tr>
+              <tr><td><a href="05-coral.html">CORAL</a></td><td>怎样持续进行开放式发现</td><td>多 Agent 自主搜索</td><td><strong>是</strong></td><td>中等 / 隐式</td><td>Evaluator</td><td>Shared Discovery Memory</td></tr>
+              <tr class="focus-row"><td>RSIAgent</td><td>怎样在未知 Environment 主动获得知识</td><td>自主环境探索</td><td><strong>是</strong></td><td>中等 / 隐式</td><td>隔离的环境 Verifier</td><td>Environment Memory</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-note">编辑性综合。相邻工作依据各自论文与本合集解读；SkillHEX 明确把可证伪失败假设转成 executable tests，Branch2Skill 以 reasoning tree 产生更密集的 step-wise evidence。不同论文任务、模型与预算不可横向比较分数。</p>
+        <p class="block-intro">这张地图也解释了 RSIAgent 与其他路线为何互补：它擅长解决 <strong>Environment → Experience</strong>，SkillCAT 更擅长 <strong>Experience → Reliable Skill</strong>，Branch2Skill 优化 Experience Efficiency，SkillHEX 则推进 <strong>Failure → Hypothesis → Test → Evidence</strong>。回到 RSIAgent 自身，四任务消融给出的机制证据是：Broad 覆盖与 Deep 追击在选定任务上确实互补。</p>
+        <figure class="paper-figure">
+          <div class="figure-head"><span>论文原图 · Figure 4</span><span>阶段消融</span></div>
+          <a href="assets/paper-figures/33-rsiagent/figure4-ablation.png" target="_blank"><img src="assets/paper-figures/33-rsiagent/figure4-ablation.png" alt="四个 OSWorld 任务上无 RSI、仅深度、仅广度和完整 RSI 的 Partial 分数比较"></a>
+          <figcaption>
+            <strong>Full RSI 平均 74.54%，Broad-only 为 65.52%，Deep-only 为 56.50%</strong>
+            <p>图中 w/o BRS 表示“从空记忆只做 DRS”，w/o DRS 表示“只保留 BRS 记忆”。T085 与 T089 上 Deep-only 低于空记忆，说明窄而少的练习可能把错误或过拟合规则写入记忆。</p>
+            <p class="figure-reading"><strong>谨慎解读：</strong>四项任务来自已有改进记录的探索性 cohort；Full RSI 是两次历史评测均值，而 Deep-only 最多允许两个课程练习，预算并不对称。这支持“在这些任务上两阶段互补”，尚不足以证明普遍因果优越性。</p>
+            <div class="figure-source"><span>来源：论文 Figure 4、Appendix C.5，第 9、29 页</span><a href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">原文 ↗</a></div>
+          </figcaption>
+        </figure>
+        <p>为什么广度可能成为深度的前提？一种合理解释是：BRS 先提供多个程序范式、检查方式与失败边界，DRS 才能围绕目标差距做局部辨识；如果一开始就只盯目标，课程代理容易在极少样本上形成错误信念。这个解释与消融方向一致，但论文没有用等预算随机任务实验隔离“覆盖多样性”“总练习量”和“阶段顺序”三者。</p>
+        <p class="block-intro">附录的案例追踪比聚合分数更接近机制证据：它把某条记忆、最终操作与评分组件连起来。下面三例说明收益不是抽象的“想得更好”，而是保存了可执行的环境细节。</p>
+        <div class="cards">
+          <article class="card"><h3>REAPER · T085</h3><p>记忆保存了片段解析与渲染配置；分句间隔从 0.8250 升至 1.0000，处理后末句从 0.2837 升至 0.8996，总分从 0.6800 升至约 0.9415。</p></article>
+          <article class="card"><h3>WPS 演示文稿 · T049</h3><p>冻结记忆提供连接线端点的边缘中心约定，关键 connector 误差归零，总分从 0.40 升到 0.80；但另一页仍未得分。</p></article>
+          <article class="card"><h3>Shotcut 视频 · T044</h3><p>记忆让 Agent 使用原生 Crop: Source 和 76 像素裁剪，满足项目结构检查，总分 0.40 → 1.00；代价不是更少步骤，Actor 迭代反而 26 → 42。</p></article>
+          <article class="card"><h3>FreeCAD · T103</h3><p>记忆提供图纸解释与几何验证程序，0.2500 的历史基线上升到 0.6789/0.6897，但支撑与安装孔仍有可见误差，说明是部分重建而非彻底解决。</p></article>
+        </div>
+        <div class="verdict"><strong>证据等级：</strong>端到端结果强力支持“冻结记忆有用”；阶段消融支持 BRS 与 DRS 在选定任务上的组件贡献；案例追踪支持具体规则被检索并影响执行。论文仍未把“主动课程更好”“独立验证更可靠”“记忆捕获的是因果关系”三项主张分别做出充分的受控验证。</div>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>自然下一步：从 Autonomous Exploration 到 Autonomous Experimentation</h2>
+        <p class="lead">RSIAgent 已经能够回答“What should I explore next?”；它还没有完整回答“What experiment should I run to determine whether hypothesis H is true?”。两者之间，是 Practice Task 与受控知识生产的差别。</p>
+        <p>DRS 可以在成功后安排 contrastive exercise，也可以在失败后生成区分 competing explanations 的练习，这已经比盲目增加难例更接近研究者式行为。但系统没有把候选解释表示为显式假设，也没有自动构造控制组、处理组、重复试验、效应量与方差，更没有在多个结果之间估计规则的适用边界。</p>
+        <p class="block-intro">如果把“主动探索”提升为“自主实验”，闭环至少需要下面八个环节。关键不是增加 Workflow Language 的复杂度，而是让每次环境交互都服务于区分某个不确定命题。</p>
+        <div class="experiment-ladder" aria-label="Autonomous Experimentation 的知识生产链">
+          <div><b>1</b>Observation<br>发现异常或未知</div>
+          <div><b>2</b>Hypothesis<br>提出可证伪解释</div>
+          <div><b>3</b>Experiment Spec<br>定义变量与指标</div>
+          <div><b>4</b>Control / Treatment<br>构造对照条件</div>
+          <div><b>5</b>Multi-rollout<br>跨 seed 重复</div>
+          <div><b>6</b>Evidence Aggregation<br>汇总效应与方差</div>
+          <div><b>7</b>Boundary Estimation<br>寻找失效范围</div>
+          <div><b>8</b>Validated Strategy<br>沉淀带证据策略</div>
+        </div>
+        <div class="verdict"><strong>核心差异：</strong>RSIAgent 的基本知识生产式是 <em>Experience → Knowledge</em>；更强的 Autonomous Experimentation 应当是 <em>Hypothesis → Controlled Experiment → Evidence → Generalizable Strategy</em>。前者提高经验获取主动性，后者提高结论的可证伪性与可迁移性。</div>
+        <figure class="paper-figure">
+          <div class="figure-head"><span>论文原图 · Figure 5</span><span>失败模式审计</span></div>
+          <a href="assets/paper-figures/33-rsiagent/figure5-failure-modes.png" target="_blank"><img src="assets/paper-figures/33-rsiagent/figure5-failure-modes.png" alt="探索不够针对、验证不完整与记忆固化不可靠的三类失败子型"></a>
+          <figcaption>
+            <strong>错误会沿“课程遗漏 → 验证漏检 → 规则固化”传播</strong>
+            <p>案例审计中，练习可能没有触碰真正薄弱点；Verifier 可能只确认产物存在，却没有覆盖全部 rubric；Actor 再把一次局部 PASS 写成范围过大的规则。图中样本很小且允许一例进入多个面板，适合作为故障 taxonomy，而不是总体发生率估计。</p>
+            <p class="figure-reading"><strong>阅读要点：</strong>外部记忆把一次错误从短期推理失误升级为可复用系统状态。记忆越持久，“不确定性、适用条件与反例”就越应成为一等字段。</p>
+            <div class="figure-source"><span>来源：论文 Figure 5 与 §4.6，第 10–11 页</span><a href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">原文 ↗</a></div>
+          </figcaption>
+        </figure>
+        <p>Verifier 的地位因此比普通 Agent 系统更关键。一次错误 PASS 不再只是一次 reward noise：它可能被蒸馏为长期规则，影响 Curriculum 的知识缺口判断，改变未来 Practice 的分布，再产生更多支持错误规则的选择性证据。这形成了 <strong>Error → Memory → Data Distribution Shift → More Error</strong> 的递归放大链。</p>
+        <div class="thesis-line">Wrong Verification → Wrong Memory → Wrong Curriculum → Misleading Experience<span>Self-evolution 中，Evaluator error 会从单步判断错误升级为数据生成过程错误。</span></div>
+        <p class="block-intro">把论文自己的失败模式与更高阶系统审计结合，最需要解决的不是七个互不相干的小缺点，而是下面五个相互耦合的结构问题。它们分别约束实验性、知识泛化、探索效率、误差稳定性与总体经济性。</p>
+        <div class="boundary">
+          <article><h3>① Practice 不等于 Experiment</h3><p>更难或更相似的练习能暴露问题，却不能自动识别哪条假设解释了变化。需要显式 H、控制变量、对照组、重复试验与拒绝标准，才能把“发现有效 case”升级为“验证一般机制”。</p></article>
+          <article><h3>② Local Experience 不等于 General Knowledge</h3><p>Distillation 与 Reconciliation 仍由 LLM 完成；一次局部 PASS 可能被推广成范围过大的规则。真正的长期知识单元需要条件、证据、反例、置信度、来源、适用范围和版本信息。</p></article>
+          <article><h3>③ Curriculum 缺少显式探索目标</h3><p>当前主要依赖 LLM 判断“什么 Practice 可能有帮助”，而不是优化 Information Gain、Uncertainty Reduction 或 Strategy Discrimination。论文观察到的 insufficiently targeted exploration 正是这一缺口的直接表现。</p></article>
+          <article><h3>④ Verifier 错误会递归污染</h3><p>隔离 Actor 与 Verifier 能降低相关错误，却不能保证判定完整。应让 executable checks、独立 evaluator、争议升级与不确定性传播共同决定一条经验是否有资格进入长期记忆。</p></article>
+          <article><h3>⑤ 成本与评测边界仍未闭合</h3><p>BRS、DRS、Verifier 与 Memory Consolidation 带来大量额外调用，论文没有统一报告完整生命周期成本；两阶段又看到 target query，聚合只替换部分任务结果。应与等预算重试、更强模型、随机课程和人工 playbook 做匹配比较，并在隐藏任务上冻结评测。</p></article>
+        </div>
+        <p class="block-intro">长期运行还要求 Memory 从“LLM-native 文件集合”升级为有生命周期的证据库。论文支持 add、revise、remove 与 contradiction reconciliation，但尚未把每条规则的证据状态结构化。</p>
+        <div class="knowledge-schema">Claim
+├── condition / scope
+├── supporting evidence / provenance
+├── counter-evidence / failure cases
+├── confidence / uncertainty
+├── last_verified / environment version
+└── supersedes / retired_by</div>
+        <p>对应的生命周期不应止于写入，而应包括 Create → Validate → Promote → Merge → Conflict Resolution → Decay → Revalidate → Retire。否则，环境越长期、记忆越丰富，旧规则、错误抽象和版本漂移越可能成为新的能力瓶颈。</p>
+        <h3 class="subhead">对 Master–Worker 路线的启发</h3>
+        <p>RSIAgent 的 Curriculum 可以看成 Master-lite：它根据当前 Memory 生成“下一项值得练习的任务”。更强的 Master 不应只是任务生成器，而应负责提出“值得验证的不确定策略”，把它写成 Experiment Spec，分配给多个 Worker 执行不同 Arm 与 Seed，再基于比较结果更新策略。</p>
+        <div class="cards">
+          <article class="card"><h3>RSIAgent 式 Master-lite</h3><p>Current Knowledge → What should I practice next? → Practice Task → Experience。</p></article>
+          <article class="card"><h3>Experimentation 式 Master</h3><p>Uncertain Strategy → Hypothesis → Arms / Workers → Multi-seed Evidence → Bounded Strategy。</p></article>
+        </div>
+        <p>因此，这篇论文真正改变的不是“模型可以不训练也变聪明”，而是把问题从 <strong>Learning from Experience</strong> 向前推进到 <strong>Choosing Experience</strong>。它留下的自然下一问，就是怎样用最少的环境交互区分假设、汇总证据，并沉淀带适用边界的策略——也就是从 Autonomous Exploration 走向 Autonomous Strategy Discovery。</p>
+        <div class="analysis"><strong>最值得做的下一项实验：</strong>在隐藏目标任务上，对齐总调用、Token、墙钟时间和工具权限，比较 Full RSI、Broad-only、随机课程、信息增益课程、人工 playbook 与无记忆重试；每项策略使用多 seed 对照，并由独立可执行检查器审计记忆规则。这个实验会同时检验主动课程的因果价值、经验效率与知识边界。</div>
+        <p class="source-note">本文依据 arXiv:2609.15364v1（2026-09-14）与论文附录撰写，未独立复现实验。编辑性推断均与论文报告结果分开表述。</p>
+      </section>
+      <a class="back" href="#top">↑ 返回顶部</a>
+    </main>
+
+    <aside class="rail">
+      <p class="side-title">快速判断</p>
+      <div class="rail-card"><h3>一句话</h3><p>RSIAgent 把 self-evolution 从“利用 Experience”推进到“主动选择 Experience”。</p></div>
+      <div class="rail-card"><h3>最强证据</h3><p>自身 Harness 前后对比、四任务阶段消融，以及附录中“记忆条目 → 操作 → 评分项”的案例链。</p></div>
+      <div class="rail-card"><h3>核心缺口</h3><ul><li>Practice ≠ Experiment</li><li>Local Case ≠ General Rule</li><li>Verifier 错误递归放大</li><li>知识生命周期不完整</li></ul></div>
+      <div class="rail-card"><h3>检索词</h3><p>Experience Acquisition · Autonomous Experimentation · Environment Memory · Broad-to-Deep · Verifier Reliability</p></div>
+    </aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=links.map(a=>document.querySelector(a.getAttribute('href'))),theme=document.getElementById('theme');
+    function update(){const d=document.documentElement,s=d.scrollHeight-innerHeight;bar.style.width=(s?scrollY/s*100:0)+'%';let active=0;sections.forEach((sec,i)=>{if(sec.getBoundingClientRect().top<150)active=i});links.forEach((a,i)=>a.classList.toggle('active',i===active))}
+    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
+    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
+</body>
+</html>
