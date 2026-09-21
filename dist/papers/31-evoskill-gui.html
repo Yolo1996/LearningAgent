@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="EvoSkill-GUI 中文深度解读：如何把静态 Skill 变成部署中可修订、可持久化、可复用的外部策略 Artifact；以及为什么它仍属于 Case-level Skill Evolution，而非 Strategy-level Self-Evolution。">
+  <title>EvoSkill-GUI：让 Skill 在部署后继续改写自己｜论文精读</title>
+  <style>
+    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}.hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(66,182,126,.25),transparent 29%),radial-gradient(circle at 8% 100%,rgba(93,133,221,.18),transparent 30%),linear-gradient(125deg,#10223c,#163d4c 56%,#3e315f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1150px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}.layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}.chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:810px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:810px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}.cards,.steps,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.step,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2),.step:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3),.step:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n),.step:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.step h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.step p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:18px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.figure-wide img{width:100%;max-height:none}.figure-compact img{width:auto;max-width:760px}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}.table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:720px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.analysis,.warning{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.boundary article{border-color:#ead5b4;background:var(--at)}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .step p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}@media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.steps,.boundary{grid-template-columns:1fr}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.figure-compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.step,.boundary article{break-inside:avoid;background:#fff}}
+    .comparison-table{min-width:900px}.result-table{min-width:780px}.equation-line{margin:18px 0;padding:16px 18px;border:1px solid #cad9eb;border-radius:11px;color:#263f61;background:var(--bt);font-size:clamp(16px,2.3vw,21px);font-weight:780;line-height:1.65;text-align:center;letter-spacing:.01em}.equation-line small{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}.takeaways{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0 8px;padding:0;counter-reset:takeaway;list-style:none}.takeaways li{position:relative;padding:13px 14px 13px 46px;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);color:#415267;font-size:14px;line-height:1.68}.takeaways li:before{position:absolute;left:13px;top:13px;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:#fff;background:var(--blue);font-size:11px;font-weight:800;content:counter(takeaway);counter-increment:takeaway}.takeaways li:nth-child(2){border-color:#d7caec;background:var(--pt)}.takeaways li:nth-child(2):before{background:var(--purple)}.takeaways li:nth-child(3){border-color:#c9deb3;background:var(--gt)}.takeaways li:nth-child(3):before{background:var(--green)}.takeaways li:nth-child(4),.takeaways li:nth-child(5){border-color:#ead5b4;background:var(--at)}.takeaways li:nth-child(4):before,.takeaways li:nth-child(5):before{background:var(--amber)}.takeaways li:last-child{grid-column:1/-1;font-weight:680}.level-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.level-compare article{padding:16px;border:1px solid #c9deb3;border-radius:11px;background:var(--gt)}.level-compare article:last-child{border-color:#d7caec;background:var(--pt)}.level-compare h3{margin:0 0 8px;font-size:15px}.level-compare p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.case-path{margin:17px 0;padding:17px 18px;border:1px solid #ead5b4;border-radius:11px;background:var(--at);font-size:14px;line-height:1.78}.case-path strong{color:#7b4b18}.case-path code{white-space:normal}.case-path .arrow{display:block;margin:3px 0;color:var(--amber);font-weight:800}.classification{margin:18px 0;padding:18px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center}.classification b{display:block;font-size:21px;color:var(--purple)}.classification span{display:block;margin-top:6px;color:var(--muted);font-size:13px}
+    body.dark .equation-line,body.dark .takeaways li,body.dark .level-compare article,body.dark .case-path,body.dark .classification{color:var(--ink);border-color:var(--line)}body.dark .equation-line,body.dark .takeaways li{background:var(--bt)}body.dark .takeaways li:nth-child(2),body.dark .level-compare article:last-child,body.dark .classification{background:var(--pt)}body.dark .takeaways li:nth-child(3),body.dark .level-compare article{background:var(--gt)}body.dark .takeaways li:nth-child(4),body.dark .takeaways li:nth-child(5),body.dark .case-path{background:var(--at)}body.dark .level-compare p{color:#bfcbda}@media(max-width:820px){.takeaways,.level-compare{grid-template-columns:1fr}.takeaways li:last-child{grid-column:auto}.equation-line{font-size:16px}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero">
+    <div class="hero-in">
+      <div class="eyebrow">PAPER REVIEW · arXiv:2609.17653v1</div>
+      <h1>EvoSkill-GUI：让 Skill 在部署后继续改写自己</h1>
+      <p class="subtitle"><span class="paper-name">Reflect, Revise, Reuse: Training-Free Skill Evolution for GUI Agents</span>Bofan Chen、Boxuan Zhang、Fei Tang 等 10 位作者 · 浙江大学、电子科技大学 · 2026-09-15</p>
+      <div class="actions">
+        <a class="action" href="https://arxiv.org/html/2609.17653v1" target="_blank" rel="noreferrer">查看论文原文 ↗</a>
+        <a class="action" href="https://github.com/ZJU-REAL/EvoSkill-GUI" target="_blank" rel="noreferrer">代码仓库 ↗</a>
+        <a class="action" href="https://zju-real.github.io/EvoSkill-GUI/" target="_blank" rel="noreferrer">项目主页 ↗</a>
+        <button class="theme" id="theme" type="button">◐ 切换主题</button>
+      </div>
+      <div class="metrics">
+        <div class="metric"><small>研究对象</small><b>部署中的 Skill</b><span>不更新模型参数</span></div>
+        <div class="metric"><small>评测平台</small><b>3 个</b><span>MobileWorld / AndroidWorld / OSWorld</span></div>
+        <div class="metric"><small>MobileWorld 最大增益</small><b>+16.2 pt</b><span>Qwen3.6-Plus</span></div>
+        <div class="metric"><small>OSWorld 最大增益</small><b>+10.5 pt</b><span>Qwen3-VL-8B</span></div>
+        <div class="metric"><small>同骨干 Critic</small><b>80.4%</b><span>143 次人工审计判断</span></div>
+        <div class="metric"><small>研究定位</small><b>Case-level</b><span>尚非 Strategy-level Evolution</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航">
+      <p class="side-title">阅读导航</p>
+      <ol>
+        <li><a href="#s1">01 从静态 Skill 到持久对象</a></li>
+        <li><a href="#s2">02 局部编辑与双尺度修订</a></li>
+        <li><a href="#s3">03 修改 Skill 胜过 Retry</a></li>
+        <li><a href="#s4">04 真实复用与迁移边界</a></li>
+        <li><a href="#s5">05 Case Repair 到策略抽象</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>核心问题：不是提出一种新 Skill，而是提出 Skill Evolution 机制</h2>
+        <p class="lead">论文最重要的概念移动，是把 Skill 从执行前生成、执行时冻结的 Prompt，变成部署中可修改、跨任务可持久保存的外部策略 Artifact。</p>
+        <div class="equation-line">Static Skill → Mutable Skill → Persistent Skill<small>模型参数保持不变，变化的是外部 Skill：S₀ → S₁ → S₂ → …</small></div>
+        <p>长程 GUI 任务并不是一条预先写好的操作脚本。弹窗、加载延迟、控件迁移、可访问性树过期，都会让原计划在中途失效。已有 Skill 方法能够保存流程知识，却常把 Skill 当成执行前生成、执行时冻结的文档；失败轨迹即使暴露了可靠线索，也不会自动写回下一次可复用的程序性知识。</p>
+        <p>EvoSkill-GUI 的问题因此可以更精确地表述为：在不训练模型、不引入更强外部教师的条件下，能否让同一个 GUI Agent 根据真实执行轨迹，定位“计划、定位还是恢复规则”中的缺口，修改持久化 Skill，并让修订后的知识服务后续相关任务？论文将 Skill 明确定义为 <strong>persistent procedural knowledge object</strong>；成功率是评测指标，但研究对象是 <strong>Skill Artifact 的部署时演化</strong>。</p>
+        <p>换句话说，论文把 deployment trajectory 直接变成 Skill 的更新信号。模型不通过梯度吸收经验；经验被写入模型外部、可以被读取和继续修改的操作知识中。这个边界移动，比“新增一种 Skill 文件格式”更接近论文的真正贡献。</p>
+        <div class="analysis"><strong>去品牌化后的本质：</strong>在部分可观测、界面持续变化的环境里，论文把适应边界从固定模型与固定文档移动到结构化 Skill 文件；以执行轨迹和终局成败为反馈，产出可检索的程序性资产，代价是额外推理调用、错误写回与维护成本。</div>
+        <p class="block-intro">如果把全文再压缩一次，后续所有方法与实验都可以挂到四个核心点和一个关键判断上。前四项是论文已经实现或用实验支持的内容，最后一项是决定其研究定位的证据边界。</p>
+        <ol class="takeaways">
+          <li><strong>研究对象改变：</strong>部署轨迹成为 Skill 更新信号，Skill 从静态文档变成持久可变对象。</li>
+          <li><strong>表示支持演化：</strong>Plan / Backup / Recovery / Failure 的结构化拆分，让错误可以局部 mutation。</li>
+          <li><strong>两个时间尺度：</strong>rollout 内即时止损，rollout 后依据完整轨迹反思与修订。</li>
+          <li><strong>证据超越 Retry：</strong>在相近三轮与 Token 预算下，Skill Revision 明显优于 pass@3，并出现留出任务复用。</li>
+          <li><strong>关键判断：</strong>论文证明的是 Case-level Skill Evolution；它没有显式完成 Case → Pattern → General Strategy，因此尚非更强意义的 Strategy-level Self-Evolution。</li>
+        </ol>
+        <p class="block-intro">这使它与“记忆更新”“权重学习”“离线建库”既相邻又不等价。下表不比较谁更强，而是说明每条路线把什么设为变量，以及部署后究竟留下什么。</p>
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <caption>相邻路线的关键差异：谁被改写、何时改写、沉淀为何物</caption>
+            <thead><tr><th>路线</th><th>主要适应对象</th><th>发生阶段</th><th>反馈信号</th><th>EvoSkill-GUI 的新增边界</th></tr></thead>
+            <tbody>
+              <tr><td>CUA-Skill / WebXSkill / MMSkills</td><td>结构化流程、程序或多模态 Skill</td><td>主要在部署前构造，检索后相对静态</td><td>离线数据与人工设计</td><td>把真实 rollout 的失败直接写回正在使用的 Skill</td></tr>
+              <tr><td>HyMem / Memp 等记忆系统</td><td>经验与记忆库</td><td>在线或跨任务更新</td><td>历史轨迹与检索反馈</td><td>修改的是可执行程序性 Skill，而不只是经验条目</td></tr>
+              <tr><td>SkillRL / EvoCUA 等训练路线</td><td>策略或模型权重</td><td>训练阶段</td><td>奖励、蒸馏或合成经验</td><td>不做参数更新，修改外部 Skill Artifact</td></tr>
+              <tr><td>CoEvoSkills</td><td>多文件 Skill Package</td><td>构建 / 演化阶段</td><td>代理验证器</td><td>聚焦动态 GUI 部署，加入即时修订、同骨干诊断与复用库</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-note">来源：论文 Introduction 与 Related Work。以上定位采用作者给出的比较框架，不构成对相邻工作的独立全面评测。</p>
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 1</span><span>静态 Skill → 可演化 Skill</span></div>
+          <a href="assets/paper-figures/31-evoskill-gui/intro.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/intro.png" alt="论文图一，对比静态单文件 Skill 与 EvoSkill-GUI 的结构化 Skill、即时修订、同骨干反思和元数据检索"></a>
+          <figcaption><strong>一张图读懂论文的概念移动</strong><p>上半部分把 Skill 视为检索后冻结的长文本；下半部分则让 Skill 具有可编辑结构，并把执行、反思、修订和复用闭合成循环。</p><p class="figure-reading"><strong>阅读要点：</strong>图中最值得记住的不是文件夹数量，而是失败反馈获得了持久化出口：一次 rollout 的教训不再只存在于临时上下文中。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/html/2609.17653v1#S1.F1" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
+        </figure>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>方法：先让知识可局部编辑，再在两个时间尺度上修订</h2>
+        <p class="lead">可进化的知识首先必须可编辑。EvoSkill-GUI 用结构化表示提供局部 mutation 的落点，再用 rollout 内与 rollout 后两条反馈回路决定何时修改。</p>
+        <div class="equation-line">S = (D, A, P, B, C, F)<small>Structured representation → Localized mutation</small></div>
+        <p>Skill Package 被写成六元组：元数据 D、可访问性工具 A、计划 P、备用定位 B、恢复规则 C、失败案例 F。最关键的不是六个字母本身，而是错误类型与可编辑位置之间形成了稳定映射；系统无需每失败一次就重写整个 Skill，而可以把修改限制在最相关的知识单元。</p>
+        <p class="block-intro">下面四项是理解“为什么结构化”最直接的方式。它们分别回答正常流程、定位替代、异常恢复和历史负例四类问题，同时把一次失败的修改范围压缩到对应文件。</p>
+        <div class="table-wrap">
+          <table>
+            <caption>从错误类型到局部 Skill mutation</caption>
+            <thead><tr><th>知识模块</th><th>回答的问题</th><th>典型错误</th><th>局部更新</th></tr></thead>
+            <tbody>
+              <tr><td><strong>P · Plan</strong></td><td>正常情况下怎样完成任务</td><td>步骤缺失、顺序错误、过早结束</td><td>修改 <code>plan.md</code></td></tr>
+              <tr><td><strong>B · Backup</strong></td><td>默认定位失效后怎么办</td><td>按钮移动、识别失败、选择器失效</td><td>修改 <code>backup.md</code></td></tr>
+              <tr><td><strong>C · Recovery</strong></td><td>进入异常状态后怎样恢复</td><td>弹窗、加载失败、流程偏航</td><td>修改 <code>recover.md</code></td></tr>
+              <tr><td><strong>F · Failure cases</strong></td><td>过去怎样失败、为何失败</td><td>同一错误重复出现</td><td>写入 <code>failure_examples/</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-note">来源：论文 §3.2、Equation 4 与 Appendix A.6。结构化 Skill 相比单文件 Skill，MobileWorld 成功率由 66.67% 提升至 69.52%。</p>
+        <p>执行阶段允许 Agent 通过 read、write、append、list、search、create_failure 等受限工具修改 Skill。即时修订处理的是“当前页面与预期不一致”这类局部偏差；若整次任务失败，另一个会话中的同骨干 Critic 只读取指令、截图、可访问性树和动作轨迹，不读取 Skill、执行者思维链或标准答案，再输出失败步、直接原因与建议。执行者随后据此做文件级修订。</p>
+        <p>信息隔离解决的不是模型能力，而是诊断污染：如果 Critic 继承原计划，它容易替错误决策辩护；如果看到标准答案，又会把不可部署的特权信息写进 Skill。但“同一参数、不同会话”仍不等于独立监督——Critic 与执行者共享盲点，论文后续人工审计也确实发现近两成诊断错误。</p>
+        <p class="block-intro">两个修订回路不是重复设计，而是处理不同故障半径。即时修订阻止局部 mismatch 扩散；事后反思使用完整轨迹处理已经暴露出的结构性错误。</p>
+        <div class="level-compare">
+          <article><h3>A · In-rollout Instant Revision</h3><p>执行仍在继续时发现 popup、控件变化或 Skill 不适配，立即编辑对应文件并继续当前 trajectory。目标是阻断 <strong>local error → state drift → cascading failure</strong>。</p></article>
+          <article><h3>B · Post-rollout Reflect → Revise</h3><p>完整 rollout 失败后，隔离 Critic 输出 failure step、direct cause 与 revision suggestion；Executor 再修改 Skill，启动新的 rollout。</p></article>
+        </div>
+        <p>因此它同时实现了 <strong>local adaptation + trajectory-level adaptation</strong>：前者是在当前状态附近纠偏，后者是在一次失败完成后修改未来行为规则。这一双时间尺度设计，是论文方法上比“多文件 Skill”更值得记住的部分。</p>
+        <p class="block-intro">完整系统还需要第三个层面：元数据检索决定修订后的知识能否在未来任务被正确调用。结构、反馈时机与检索门控共同形成闭环，缺一项都会退化成一次性修补。</p>
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 2</span><span>结构、演化与复用</span></div>
+          <a href="assets/paper-figures/31-evoskill-gui/method.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/method.png" alt="EvoSkill-GUI 总体架构，包含多文件 Skill Package、执行反思修订循环、信息隔离和元数据检索复用"></a>
+          <figcaption><strong>系统不是一个 Prompt，而是一个带写权限边界的控制回路</strong><p>A 展示文件级知识分工；B 展示即时编辑、隔离诊断与事后修订；C 展示命中阈值后的复用，以及未命中时的新 Skill 生成。</p><p class="figure-reading"><strong>阅读要点：</strong>受限工具接口提供的是可审计性与作用域约束，不是正确性保证。修订是否有害，仍取决于 Critic 诊断与后续验证。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/html/2609.17653v1#S2.F2" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
+        </figure>
+        <h3 class="subhead">检索不是“语义越像越好”，而是先卡住任务边界</h3>
+        <p>每个 Skill 的检索元数据包含 intent、app、platform、keywords、args、history 与 status。评分将查询覆盖率和集合重叠度组合，再加入应用与关键词奖励、缺失关键概念的惩罚；最高分超过阈值 0.6 才复用，否则新建 Skill。它本质上是一个低成本、人工加权的选择门，而不是学习到的检索器。</p>
+        <div class="analysis"><strong>方法主线：</strong>结构化表示让知识可以局部改；双时间尺度让系统知道何时改；元数据检索让改过的知识能够在未来再次被调用。三者合在一起，才构成 Skill Evolution，而不只是失败后的 Prompt 修补。</div>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>关键证据：修改 Skill 比相同量级的 Retry 更有效</h2>
+        <p class="lead">论文最有辨识度的实验结论，不只是成功率提高，而是在相近三轮执行与更低 Token 总量下，execution → reflection → skill revision 明显胜过 execution → retry → retry。</p>
+        <div class="level-compare">
+          <article><h3>Repeated Sampling · pass@3</h3><p><strong>62.8%</strong> 成功率 · <strong>103.00M</strong> tokens<br>每次 rollout 相互独立，失败不改变下一次的程序性知识。</p></article>
+          <article><h3>EvoSkill-GUI · 3 rounds</h3><p><strong>69.5%</strong> 成功率 · <strong>94.75M</strong> tokens<br>失败经过反思并写回 Skill，下一轮从修订后的状态继续。</p></article>
+        </div>
+        <p>这个对照削弱了最直接的替代解释：“只是因为多跑了两次，所以更容易成功。”EvoSkill-GUI 不仅以更低总 Token 获得高 6.7 个百分点的结果，而且把一次失败留下的诊断变成下一轮可用的外部状态。</p>
+        <p>不过它仍不能单独证明“持久 Skill 写回”是全部增益来源，因为完整系统同时改变了 Skill 生成、反思、工具使用和可访问性信息的组织方式。主结果证明整套系统有用；信息隔离、即时修订、文件结构和检索阈值的消融，才开始回答为什么有用。</p>
+        <p>MobileWorld 的 GUI-only 设置中，四个不同类型骨干都提升：Claude-Sonnet-4.6 为 +10.5 个百分点，Qwen3.6-Plus 为 +16.2，Qwen3.6-35B-A3B 为 +12.4，MAI-UI-8B 为 +7.6。OSWorld 上两个 8B 模型整体提升 +8.1 与 +10.5；AndroidWorld 两个 seed 阶段提升 +2.6 与 +6.0。这说明方法并非只对某一类模型有效，但论文没有报告多次独立运行的置信区间，因此小幅差异不应被解释为稳定排名。</p>
+        <figure class="paper-figure figure-compact">
+          <div class="figure-head"><span>论文原图 · Figure 3</span><span>MobileWorld 主结果</span></div>
+          <a href="assets/paper-figures/31-evoskill-gui/mobileworld_summary_final.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/mobileworld_summary_final.png" alt="MobileWorld 上四个基础模型加入 EvoSkill-GUI 前后的成功率柱状图"></a>
+          <figcaption><strong>四类骨干都受益，但绝对水平仍由基础模型决定</strong><p>完整框架在闭源通用模型、开放权重模型和 GUI 专用模型上都提高成功率；这支持“外部 Skill 适应可以补足不同骨干”的实用性判断。</p><p class="figure-reading"><strong>谨慎解读：</strong>该图是端到端结果，不能单独证明结构化文件、信息隔离或持久复用中的任一机制是唯一原因。</p><div class="figure-source"><span>来源：论文 Figure 3</span><a href="https://arxiv.org/html/2609.17653v1#S4.F3" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
+        </figure>
+        <p class="block-intro">下面把论文最关键的“主结果—机制证据—成本对照”放在同一证据板上。最强机制信号来自信息隔离与即时修订消融；单文件对照也有效，但差距相对较小。</p>
+        <div class="table-wrap">
+          <table class="result-table">
+            <caption>核心结果与它们真正支持的结论（成功率，%）</caption>
+            <thead><tr><th>实验</th><th>基线 / 对照</th><th>EvoSkill-GUI</th><th>变化</th><th>可支持的结论</th></tr></thead>
+            <tbody>
+              <tr><td>MobileWorld · Qwen3.6-Plus</td><td>53.3</td><td>69.5</td><td class="positive">+16.2 pt</td><td>完整系统对该骨干有效</td></tr>
+              <tr><td>OSWorld · GUI-Owl-1.5-8B</td><td>46.7</td><td>54.8</td><td class="positive">+8.1 pt</td><td>方法可延伸到桌面工作流</td></tr>
+              <tr><td>OSWorld · Qwen3-VL-8B</td><td>23.8</td><td>34.3</td><td class="positive">+10.5 pt</td><td>跨骨干的桌面收益</td></tr>
+              <tr><td>去掉信息隔离</td><td>60.95</td><td>69.52</td><td class="positive">+8.57 pt</td><td>隔离 Critic 上下文对修订质量有贡献</td></tr>
+              <tr><td>去掉即时修订</td><td>62.86</td><td>69.52</td><td class="positive">+6.66 pt</td><td>rollout 内止损有贡献</td></tr>
+              <tr><td>单文件 → 结构化 Package</td><td>66.67</td><td>69.52</td><td class="positive">+2.85 pt</td><td>文件级分工支持定向修订</td></tr>
+              <tr><td>相近预算：pass@3</td><td>62.8 / 103.00M token</td><td>69.5 / 94.75M token</td><td class="positive">+6.7 pt</td><td>收益不能仅由更多 token 解释</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="source-note">来源：论文 Figure 3、Table 1–4、Table 10。百分点差值按论文报告值；Token 对照来自 MobileWorld，M 表示百万。</p>
+        <p>结构化表示的证据也应放在正确层级理解：单文件到多文件 Package 带来 +2.85 个百分点，说明局部编辑具有价值；但信息隔离与即时修订的影响更大，分别对应 +8.57 与 +6.66 个百分点。这表明论文的贡献不是一个目录结构，而是“可编辑表示 + 双尺度反馈 + 受控诊断”的联合机制。</p>
+        <p>失败类型分析进一步支持定向文件设计：计划级错误修改 <code>plan.md</code> 后恢复 16/23（69.6%），定位错误修改 <code>backup.md</code> 后恢复 6/12（50.0%），缺少应急分支修改 <code>recover.md</code> 后只恢复 1/4（25.0%）。这说明“错误分类—文件修订”具有可操作价值，也暴露恢复规则最难仅靠少量失败轨迹学稳。</p>
+        <div class="warning"><strong>没有被主结果证明的事：</strong>论文没有证明 Skill 修订永远单调变好，也没有给出形式化 verifier。OSWorld 中仍出现 GUI-Owl 的 OS 类别 -4.1 pt、Qwen 的 Thunderbird -13.3 pt；作者将其归因于运行波动和简单任务被 Skill 过度复杂化，但这些解释仍是合理假设，不是隔离后的因果结论。</div>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>复用确实存在，但迁移强度仍取决于任务相似性</h2>
+        <p class="lead">“多轮变好”并不自动等于“持续自进化”，同任务族复用也不等于通用策略迁移。论文真正有力的证据，是冻结来源任务后，已有 Skill 在部分留出任务上仍提供了可测收益。</p>
+        <p>MobileWorld 上四个骨干从第 1 轮到第 3 轮都上升。Qwen3.6-Plus 的五轮扩展更能说明形状：56.2% → 61.9% → 68.6% → 68.6% → 69.5%。前三轮累计 +12.4 个百分点，后两轮只再增加 0.9，说明反馈循环存在明显边际递减；“最多三轮”是成本—性能折中，不是已经发现可无限递归提升的过程。</p>
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 6</span><span>三轮演化轨迹</span></div>
+          <a href="assets/paper-figures/31-evoskill-gui/evolution.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/evolution.png" alt="四个基础模型在 MobileWorld 三轮 Skill 演化中的成功率变化"></a>
+          <figcaption><strong>反馈带来累积收益，但图中只有三个离散轮次</strong><p>四条曲线共同上升，支持短周期 Skill 修订的普适实用性；开放权重与专用 GUI 模型同样受益。</p><p class="figure-reading"><strong>谨慎解读：</strong>该图不构成长期稳定性或递归自改进证据。论文自己对五轮 Qwen3.6-Plus 的结果显示，提升在第三轮后基本饱和。</p><div class="figure-source"><span>来源：论文 Figure 6</span><a href="https://arxiv.org/html/2609.17653v1#S4.F6" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
+        </figure>
+        <h3 class="subhead">三组“复用”证据的强弱不同</h3>
+        <p>AndroidWorld 的 116+116 任务流中，Phase 2 是同任务族的 seed-42 参数化变体，全部使用既有库，成功率从 55.2% 提升到 61.2%，库最终增长到 98 个 Skill，复用比例达到 56.1%。这证明了同族任务中的经验累积，但不能直接外推到全新应用类别。</p>
+        <p>更严格的 MobileWorld 留出实验将 87 个任务用于建库、30 个任务只做评测。仅使用已有库时，EvoSkill-GUI 完成 22/30（73.3%），无 Skill 的 pass@3 完成 12/30（40.0%）。16 个触发检索的任务中，15 个检索到合适 Skill；其中 EvoSkill-GUI 成功 12 个，而 pass@3 成功 7 个。另 14 个未检索任务的收益则来自新 Package 生成与演化，不能计作“已有 Skill 迁移”。</p>
+        <div class="analysis"><strong>这项证据不能忽略：</strong>检索已有 Skill 的 16 个任务中，EvoSkill-GUI 比 pass@3 多成功 5 个，说明 Skill 并非只能修好原任务。但它证明的是“相关任务间存在可复用程序性知识”，尚未证明系统已经从具体案例中抽取出带明确适用边界的通用策略。</div>
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 4</span><span>AndroidWorld 顺序任务流</span></div>
+          <a href="assets/paper-figures/31-evoskill-gui/skill_library.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/skill_library.png" alt="AndroidWorld 两阶段任务流中成功率、Skill 库规模和复用比例随任务推进的变化"></a>
+          <figcaption><strong>库变大、复用变多，累计成功率保持领先</strong><p>上图对比基线与 EvoSkill-GUI 的滑动成功率，下图显示 Skill 数量和复用率随任务推进增长；虚线分隔 seed-30 与相关 seed-42 变体。</p><p class="figure-reading"><strong>阅读要点：</strong>它展示了“程序性知识会积累”，但 Phase 2 并非跨应用类别的开放世界迁移，因此更适合称为相关任务复用。</p><div class="figure-source"><span>来源：论文 Figure 4</span><a href="https://arxiv.org/html/2609.17653v1#S4.F4" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
+        </figure>
+        <p>Critic 的可靠性决定了积累是复利还是污染。作者人工标注 56 个失败任务中的 143 次判断，115 次正确（80.4%），28 次错误（19.6%）；至少 4 次把失败误判为成功并提前终止。这个结果很重要，因为它把“同骨干自诊断”从宣传语变成可测对象，也说明没有 verifier 的持久化写回具有真实回归风险。</p>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>关键判断：它证明 Skill 可以持续被修，却没有证明经验已变成通用策略</h2>
+        <p class="lead">EvoSkill-GUI 解决得较好的是“How can a deployed Skill keep changing?”；它尚未真正解决“How can experience become a generalizable strategy?”。两者之间的抽象鸿沟，是论文留下的最大研究空间。</p>
+        <p>从贡献层级看，第一层是概念贡献：让部署中的 Skill Artifact 成为适应对象。第二层是系统贡献：结构化文件、受限写接口、信息隔离 Critic 与元数据检索构成可运行闭环。第三层才是即时修订、计划 / 定位 / 恢复分工、失败案例写入与阈值检索。实验则证明这条闭环在多个 GUI 骨干、相关任务和有限留出任务上有效。</p>
+        <p>但论文的实际更新原语仍接近 <strong>one trajectory → diagnosis → direct skill edit</strong>。作者在 Introduction 中也将其描述为 Skill Package 通过重复使用积累 <strong>task-specific experience</strong>。这不是缺点的简单同义改写，而是准确标出了当前系统学习到的主要粒度。</p>
+        <h3 class="subhead">Kevin 简历案例：成功修复一个流程，但抽象发生在哪里？</h3>
+        <p>附录中的 SendInterviewEmailTask 很能说明方法的力量与边界。Agent 找到 <code>Kevin_CV.pdf</code> 后，没有打开验证内容、确认收件人并检查附件，就直接进入发信流程；Critic 将根因定位为缺少 verification checkpoint，随后系统把 open、verify、attach 和 verify attachment 写入计划与恢复规则，第二轮成功。</p>
+        <div class="case-path"><strong>论文实际完成的修订路径</strong><span class="arrow">↓</span><code>找到 Kevin_CV.pdf 但未验证 → 诊断为缺少 verification checkpoint → 在 Skill 中增加 open → verify → attach → verify attachment</code></div>
+        <p class="source-note">来源：论文 Appendix A.6.1，Case 1: Verification Checkpoint Insertion。首轮与第二轮均执行 14 步，得分由 0.0 变为 1.0。</p>
+        <p>这个案例证明了轨迹诊断可以变成有效的程序性修订。但系统没有一个显式的 abstraction operator，把“Kevin 的文件要打开确认”提升为跨任务策略，例如：<strong>当后续不可逆动作依赖一个尚未被 observation 直接确认的中间状态时，必须先插入 verification checkpoint</strong>。后者才可能自然迁移到附件上传、商品发布、订单取消、价格修改、表单提交或文件删除。</p>
+        <div class="equation-line">Case → Pattern → General Strategy<small>论文显式实现了 Case → Diagnosis → Direct Edit；Pattern 抽取与适用边界主要隐含地交给 LLM</small></div>
+        <p>因此，持久化不等于泛化，复用也不自动等于策略抽象。一个 Skill 可以在相似任务中命中并奏效，是“程序片段具有迁移性”的证据；只有当系统能从多个案例中归纳共同模式、写明适用条件与失效条件，并在表面不同的新任务上保持收益，才更接近 Strategy-level Self-Evolution。</p>
+        <p class="block-intro">把已证实能力与尚未建立的能力并排来看，能避免两种误读：既不把它贬低成普通 Retry，也不把局部成功夸大为通用策略学习。</p>
+        <div class="level-compare">
+          <article><h3>论文已经支持</h3><p>部署中的 Skill 可以被真实轨迹持续修订；结构化表示支持局部编辑；修订优于相近预算 Retry；部分已有 Skill 能在留出相关任务上复用。</p></article>
+          <article><h3>论文尚未建立</h3><p>从多个案例显式归纳跨场景策略；学习策略的适用边界与例外；处理互相冲突的经验；在全新应用类别中验证抽象规则。</p></article>
+        </div>
+        <p class="block-intro">在这一主判断之下，其他限制可以按它们是否阻碍“从案例修复走向策略学习”重新排序。每项都对应一个会显著改变论文解释的实验。</p>
+        <div class="boundary">
+          <article><h3>1 · 缺少显式抽象层</h3><p><strong>独立结构性判断：</strong>更新从单条轨迹直接进入具体 Skill 文件，没有单独的 Pattern 归纳、适用域描述和冲突合并阶段。<br><strong>关键检验：</strong>比较 direct edit 与“多案例聚合 → 策略抽取 → 边界验证”在跨应用任务上的迁移。</p></article>
+          <article><h3>2 · 没有写回 Verifier</h3><p><strong>论文明确：</strong>同骨干 Critic 有 19.6% 错误，至少 4 次误判成功；系统没有形式化 veto。<br><strong>关键检验：</strong>比较直接覆盖、版本化回滚和独立执行验证的累计回归率。</p></article>
+          <article><h3>3 · 迁移仍依赖相似性</h3><p><strong>论文明确：</strong>AndroidWorld Phase 2 是同任务族参数变体；作者也承认全新应用类别可能更弱。<br><strong>关键检验：</strong>冻结 Skill 库，在未见应用、不同 UI 与不同操作系统上检验策略级迁移。</p></article>
+          <article><h3>4 · 生命周期成本未闭合</h3><p><strong>证据衍生：</strong>Token 低于 pass@3，但 A11y 增加运行时间，失败还需要 Critic 与 Revision 调用。<br><strong>关键检验：</strong>同时报告延迟、调用成本、失败修订和维护开销，并计算复用的摊销点。</p></article>
+        </div>
+        <h3 class="subhead">最能推进这条研究线的下一项实验</h3>
+        <p>最关键的实验不是再加一个 GUI Benchmark，而是构造一组表面任务不同、底层策略相同的任务簇。例如，让“未确认中间状态便执行不可逆动作”分别出现在发邮件、删文件、改价格与提交表单中；只在一个或少量任务上提供失败轨迹，然后冻结更新，测试抽象出的 verification strategy 是否迁移到其他应用。</p>
+        <p>实验应同时比较三条路径：独立 Retry、单案例直接写回、以及多案例 Pattern 抽取后再写回。如果第三条在未见应用上稳定胜出，并能说明策略何时不适用，才真正跨过 Case Repair 与 Generalizable Skill Learning 之间的边界。</p>
+        <div class="classification"><b>Case-level Skill Evolution</b><span>而不是更强意义上的 Strategy-level Self-Evolution</span></div>
+        <div class="analysis"><strong>三句话带走：</strong>第一，EvoSkill 把 Skill 从静态 Prompt 变成 deployment 中可持续修改、持久保存和后续复用的 external policy artifact。第二，Plan / Backup / Recovery / Failure 的结构化拆分支持局部 mutation，并连接 rollout 内即时修复与 rollout 后 trajectory-level reflection。第三，也是最重要的：它证明了 Skill 可以持续被修，但尚未解决如何从具体 case 中学到具有明确适用边界、能够跨 case 泛化的策略。</div>
+        <p class="source-note">资料来源：<a href="https://arxiv.org/html/2609.17653v1" target="_blank" rel="noreferrer">arXiv:2609.17653v1</a>（2026-09-15）、论文附录与作者公开代码页面。本页未独立复现实验；所有数值均按 v1 版本整理，编辑性推断已在正文中明确标注。</p>
+        <a class="back" href="#top">↑ 返回顶部</a>
+      </section>
+    </main>
+
+    <aside class="rail">
+      <div class="rail-card"><h3>先抓住一个判断</h3><p>这是 Case-level Skill Evolution：把 Skill 变成部署时可写的外部状态，但尚未显式学习跨案例策略。</p></div>
+      <div class="rail-card"><h3>证据最强处</h3><ul><li>四类骨干一致提升</li><li>隔离与即时修订消融</li><li>相近 Token 的 pass@3</li><li>30 个留出任务迁移</li></ul></div>
+      <div class="rail-card"><h3>核心研究空间</h3><p>从 Case → Diagnosis → Direct Edit，走向 Case → Pattern → General Strategy，并为策略写明适用边界。</p></div>
+    </aside>
+  </div>
+  <script>
+    const progress=document.getElementById('progress');
+    const links=[...document.querySelectorAll('.toc a')];
+    const sections=links.map(a=>document.querySelector(a.getAttribute('href')));
+    function update(){const d=document.documentElement;const max=d.scrollHeight-d.clientHeight;progress.style.width=(max?d.scrollTop/max*100:0)+'%';let active=0;sections.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<160)active=i});links.forEach((a,i)=>a.classList.toggle('active',i===active))}
+    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
+    const theme=document.getElementById('theme');theme.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('paper-theme',document.body.classList.contains('dark')?'dark':'light')});if(localStorage.getItem('paper-theme')==='dark')document.body.classList.add('dark');
+  </script>
+  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
+</body>
+</html>

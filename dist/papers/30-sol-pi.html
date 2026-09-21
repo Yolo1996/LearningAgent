@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="SoL-Pi 中文深度解读：Auto-Research 如何把 Agent Harness 本身作为研究对象，通过 Broad→Deep 搜索与 535 个可验证环境，从轨迹中发现可迁移系统机制，并进行 Performance—Token—Cost Pareto 优化。">
+
+  <title>SoL-Pi：让智能体先学会少花 Token，再递归改进自己｜论文精读</title>
+  <style type="text/css">
+  :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#4f8516;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#f0f7e7;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}.hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(118,185,0,.25),transparent 29%),radial-gradient(circle at 8% 100%,rgba(93,133,221,.18),transparent 30%),linear-gradient(125deg,#10223c,#173a5b 56%,#3e315f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1150px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}.layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}.chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:810px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:810px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}.cards,.steps,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.step,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2),.step:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3),.step:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n),.step:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.step h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.step p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:18px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.figure-wide img{width:100%;max-height:none}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}.table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:760px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.perf-row td{background:var(--pt)!important}.positive{color:var(--green);font-weight:750}.negative{color:var(--red);font-weight:750}.analysis,.warning{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.boundary article{border-color:#ead5b4;background:var(--at)}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#25351c;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .step p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}@media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.steps,.boundary{grid-template-columns:1fr}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.step,.boundary article{break-inside:avoid;background:#fff}}
+    .comparison-table{min-width:980px}
+  </style>
+</head>
+
+<body id="top">
+  <div class="progress" aria-hidden="true">
+    <span id="progress"></span>
+  </div>
+
+  <header class="hero">
+    <div class="hero-in">
+      <div class="eyebrow">
+        PAPER REVIEW · arXiv:2609.20519v1
+      </div>
+
+      <h1>SoL-Pi：让智能体先学会少花 Token，再递归改进自己</h1>
+
+      <p class="subtitle"><span class="paper-name">SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</span>Haozhe Liu、Tian Ye、Sensen Gao 等 14 位作者 · NVIDIA、NTU、MIT · 2026-09-17</p>
+
+      <div class="actions">
+        <a class="action" href="https://arxiv.org/abs/2609.20519" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="https://github.com/NVlabs/SoL-Pi" target="_blank" rel="noreferrer">代码仓库 ↗</a><a class="action" href="https://nvlabs.github.io/SoL-Pi/" target="_blank" rel="noreferrer">项目主页 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <small>候选方向</small><b>152 → 4</b><span>自动研究筛选漏斗</span>
+        </div>
+
+        <div class="metric">
+          <small>搜索环境</small><b>535</b><span>495 仓库任务 + 40 合成任务</span>
+        </div>
+
+        <div class="metric">
+          <small>搜索规模</small><b>3000+ 次运行</b><span>6 万+ Agent—环境交互</span>
+        </div>
+
+        <div class="metric">
+          <small>核心评测</small><b>51 个任务</b><span>EdgeBench 公开集合</span>
+        </div>
+
+        <div class="metric">
+          <small>Token 降幅</small><b>44.7–49.0%</b><span>完整四机制栈相对 Pi</span>
+        </div>
+
+        <div class="metric">
+          <small>论文版本</small><b>v1 · 15 页</b><span>8 图 · 4 表</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航">
+      <p class="side-title">阅读导航</p>
+
+      <ol>
+        <li><a href="#s1">01 Harness 成为研究对象</a></li>
+
+        <li><a href="#s2">02 Broad → Deep 搜索</a></li>
+
+        <li><a href="#s3">03 Environment Scaling</a></li>
+
+        <li><a href="#s4">04 Trace → System Mechanism</a></li>
+
+        <li><a href="#s5">05 Pareto 优化与结论</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>核心问题：Harness 本身能不能被 Auto-Research 自动优化</h2>
+
+        <p class="lead">这篇论文最重要的概念移动，不是提出一种新的 Context Compression，而是把 Auto-Research 的搜索对象从代码、模型、算法与超参数，推进到承载 Agent 行为的整个 Harness。</p>
+
+        <p>传统 Auto-Research 通常把 Agent 当作研究者：它修改目标代码、训练配置或算法实现，再通过实验结果获得反馈。SoL-Pi 把视角反过来——如果 Agent 的表现由“模型 + Harness”共同决定，那么研究者是否也能修改自己赖以行动的运行系统？这里的 Harness 不只是 System Prompt，而是 context 管理、工具接口、observation 处理、delegation、progress control、prompt / policy 与 execution loop 的组合。</p>
+
+        <p>因此，论文真正的问题可以写成：能否从大量 Agent Trajectory 中自动识别反复出现的系统性低效，把它们转化为可执行的 Harness Hypothesis，再经过实现、评审、多环境 Rollout 和成本—能力验证，沉淀成跨任务复用的系统机制？Token 效率是这次搜索采用的目标，但“让 Auto-Research 研究 Agent System 自身”才是更上位的研究定位。</p>
+
+        <p>这一区分很重要。上下文压缩方法通常预先认定问题位于历史太长；手工 Harness Engineering 则由人观察轨迹、修改工具和规则；任务特定 Harness Evolution 可能把某个 Benchmark 的反馈直接写进 Prompt 或代码。SoL-Pi 希望得到的不是更短的一段文本，也不是某项任务的定制策略，而是从多环境重复模式中发现的 Harness Primitive。</p>
+
+        <div class="analysis">
+          <strong>从 Self-Evolution 到 System Evolution：</strong>传统路径常是 Trace → Memory / Skill，即让 Agent “记住什么”；SoL-Pi 展示的是 Trace → Harness Primitive，即让运行系统“改变什么”。Action Fusion 就来自对大量轨迹中 edit → test 相邻模式的观察，而不是一条自然语言经验。
+        </div>
+
+        <p class="block-intro">下面的比较用于定位研究对象，而不是给方法排总名次。SoL-Pi 与 Meta-Harness、AHE 等工作的距离最近；它的特征是把多环境搜索、任务级 Token 成本和能力约束同时放进 Harness Evolution。</p>
+
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <caption>Auto-Research 的搜索对象如何从任务产物扩展到 Agent System</caption>
+            <thead>
+              <tr><th>研究路线</th><th>被优化的对象</th><th>反馈主要来自</th><th>最终沉淀</th><th>与 SoL-Pi 的关系</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>常规 Auto-Research</td><td>代码、模型、算法、超参数</td><td>任务得分、Loss、验证器</td><td>更好的目标程序或模型配置</td><td>SoL-Pi 把同一研究循环转向执行 Agent 的外围系统</td></tr>
+              <tr><td><a href="https://arxiv.org/abs/2510.00615" target="_blank" rel="noreferrer">ACON</a> / <a href="https://arxiv.org/abs/2510.11967" target="_blank" rel="noreferrer">Context-Folding</a> / <a href="https://arxiv.org/abs/2510.24699" target="_blank" rel="noreferrer">AgentFold</a></td><td>历史与 Observation 的压缩、折叠和主动管理</td><td>失败分析、监督学习或强化学习</td><td>更小且更保真的活动上下文</td><td>属于单一 Harness 维度；SoL-Pi 的搜索空间还覆盖 action、tool、delegation 与 execution loop</td></tr>
+              <tr><td><a href="https://arxiv.org/abs/2603.03329" target="_blank" rel="noreferrer">AutoHarness</a> / <a href="https://arxiv.org/abs/2607.15524" target="_blank" rel="noreferrer">RHI</a></td><td>环境定制代码防护或任务特定 Prompt Loop</td><td>少轮环境反馈或版本成对比较</td><td>定制 Harness / Prompt 规范</td><td>同样自动改 Harness，但更强调环境或任务内适应</td></tr>
+              <tr><td><a href="https://arxiv.org/abs/2603.28052" target="_blank" rel="noreferrer">Meta-Harness</a> / <a href="https://arxiv.org/abs/2604.25850" target="_blank" rel="noreferrer">AHE</a></td><td>Harness 代码、组件、工具、中间件与记忆</td><td>历史候选、分数、轨迹与分层可观测证据</td><td>端到端优化且可迁移的 Harness</td><td>最接近；SoL-Pi 进一步突出多环境规模、Token 经济性与冻结后的单向验证</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="source-note">来源：SoL-Pi Introduction / Related Work 及各相邻工作的原论文。不同工作的任务与指标不可直接做数值比较。</p>
+
+        <p>所以，四个具体机制不是论文的第一层贡献，而是对核心命题的经验性证明：Auto-Research 不仅能产生一个补丁或一段 Skill，还能从轨迹中发明新的运行时原语。论文由此把“Agent 学会了什么”扩展为“Agent 所处的系统应该如何变化”。</p>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>核心方法：Broad → Deep 的递归 Auto-Research 搜索</h2>
+
+        <p class="lead">SoL-Pi 把 Harness Evolution 组织成多层研究循环：外层扩展假设覆盖面，内层沿独立谱系反复实现、实验、分析和修订，直到候选被淘汰或冻结。</p>
+
+        <p>搜索从已有执行轨迹开始。Oracle Analysis 不直接提出“再压缩一点”之类泛化建议，而是寻找可定位的系统开销：相邻动作是否高度稳定、上下文何时增长、哪些大型 Observation 会反复进入后续请求、诊断证据是否被长日志淹没。每个 Research Direction 都必须同时指出开销来源与可能改变的 Harness 边界。</p>
+
+        <p><strong>Broad Search</strong> 负责探索空间。论文从 context、progress、tools、delegation、prompt / policy、improvement / evaluation 六类来源生成 152 个方向，先判断哪类问题具有足够大的机制空间，而不是一开始就围绕某个手工假设微调阈值。广度的意义在于增加发现不同类型系统规律的概率。</p>
+
+        <p><strong>Deep Search</strong> 负责把一个方向变成可靠机制。每条谱系反复执行 Hypothesis → Implementation → Experiment → Analysis → Revision；实现者要满足明确完成条件，独立 Reviewer 再检查改动。一次实验可产生多条轨迹，独立 Analyzer 分别定位重复动作、上下文增长或诊断缺口，Reducer 汇总为下一轮提案依据。</p>
+
+        <p>“Recursive” 体现在多个嵌套层级：Agent 在环境中迭代解决任务，Research Agent 根据轨迹迭代机制，同一机制又在多轮实现—评审—验证中逐渐稳定；成功机制合并进更高效的 Harness 后，还可以成为下一轮 Auto-Research 的起点。论文实验证明的是前面几层搜索流程，最后这一层“更高效 Harness 继续寻找更高效 Harness”仍是未来愿景。</p>
+
+        <p class="block-intro">流程中的关键不是让研究 Agent 无限尝试，而是让每条谱系可隔离、可停止、可审查。Broad 阶段问“哪里值得研究”，Deep 阶段问“这个机制能否稳定实现并通过证据门槛”，两者共同避免把预算全压在最早出现的局部想法上。</p>
+
+        <div class="steps">
+          <article class="step"><h3>1 · Observe</h3><p>收集基线 Harness 的执行轨迹，定位重复动作、上下文压力、大型观测和薄弱诊断信号。</p></article>
+          <article class="step"><h3>2 · Propose</h3><p>把观察转成可证伪的 Harness Hypothesis，明确修改位置、预期收益与能力风险。</p></article>
+          <article class="step"><h3>3 · Implement & Review</h3><p>实现候选并由独立 Reviewer 检查；未达到完成条件的版本返回修订。</p></article>
+          <article class="step"><h3>4 · Rollout & Analyze</h3><p>在固定环境中运行，多 Analyzer 分析轨迹，结果再汇总为下一轮修改依据。</p></article>
+          <article class="step"><h3>5 · Capability Gate</h3><p>所有能力指标必须落在事先声明的容差内，防止把少做任务误认成效率。</p></article>
+          <article class="step"><h3>6 · Efficiency Gate</h3><p>至少一项成本或 Token 指标改善，并在合格候选中保留非支配点。</p></article>
+        </div>
+
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 1</span><span>Broad → Deep 自动研究漏斗</span></div>
+          <a href="assets/paper-figures/30-sol-pi/teaser.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/teaser.png" alt="SoL-Pi 从研究环境、执行轨迹、候选想法到四个保留机制的自动研究流程，以及 EdgeBench 示例结果" loading="lazy"></a>
+          <figcaption>
+            <strong>从轨迹观察到冻结 Harness：研究循环本身就是论文的核心方法</strong>
+            <p>左侧环境产生多样轨迹，中间 Research AI 提出候选并通过 Performance 与 Cost 门槛，右侧保留机制合并为 SoL-Pi；冻结后才进入 EdgeBench。</p>
+            <p class="figure-reading"><b>阅读要点：</b>“Scaling” 同时包含搜索广度与谱系深度。论文报告 152 个方向、3000+ 次运行和 6 万+ 次 Agent—环境交互，但没有建立投入规模与收益之间的 Scaling Law。</p>
+            <div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a></div>
+          </figcaption>
+        </figure>
+
+        <div class="analysis"><strong>标题中的 Recursive：</strong>已经被实验展示的是“轨迹内执行循环 + 机制开发循环 + 多谱系搜索循环”；把 SoL-Pi 用作下一轮研究 Harness、形成效率递归复利，则是作者提出的长期愿景，而非本文已经测得的结论。</div>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>核心基础设施：Environment Scaling 才让 Harness 规律有机会泛化</h2>
+
+        <p class="lead">SoL-Pi 的关键基础设施不是某个 Prompt，而是 535 个多样、可执行、可自动验证的研究环境。作者的核心假设是：只有跨越足够多环境仍反复出现的交互模式，才更可能成为可迁移 Harness 机制。</p>
+
+        <p>如果只在几十个公开 Benchmark Case 上改 Harness，优化器很容易学到题集结构、验证器偏好或固定工作流。Harness 又直接控制工具、上下文、终止和恢复，因此这种过拟合比普通 Prompt Tuning 更隐蔽：分数可能上升，但改动并未形成可以跨仓库复用的系统规律。</p>
+
+        <p>论文因此构造两类研究环境。495 个 Repository-derived Environment 来自 GitHub issue–PR 对：保留修复前代码和离线依赖，向 Agent 隐藏已合并补丁与回归测试，并确认测试在补丁前失败、补丁后通过。它们提供真实软件变更中的多语言、多仓库与多工具轨迹。</p>
+
+        <p>另外 40 个 Verifier-driven Environment 先定义可执行成功条件，再围绕验证器构造任务。这类环境不要求复现某个参考 Patch，允许多条有效解法，用来补充仓库历史无法覆盖的开放式问题。两类环境共同承担“发现规律”，EdgeBench 则被留到机制冻结后承担“检查迁移”。</p>
+
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 3</span><span>535 个搜索环境与 Held-out EdgeBench 的隔离</span></div>
+          <a href="assets/paper-figures/30-sol-pi/environments.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/environments.png" alt="495 个仓库派生环境和 40 个验证器驱动环境汇入 535 个搜索环境，机制冻结后再进入 EdgeBench" loading="lazy"></a>
+          <figcaption>
+            <strong>环境多样性不是数据规模装饰，而是 Harness Generalization 的前提假设</strong>
+            <p>左侧两类环境只为机制搜索提供反馈；机制源码、配置与接受规则冻结后，才进入右侧 EdgeBench。Held-out 结果不返回搜索循环。</p>
+            <p class="figure-reading"><b>阅读要点：</b>逻辑链是 Environment Diversity → recurring interaction pattern → reusable mechanism。论文展示了这条路线可行，但没有控制环境数量与多样性、绘制泛化收益曲线，因此它仍是方法假设而非已经建立的 Scaling Law。</p>
+            <div class="figure-source"><span>来源：论文 Figure 3；原图文字在阅读栏宽度下仍可辨识</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a></div>
+          </figcaption>
+        </figure>
+
+        <p class="block-intro">这套环境设计同时解决三件事：真实任务提供自然轨迹，多解验证器避免把“唯一 Patch”误当能力，搜索—评测隔离减少 Benchmark Hack。三者缺一，自动研究都可能把局部反馈错误地固化进 Harness。</p>
+
+        <div class="cards">
+          <article class="card"><h3>真实失败—修复对</h3><p>Issue 提供任务语义，pre-fix repository 提供初始状态，fail-before / pass-after 测试提供可执行证据。</p></article>
+          <article class="card"><h3>允许多条解法</h3><p>Verifier-driven 环境只规定成功条件，不要求复制参考轨迹，使优化器能观察不同策略下的共同开销。</p></article>
+          <article class="card"><h3>隔离候选谱系</h3><p>每个方向在一次性研究实例中独立演化；失败实现与临时编排代码不会污染其他机制。</p></article>
+          <article class="card"><h3>冻结后外测</h3><p>EdgeBench 结果只接受或拒绝冻结候选，不触发针对性修补，从因果上切断验证反馈回流。</p></article>
+        </div>
+
+        <p>评测口径仍需谨慎：EdgeBench 公开 51 个任务，其中 11 个用于冻结候选的一次性接受，余下 40 个用于最终泛化评估；论文主表报告 51 个任务的总体结果。因此，11 个任务和 40 个任务的证据角色并不完全相同。论文也没有与简单 Test-time Scaling 做严格等反馈、等推理预算对照。</p>
+
+        <div class="analysis"><strong>这一部分为何比“四个 Trick”更重要：</strong>机制列表会过时，但“用大量可验证环境寻找跨轨迹重复模式”的研究范式可以继续发现新机制。SoL-Pi 的长期价值取决于环境分布能否持续扩展，而不仅取决于当前四个实现。</div>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>核心产物：把 Trace 中的重复规律编译成 System Mechanism</h2>
+
+        <p class="lead">四个最终机制最值得学习的不是具体阈值，而是它们如何把轨迹观察变成运行系统的结构变化：压缩交互拓扑、对 Context 做成本决策、把 Observation 外置成可寻址对象，以及只委派阅读而不委派推理。</p>
+
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head"><span>论文原图 · Figure 4</span><span>四类 Harness Mechanism 的触发点与回退边界</span></div>
+          <a href="assets/paper-figures/30-sol-pi/mechanisms.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/mechanisms.png" alt="Action Fusion、Online Context Compact、ObservationPack 与 Evidence-Preserving Reducer 的四联机制图" loading="lazy"></a>
+          <figcaption>
+            <strong>四个机制分别改写 Action、Context、Observation 与 Delegated Reading</strong>
+            <p>绿色表示机制路径与预期节省，红色表示额外成本或验证失败。共同设计原则是：信息可以延迟、外置或压缩，但必须保留可取回、可验证或退回原文的路径。</p>
+            <p class="figure-reading"><b>阅读要点：</b>SoL-Pi 不是“统一摘要一切”。它先区分开销发生在哪个系统边界，再为每类开销设计不同的触发条件和失败回退。</p>
+            <div class="figure-source"><span>来源：论文 Figure 4；四个原始面板完整保留</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a></div>
+          </figcaption>
+        </figure>
+
+        <p class="block-intro">从系统角度看，四个 Mechanism 分别改变不同的信息流。Action Fusion 减少模型回合；Online Compact 决定何时值得重写 Context；ObservationPack 改变大输出的存储位置；Reducer 改变谁负责从日志中找证据。</p>
+
+        <div class="steps">
+          <article class="step"><h3>① Action Fusion · 压缩交互拓扑</h3><p>基线常执行 edit → 模型读取结果 → 决定 run test；新工具把修改与确定性的后续命令合并，典型流程从 3 次 API 调用降到 2 次。需要先检查修改结果时仍保持分离。</p></article>
+          <article class="step"><h3>② Online Context Compact · 成本收益决策</h3><p>在计划步骤完成的语义边界估计剩余请求、增长速率与缓存重写成本；只有 Future Saving &gt; Rewrite Cost，或接近窗口上限时才压缩。</p></article>
+          <article class="step"><h3>③ ObservationPack · 外部记忆 + Pointer</h3><p>超过 10 KiB 的输出先归档，前两次请求发送全文；从第三次起改为稳定句柄、原始大小和 1 KB 头尾摘录，需要时再精确分页取回。</p></article>
+          <article class="step"><h3>④ Evidence-Preserving Reducer · 委派阅读</h3><p>低价模型从至少 4 KiB 的构建 / 测试日志中提取证据；确定性验证 schema、hash、exit status 与 exact quote。验证失败、疑似凭据或未缩短时退回原文。</p></article>
+        </div>
+
+        <p>Reducer 先处理工具结果，ObservationPack 再决定投影到主模型 Context 的形式；后者识别已经验证的 Receipt 并跳过再次打包。文件读取和搜索结果不进入 Reducer，辅助模型只负责选证据，主 Agent 仍负责诊断和决策——也就是 <strong>delegate reading, not reasoning</strong>。</p>
+
+        <h3 class="subhead">机制不是越多越好：先看它们落在 Pareto Front 的什么位置</h3>
+
+        <p class="block-intro">论文同时报告两种工作点：SoL-Pi [Efficiency] 是固定四机制完整栈；SoL-Pi [Performance] 则在每个后端上选择平均分最高的单机制配置。前者追求最低绝对成本，后者追求最高任务分数，不能混成一个“最好版本”。</p>
+
+        <p>在 EdgeBench 的 GPT-5.6 Sol 结果中，完整栈相对 Pi 将总 Token 流量从 2.1538B 降到 1.0990B，下降 49.0%；API 成本从 1339 美元降到 894 美元，下降 33.2%；平均分从 44.833 降到 42.003，即保留 93.7%。ObservationPack 单独使用时平均分升至 47.208，同时 Token 流量低 6.1%，是该后端的性能配置。</p>
+
+        <p>在未参与搜索的 Opus 5 后端，完整栈不经再搜索直接迁移：相对 Pi 的 Token 流量下降 44.7%，成本下降 33.5%，平均分保留 94.3%。不过最高分来自 Action Fusion（50.482），而最佳成本/分数比来自 ObservationPack（0.4899 美元/score）。这说明“完整栈成本最低”不等于“完整栈在所有归一化指标上最优”。</p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              EdgeBench：基线、完整效率栈与最高分单机制配置
+            </caption>
+
+            <thead>
+              <tr>
+                <th>后端 / 配置</th>
+
+                <th>总 Token 流量 (B) ↓</th>
+
+                <th>API 成本 ($) ↓</th>
+
+                <th>平均分 ↑</th>
+
+                <th>成本 / score ($) ↓</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>GPT-5.6 Sol · Pi</td>
+
+                <td>2.1538</td>
+
+                <td>1,339</td>
+
+                <td>44.833</td>
+
+                <td>0.5855</td>
+              </tr>
+
+              <tr class="focus-row">
+                <td>GPT-5.6 Sol · SoL-Pi [Efficiency]</td>
+
+                <td>1.0990</td>
+
+                <td>894</td>
+
+                <td>42.003</td>
+
+                <td>0.4174</td>
+              </tr>
+
+              <tr class="perf-row">
+                <td>GPT-5.6 Sol · +ObservationPack [Performance]</td>
+
+                <td>2.0224</td>
+
+                <td>1,271</td>
+
+                <td>47.208</td>
+
+                <td>0.5280</td>
+              </tr>
+
+              <tr>
+                <td>Opus 5 · Pi</td>
+
+                <td>2.3697</td>
+
+                <td>1,741</td>
+
+                <td>44.756</td>
+
+                <td>0.7625</td>
+              </tr>
+
+              <tr class="focus-row">
+                <td>Opus 5 · SoL-Pi [Efficiency]</td>
+
+                <td>1.3101</td>
+
+                <td>1,158</td>
+
+                <td>42.224</td>
+
+                <td>0.5376</td>
+              </tr>
+
+              <tr class="perf-row">
+                <td>Opus 5 · +Action Fusion [Performance]</td>
+
+                <td>2.1016</td>
+
+                <td>1,605</td>
+
+                <td>50.482</td>
+
+                <td>0.6235</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="source-note">来源：论文 Table 2。↑ 越高越好，↓ 越低越好；价格按论文所用的 2026-08-17 API 价格计算。</p>
+
+        <div class="analysis">
+          <strong>怎么读：</strong>完整栈在两种后端都把 API 成本压低约三分之一，但付出了约 2.6–2.8 个平均分的点估计代价。论文没有为这些均分报告置信区间或显著性检验，因此“性能相当”应理解为作者预设容差下的工程判断，而非统计等价证明。
+        </div>
+
+        <p class="block-intro">单组件消融把“哪个机制更有效”拆成三类答案：最低绝对成本、最高平均分、以及最低单位得分成本。结果随后端变化明显，支持迁移的同时也显示了搜索后端依赖。</p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              四个组件的 add-one 消融：平均分 / 成本 / 成本效率
+            </caption>
+
+            <thead>
+              <tr>
+                <th>配置</th>
+
+                <th>Sol 分数 ↑</th>
+
+                <th>Sol 成本 ($) ↓</th>
+
+                <th>Sol $/score ↓</th>
+
+                <th>Opus 分数 ↑</th>
+
+                <th>Opus 成本 ($) ↓</th>
+
+                <th>Opus $/score ↓</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Pi Baseline</td>
+
+                <td>44.833</td>
+
+                <td>1,339</td>
+
+                <td>0.5855</td>
+
+                <td>44.756</td>
+
+                <td>1,741</td>
+
+                <td>0.7625</td>
+              </tr>
+
+              <tr>
+                <td>+ Action Fusion</td>
+
+                <td>46.664</td>
+
+                <td>1,235</td>
+
+                <td>0.5190</td>
+
+                <td class="positive">50.482</td>
+
+                <td>1,605</td>
+
+                <td>0.6235</td>
+              </tr>
+
+              <tr>
+                <td>+ Online Context Compact</td>
+
+                <td>41.993</td>
+
+                <td>935</td>
+
+                <td>0.4365</td>
+
+                <td>49.155</td>
+
+                <td>1,537</td>
+
+                <td>0.6130</td>
+              </tr>
+
+              <tr>
+                <td>+ Evidence-Preserving Reducer</td>
+
+                <td>44.630</td>
+
+                <td>1,200</td>
+
+                <td>0.5274</td>
+
+                <td>43.405</td>
+
+                <td>1,456</td>
+
+                <td>0.6578</td>
+              </tr>
+
+              <tr>
+                <td>+ ObservationPack</td>
+
+                <td class="positive">47.208</td>
+
+                <td>1,271</td>
+
+                <td>0.5280</td>
+
+                <td>47.047</td>
+
+                <td>1,176</td>
+
+                <td class="positive">0.4899</td>
+              </tr>
+
+              <tr class="focus-row">
+                <td>完整四机制栈</td>
+
+                <td>42.003</td>
+
+                <td class="positive">894</td>
+
+                <td class="positive">0.4174</td>
+
+                <td>42.224</td>
+
+                <td class="positive">1,158</td>
+
+                <td>0.5376</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="source-note">来源：论文 Table 4。每个组件行都是在 Pi 上单独增加一个机制；完整栈不是逐行累加实验。</p>
+
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head">
+            <span>论文原图 · Figure 6</span><span>机制触发率、强度与触发任务上的效率增益</span>
+          </div><a href="assets/paper-figures/30-sol-pi/activation.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/activation.png" alt="四个机制在 GPT-5.6 Sol 和 Opus 5 上的任务触发率、触发强度及 Token 效率增益柱状图" loading="lazy"></a>
+
+          <figcaption>
+            <strong>Opus 5 上多数机制触发更少，但触发后的收益未消失</strong>
+
+            <p>Online Context Compact 的任务触发率从 Sol 的 92.2% 降至 Opus 的 33.3%；Action Fusion 的平均触发强度从 70.58 降至 13.54。相反，ObservationPack 在 Opus 触发任务上的效率增益达到 35.8%。</p>
+
+            <p class="figure-reading"><b>谨慎解读：</b>效率增益是在各配置自己的“触发任务子集”上计算，不同柱子不是完全相同的任务集合，适合描述机制行为，不能直接当作严格因果交互效应。</p>
+
+            <div class="figure-source">
+              <span>来源：论文 Figure 6</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a>
+            </div>
+          </figcaption>
+        </figure>
+
+        <h3 class="subhead">跨基准：节省较稳定，能力代价并不总是可忽略</h3>
+
+        <p>Terminal-Bench 4 的 63 个 CPU 任务上，Codex 与 Pi 都解出 18 个，SoL-Pi 只解出 15 个；与此同时，SoL-Pi 相对 Pi 的总模型成本低 26.3%，每个解出任务成本低 11.6%。这不是“同等能力纯降本”，而是明确的解题率—成本交换。IMO 2026 的 6 道 Lean 4 验证题中，SoL-Pi 与 Pi 都通过 3 道，SoL-Pi 总成本更低；Codex 通过 5 道，但总成本最高。</p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Terminal-Bench 4 与 IMO 2026 的外部评测
+            </caption>
+
+            <thead>
+              <tr>
+                <th>Harness</th>
+
+                <th>TB4 解出 / 63 ↑</th>
+
+                <th>TB4 总成本 ($) ↓</th>
+
+                <th>TB4 每题成本 ($) ↓</th>
+
+                <th>IMO 通过 / 6 ↑</th>
+
+                <th>IMO 总成本 ($) ↓</th>
+
+                <th>IMO 每题成本 ($) ↓</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Codex</td>
+
+                <td>18</td>
+
+                <td>272.35</td>
+
+                <td>15.13</td>
+
+                <td class="positive">5</td>
+
+                <td>114.47</td>
+
+                <td>22.89</td>
+              </tr>
+
+              <tr>
+                <td>Pi</td>
+
+                <td>18</td>
+
+                <td>286.45</td>
+
+                <td>15.91</td>
+
+                <td>3</td>
+
+                <td>75.95</td>
+
+                <td>25.32</td>
+              </tr>
+
+              <tr class="focus-row">
+                <td>SoL-Pi</td>
+
+                <td class="negative">15</td>
+
+                <td class="positive">211.12</td>
+
+                <td class="positive">14.07</td>
+
+                <td>3</td>
+
+                <td class="positive">62.69</td>
+
+                <td class="positive">20.90</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="source-note">来源：论文 Table 3。TB4 排除依赖 GPU 的任务；IMO 均使用 GPT-5.6 Sol (xhigh)，单题上限 150 分钟。</p>
+
+        <figure class="paper-figure figure-wide">
+          <div class="figure-head">
+            <span>论文原图 · Figure 5</span><span>20 工作者集群的两小时内核优化</span>
+          </div><a href="assets/paper-figures/30-sol-pi/swarm.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/swarm.png" alt="五组共二十个工作 Agent 的协作架构，以及 SoL-Pi 集群、单 Agent、Pi 集群的周期数和成本比较" loading="lazy"></a>
+
+          <figcaption>
+            <strong>更省的工作者 Harness 让同一两小时预算覆盖更多有效探索</strong>
+
+            <p>SoL-Pi 集群达到 1,127 cycles，优于单 Agent 的 1,333 和 Pi 集群的 1,366（越低越好）；成本为 60.11 美元，低于 Pi 集群的 82.12，但高于单 Agent 的 39.20。</p>
+
+            <p class="figure-reading"><b>谨慎解读：</b>每种配置只运行一次两小时实验，没有多次重复或不确定性估计。它展示了一个有希望的系统案例，不能据此推断稳定的集群平均收益。</p>
+
+            <div class="figure-source">
+              <span>来源：论文 Figure 5；三个最终候选均通过官方正确性检查</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a>
+            </div>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>核心结论：Harness Evolution 是 Pareto 优化，而非机制堆叠</h2>
+
+        <p class="lead">论文最重要的实验结论不是“完整 SoL-Pi 赢了”，而是 Performance、Token 与 Cost 之间存在多目标权衡：完整栈更省，某些单机制配置却能同时降低成本并提高分数。</p>
+
+        <p>在 GPT-5.6 Sol 上，完整四机制栈相对 Pi 将 Token 流量降低 49.0%、成本降低 33.2%，但平均分从 44.833 降到 42.003；ObservationPack 单独使用则把平均分提高到 47.208，同时 Token 流量低 6.1%。在 Opus 5 上，Action Fusion 得到最高平均分 50.482，而 ObservationPack 得到最佳成本 / 得分 0.4899 美元。机制数量因此不是单调收益变量。</p>
+
+        <p>这意味着未来 Harness Auto-Research 不应寻找唯一“最佳 Harness”，而应搜索 Pareto Front：在给定能力下最低成本、在给定预算下最高性能，或在部署约束下最稳定的触发组合。论文的 Capability Gate + Efficiency Gate 已经体现这一思想，但最终完整栈仍是作者选定的效率工作点，不是对所有使用场景的普遍最优解。</p>
+
+        <p class="block-intro">如果把整篇论文再压缩一层，真正值得迁移的是下面三个大思想。它们分别回答研究对象、泛化来源和自进化产物三个问题，四个具体 Mechanism 则是这些思想的实例。</p>
+
+        <div class="cards">
+          <article class="card"><h3>AutoResearch(Agent System)</h3><p>Harness 与模型共同决定 Agent 行为，因此运行系统本身也应成为可观察、可修改、可验证的研究对象。</p></article>
+          <article class="card"><h3>Environment Scaling → Generalization</h3><p>从大量异质可执行环境中寻找 recurring pattern，比在少量公开题目上反复调参更可能得到可迁移机制。</p></article>
+          <article class="card"><h3>Trace → System Mechanism</h3><p>轨迹不仅能蒸馏成 Memory / Skill，还能编译成新的 Tool Primitive、Context Policy 与 Observation Protocol。</p></article>
+          <article class="card"><h3>Pareto-optimal Harness</h3><p>Performance、Token 与 Cost 必须联合优化；部署时应按预算和能力容差选择工作点，而不是默认全开。</p></article>
+        </div>
+
+        <div class="analysis"><strong>五个记忆关键词：</strong>Auto-Research Harness、Environment Scaling、Trace → System Mechanism、Pareto Optimization、Recursive Harness Improvement。</div>
+
+        <h3 class="subhead">证据边界：论文展示了可行性，但还没有建立递归加速定律</h3>
+
+        <p>首先，Harness 只从 GPT-5.6 Sol 轨迹更新，Opus 5 上四个机制的触发率和强度普遍下降。尽管触发任务上的效率仍有改善，这表明机制何时启动与底层模型行为强相关。作者将多后端训练列为未来方向，而当前证据只能支持“在一个额外后端上初步迁移”。</p>
+
+        <p>其次，完整自动研究循环成本高，论文没有在固定预算下系统比较搜索广度与深度，也没有给出搜索本身的总计算成本与净回收期。搜索用了 535 个环境、3000+ 次运行和 6 万+ 次交互，但这些投入是否优于更小的人工工程团队或更窄的搜索空间，仍无对照实验。</p>
+
+        <p>再次，核心数值多为单次点估计。论文没有报告 EdgeBench 多随机种子方差或显著性；集群实验每种配置仅运行一次；API 成本还依赖 2026-08-17 的价格。因而复现时应同时记录任务得分、总 Token、缓存读写、模型价格、机制触发情况和失败回退，而不能只复核一张成本表。</p>
+
+        <p class="block-intro">如果要把论文转成自己的 Harness 工程计划，最值得迁移的不是四个具体阈值，而是“可逆、可验证、可归因”的设计原则。优先测量浪费，再引入最小机制，并为压缩失败与信息需求保留明确退路。</p>
+
+        <div class="boundary">
+          <article>
+            <h3>已被实验支持</h3>
+
+            <p>在论文设置中，完整栈在 Sol 与 Opus 上均显著降低记录到的 Token 流量和 API 成本；单机制还能在特定后端提升平均分或单位得分效率。</p>
+          </article>
+
+          <article>
+            <h3>尚未被证明</h3>
+
+            <p>跨更多模型与真实生产工作流的稳定收益、搜索规模定律、长期净成本回收，以及用 SoL-Pi 继续搜索是否会产生递归复利。</p>
+          </article>
+        </div>
+
+        <div class="warning">
+          <strong>复现抓手：</strong>先复现 Pi 基线与四个 add-one 配置，再测试完整栈；保持任务、模型、推理强度、时间预算、价格日期一致。特别检查缓存读取下降是否伴随缓存写入上升，以及低成本是否来自未完成工作或机制未触发。
+        </div>
+
+        <p class="source-note">主要来源：Haozhe Liu 等，<em>SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</em>，arXiv:2609.20519v1，提交于 2026-09-17。本文依据论文 PDF、作者公开源码与项目页整理，未独立运行代码或复现实验；派生百分比均按论文表格点估计计算。</p><a class="back" href="#top">↑ 返回顶部</a>
+      </section>
+    </main>
+
+    <aside class="rail">
+      <div class="rail-card">
+        <h3>一句话概括</h3>
+
+        <p>在大量可验证环境中分析轨迹、提出并迭代 Harness Hypothesis，把 recurring pattern 变成兼顾能力与成本的通用系统机制。</p>
+      </div>
+
+      <div class="rail-card">
+        <h3>五个关键词</h3>
+
+        <ul>
+          <li>Auto-Research Harness</li>
+
+          <li>Environment Scaling</li>
+
+          <li>Trace → System Mechanism</li>
+
+          <li>Pareto Optimization</li>
+
+          <li>Recursive Harness Improvement</li>
+        </ul>
+      </div>
+
+      <div class="rail-card">
+        <h3>尚缺的证据</h3>
+
+        <p>与简单 Test-time Scaling 的严格等预算对照，以及搜索投入的总成本与净回收期。</p>
+      </div>
+    </aside>
+  </div><script type="text/javascript">
+const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');addEventListener('scroll',()=>{const h=document.documentElement,d=h.scrollHeight-h.clientHeight;bar.style.width=`${d?Math.min(100,100*h.scrollTop/d):0}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
+</body>
+</html>
