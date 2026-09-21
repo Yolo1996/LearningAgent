@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="WikiSkill 中文深度解读：为什么技能演化需要把原始轨迹、持久知识与可执行技能分层，以及论文的证据、迁移结果与开放边界。">
+  <title>WikiSkill：技能不该直接记住经验，而该由持久知识编译出来｜论文精读</title>
+  <style>
+    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
+    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(108,151,213,.28),transparent 29%),radial-gradient(circle at 8% 100%,rgba(57,132,93,.2),transparent 30%),linear-gradient(125deg,#10223c,#173b51 56%,#40335f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}
+    .chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:820px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:820px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .cards,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--at)}.shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.shift article:nth-child(2){border-color:#c9deb3;background:var(--gt)}.shift article:nth-child(3){border-color:#d7caec;background:var(--pt)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--paper);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}.thesis-line{margin:18px 0;padding:17px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center;font-size:18px;font-weight:780;line-height:1.55}.thesis-line span{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}
+    .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:88px;padding:12px 8px;place-items:center;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:750;line-height:1.45}.flow div:nth-child(2),.flow div:nth-child(4){border-color:#d7caec;background:var(--pt)}.flow div:nth-child(3){border-color:#c9deb3;background:var(--gt)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.analysis,.warning,.verdict{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.verdict{border-color:var(--purple);color:#55426f;background:var(--pt)}
+    .paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.paper-figure.compact img{width:auto;max-width:820px;max-height:none}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
+    body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
+    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.flow{grid-template-columns:1fr}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.paper-figure.compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero"><div class="hero-in">
+    <div class="eyebrow">PAPER REVIEW · arXiv:2608.27454v1</div>
+    <h1>WikiSkill：技能不该直接记住经验，而该由持久知识编译出来</h1>
+    <p class="subtitle"><span class="paper-name">WikiSkill: Compiling Agent Experience into Persistent Knowledge for Skill Evolution</span>Liyan Tang、Cyrus Rashtchian、Chun-Sung Ferng、Andrew Tomkins、Da-Cheng Juan、Tu Vu · Google Research / Virginia Tech · 2026-08-27</p>
+    <div class="actions"><a class="action" href="https://arxiv.org/abs/2608.27454v1" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/35-wikiskill/paper.pdf" target="_blank">本地 PDF ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="metrics">
+      <div class="metric"><small>研究对象</small><b>技能演化的知识状态</b><span>不改模型权重，改进可执行程序知识</span></div>
+      <div class="metric"><small>概念移动</small><b>Trace → Wiki → Skill</b><span>把“学到什么”与“执行什么”分开</span></div>
+      <div class="metric"><small>实验范围</small><b>5 模型 × 5 任务</b><span>数学、搜索、表格、长文档、具身</span></div>
+      <div class="metric"><small>平均优势</small><b>全模型块最佳</b><span>相对最强技能基线 +3.3 至 +12.0 点</span></div>
+      <div class="metric"><small>关键消融</small><b>Wiki 给 Proposer</b><span>平均 48.7% → 63.7%</span></div>
+      <div class="metric"><small>核心边界</small><b>未测试技能检索</b><span>全部技能直接注入提示词</span></div>
+    </div>
+  </div></header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
+      <li><a href="#s1">01 真问题：经验没有知识状态</a></li><li><a href="#s2">02 三层架构与不对称回滚</a></li><li><a href="#s3">03 四步循环为何这样分工</a></li><li><a href="#s4">04 证据：性能、迁移与消融</a></li><li><a href="#s5">05 边界与下一决定性实验</a></li>
+    </ol></nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>真正缺的不是更多轨迹，而是一个可积累的“知识状态”</h2>
+        <p class="lead">WikiSkill 的问题不是“如何把一次失败写进 Skill”，而是：跨多轮优化时，系统怎样保留对失败原因、成功策略与被拒修改的理解，同时又不把这些杂乱历史直接塞给执行 Agent。</p>
+        <p>Agent Skill 把领域知识和工作流包装成可复用文件，优点是无需更新模型参数、可审计、可移植。但自动演化 Skill 时，传统路线通常从当轮执行轨迹直接生成补丁，或把历次提案与分数堆成扁平历史。它们保存了“发生过什么”，却没有维护一个独立、持续重组的“我们已经学会什么”。随着轮次增加，证据散落在轨迹、补丁、拒绝记录和元反馈中，下一轮仍可能重新发现同一失败。</p>
+        <p>论文因此把研究对象从“技能文本”上移到“技能演化过程中的知识表示”。此前方法把经验直接压进可执行 Skill；WikiSkill 在两者之间插入持续生长的 Wiki，让原始记录、抽象知识和部署程序承担不同职责。这里的 Wiki 不是给最终 Agent 查答案的普通记忆库，而是给技能开发过程使用的研究笔记与审计账本。</p>
+        <div class="thesis-line">技能是可部署的程序知识；Wiki 是不会随失败补丁一起被回滚的研究知识。<span>论文的核心不是多一个目录，而是把“学习状态”从“当前可执行状态”中解耦。</span></div>
+        <p class="block-intro">与最近邻方法的差异，最适合按“经验最后被保存成什么”来比较。下面不是模块清单，而是三种不同的长期状态设计。</p>
+        <div class="cards">
+          <article class="card"><h3>扁平提案历史（EvoSkill）</h3><p>保留候选修改和评估结果，能避免部分重复，但历史仍围绕补丁组织，缺少跨轨迹整合后的独立知识表示。</p></article>
+          <article class="card"><h3>轨迹归纳到 Skill（Trace2Skill / SkillOpt）</h3><p>从成功与失败轨迹抽取经验并合并为技能更新，直接服务执行，却容易让诊断证据、被拒原因与最终程序混在一起。</p></article>
+          <article class="card"><h3>WikiSkill</h3><p>Raw 保真、Wiki 归纳、Skill 执行；技能可回滚，Wiki 继续累积，使后续提案能利用先前失败而不继承失败代码。</p></article>
+          <article class="card"><h3>并非一般 Harness 搜索</h3><p>模型、工具与外层 Harness 保持固定，研究集中在可复用程序技能；这使结论更清楚，也限制了它对更广系统优化的覆盖。</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>三层架构的关键：知识与程序采用不同的生命周期</h2>
+        <p class="lead">Raw、Wiki、Skill 不是三个同义记忆库。它们分别追求可追溯性、跨轮次归纳与执行效率；真正有价值的是三者的写入权限和回滚规则不同。</p>
+        <p>Raw Layer 只写一次，保存完整推理、工具调用、输出与答案，是可回查的证据层。Wiki Layer 把多条轨迹整理成失败模式、成功策略、演化日志和 skill-impact 审计记录；它可以增量修改，但不会因候选 Skill 被拒而回滚。Skill Layer 则只保留当前被接受的程序性指令，并通过 PURPOSE.md 追溯到启发它的 Wiki 模式。</p>
+        <p>这构成一种不对称回滚：可执行状态必须服从验证集，知识状态则保留成功与失败。候选 Skill 若导致验证分下降，系统撤销补丁，却把提案 diff、分数和拒绝结论写回 Wiki。失败因此从“无效改动”变成“未来搜索的约束”。这比简单保存日志更强，因为 Maintainer 会把多轮证据更新到同一模式页，而不是让 Proposer 自己从无序历史中重新归纳。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>三层知识架构</span></div><a href="assets/paper-figures/35-wikiskill/framework.png" target="_blank"><img src="assets/paper-figures/35-wikiskill/framework.png" alt="WikiSkill 的 Raw、Wiki、Skill 三层架构以及 Inference、Maintainer、Proposer、Gating 四步循环"></a><figcaption><strong>同一轮经验被分成证据、知识与程序三种资产</strong><p>Raw 层永久保留执行轨迹；Wiki 层持续整合模式和演化记录；Skill 层只保留通过验证的执行规则。四个角色围绕三层读写，形成可回滚程序与不可回滚知识并存的闭环。</p><p class="figure-reading"><b>阅读要点：</b>绿色回路说明 Wiki 在候选 Skill 失败时仍更新；蓝色路径则表明 Inference Agent 只接收 Skill，不在训练 rollout 中读取 Wiki。这两个权限边界共同构成论文的机制主张。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/abs/2608.27454v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="block-intro">去掉品牌名后，这篇论文的本质可以写成一条控制边界移动：把长期学习状态从“正在部署的 Skill 文本”移到“独立、可审计、持续整合的知识库”，再由验证信号决定哪些知识被编译回程序。</p>
+        <div class="shift">
+          <article><small>过去固定</small><h3>经验与 Skill 绑定</h3><p>诊断、策略与补丁一起被接受或丢弃，长期状态容易等同于当前 Skill。</p></article>
+          <article><small>WikiSkill 变为可控</small><h3>知识独立累积</h3><p>Wiki 保存模式、历史与拒绝证据，Skill 只是知识的一次可执行编译。</p></article>
+          <article><small>瓶颈转移</small><h3>从遗忘转向治理</h3><p>不再只担心经验丢失，而要管理 Wiki 的增长、冲突、陈旧与验证集过拟合。</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>四步循环：为什么“执行 Agent 看不到 Wiki”反而更好</h2>
+        <p class="lead">WikiSkill 不是让所有角色共享更多上下文，而是把信息分发限制得更严格：执行只看通过验证的 Skill，诊断和提案才访问 Wiki 与轨迹。</p>
+        <p>每轮先由 Inference Agent 使用当前 Skill 在训练集执行任务，产生不可变轨迹。Wiki Maintainer 从最多 8 条分层抽样轨迹中做根因分析与成功策略提炼，更新模式页和演化日志。Skill Proposer 以 ReAct 方式读取 Wiki 索引、skill-impact 与任务结果摘要，再按需打开具体模式页和轨迹，每轮只提出一个原子修改。最后，候选 Skill 在验证集上必须严格超过历史最好分数才被接受，否则回滚。</p>
+        <div class="flow" aria-label="WikiSkill 四步演化循环"><div>① 执行<br>当前 Skill 产生训练轨迹</div><div>② 归纳<br>Maintainer 更新 Wiki 模式</div><div>③ 编译<br>Proposer 生成原子 Skill 补丁</div><div>④ 门控<br>验证提升则接受，否则回滚</div></div>
+        <p>为什么不让 Inference Agent 也读 Wiki？消融显示，当 Proposer 可读 Wiki 时，再让执行 Agent 读取 Wiki 会把四项平均分从 63.7% 降到 60.9%，LiveMath 从 72.6% 降到 64.8%。作者的解释是：执行轨迹可能借助 Wiki 临时解决任务，使 Skill 自身的缺口被遮蔽，Proposer 得到的训练信号反而不再指向“程序知识缺了什么”。</p>
+        <div class="analysis"><b>机制判断：</b>这项结果支持“信息隔离有助于形成更可诊断的轨迹”，但还不能完全证明作者提出的因果解释。读取 Wiki 同时改变了上下文长度、信息量和执行策略；若要确认是“掩盖 Skill 缺口”，还需要控制上下文预算并分析轨迹中的 Skill 遵循率与 Wiki 依赖度。</div>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 3</span><span>跨轮次案例</span></div><a href="assets/paper-figures/35-wikiskill/wiki-demo.png" target="_blank"><img src="assets/paper-figures/35-wikiskill/wiki-demo.png" alt="ALFWorld 中从循环失败模式、被拒提案到 break-repetition-loop 技能逐轮形成的案例"></a><figcaption><strong>被拒绝的修改并未消失，而是改变了下一次提案</strong><p>在 ALFWorld 案例中，Iteration 0 的 goal-directed-action 未提升验证分而被拒；其 diff 与结论进入 skill-impact。Iteration 1 随后形成更具体的 break-repetition-loop 规则，后续又根据新出现的循环模式继续细化。</p><p class="figure-reading"><b>阅读要点：</b>案例说明 Wiki 的角色不是缓存正确答案，而是维护“问题模式—提案—结果”的因果线索。它是对机制的可读例证，不等同于跨任务的因果证明。</p><div class="figure-source"><span>来源：论文 Figure 3；为版面可读性使用原图渲染</span><a href="https://arxiv.org/abs/2608.27454v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>实验真正建立了什么：强性能、可迁移程序知识与一项关键消融</h2>
+        <p class="lead">证据链分三层：主结果证明“有效”，跨模型迁移证明“知识不完全绑定生成它的模型”，Wiki 权限消融则最接近验证论文的核心机制。</p>
+        <p>论文覆盖 LiveMath、SealQA、SpreadsheetBench、OfficeQA 与 ALFWorld，使用 Qwen 4B/9B/27B、Gemma 31B 与 Gemini 3.5 Flash。所有方法从空 Skill 开始，最终 Skill 在推理时直接注入系统提示；完整演化流程独立运行三次，并以配对 bootstrap（1,000 次）判断显著性。主表中 WikiSkill 在五个模型块的跨任务平均分均最高。</p>
+        <div class="table-wrap"><table><caption>主结果的压缩视图：跨五任务平均分（%）</caption><thead><tr><th>推理模型</th><th>No skill</th><th>最强对比技能方法</th><th>WikiSkill</th><th>相对最强对比</th></tr></thead><tbody>
+          <tr><td>Qwen-3.5-4B</td><td>26.2</td><td>35.2（SkillOpt）</td><td>38.5</td><td class="positive">+3.3 点</td></tr>
+          <tr><td>Qwen-3.5-9B</td><td>29.9</td><td>42.3（EvoSkill）</td><td>47.4</td><td class="positive">+5.1 点</td></tr>
+          <tr><td>Qwen-3.6-27B</td><td>39.4</td><td>53.3（EvoSkill）</td><td>63.3</td><td class="positive">+10.0 点</td></tr>
+          <tr><td>Gemma-4-31B</td><td>41.3</td><td>49.1（SkillOpt）</td><td>54.9</td><td class="positive">+5.8 点</td></tr>
+          <tr class="focus-row"><td>Gemini-3.5-Flash</td><td>49.5</td><td>56.1（EvoSkill）</td><td>68.1</td><td class="positive">+12.0 点</td></tr>
+        </tbody></table></div>
+        <p class="source-note">来源：论文 Table 1。平均分为五个 Benchmark 的宏平均；每个方法为三次完整演化流程的测试均值。</p>
+        <p>缩放结果尤其有意思：Qwen 系列从 4B 到 27B，WikiSkill 相对无 Skill 的平均增益从 +12.3、+17.5 增至 +23.9 点。Qwen-9B 加 Skill 的 47.4% 还超过 Qwen-27B 无 Skill 的 39.4%。这说明 Skill 不是模型能力的简单替代品：强模型更会发现和执行复杂程序知识，小模型则能用好 Skill 弥补一部分参数规模差距。</p>
+        <figure class="paper-figure compact"><div class="figure-head"><span>论文原图 · Figure 1</span><span>模型能力与技能演化</span></div><a href="assets/paper-figures/35-wikiskill/scaling.png" target="_blank"><img src="assets/paper-figures/35-wikiskill/scaling.png" alt="不同模型规模下 No skill、EvoSkill、SkillOpt 与 WikiSkill 的平均准确率曲线"></a><figcaption><strong>WikiSkill 的优势随模型能力增强而扩大</strong><p>图中展示不同推理模型在五项任务上的平均准确率。WikiSkill 在四个可比模型点均高于无 Skill 与两类对比方法，且强模型端的绝对差距更明显。</p><p class="figure-reading"><b>谨慎解读：</b>横轴同时跨越模型规模、代际和模型家族，不应把整条曲线当成严格缩放律；论文最可靠的尺度比较来自同一 Qwen 家族内部。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/abs/2608.27454v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p>跨模型迁移进一步拆开“发现 Skill”与“执行 Skill”两种能力。Qwen-27B 生成的 Skill 让 Qwen-9B 在 SpreadsheetBench 上从 24.3% 升到 50.5%，高于自演化 Skill 的 33.6%；但 Qwen-4B 的 Spreadsheet Skill 又会让 Gemini 从 50.5% 降至 18.1%。论文的轨迹分析显示，小模型会写入单行命令等低层 workaround，它们能救小模型，却限制强模型使用更完整脚本。于是“可迁移”不是 Skill 的固有属性，而是程序抽象层级与目标模型执行能力的匹配关系。</p>
+        <div class="table-wrap"><table><caption>核心机制消融：Wiki 应该给谁看？（Gemini-3.5-Flash，四任务平均）</caption><thead><tr><th>Inference 读 Wiki</th><th>Proposer 读 Wiki</th><th>平均分</th><th>解释</th></tr></thead><tbody>
+          <tr><td>—</td><td>—</td><td>40.4</td><td>No-skill 基线</td></tr>
+          <tr><td>是</td><td>否</td><td>45.3</td><td>执行受益，但未形成持久知识驱动的 Skill</td></tr>
+          <tr><td>否</td><td>否</td><td>48.7</td><td>保留演化循环，但移除 Wiki Maintainer</td></tr>
+          <tr><td>是</td><td>是</td><td>60.9</td><td>Wiki 同时参与执行与提案</td></tr>
+          <tr class="focus-row"><td>否</td><td>是</td><td>63.7</td><td>论文默认：知识服务开发，不直接服务 rollout</td></tr>
+        </tbody></table></div>
+        <p class="source-note">来源：论文 Table 3；不含因初始验证已满分而无法演化 Skill 的 ALFWorld。</p>
+        <p>从主张—证据关系看，端到端分数支持 WikiSkill 的总体效用，跨模型实验支持程序知识可迁移，权限消融支持持久 Wiki 对 Skill 开发的重要性。它们尚未独立证明“结构化 Wiki”优于“同等上下文预算下的更强平面历史检索”，也没有给出完整生命周期成本，因此不能仅凭分数断言该架构在所有预算下占优。</p>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>论文的边界：知识积累解决遗忘，也制造新的治理问题</h2>
+        <p class="lead">WikiSkill 把瓶颈从“经验散失”迁移到“知识如何检索、压缩、去冲突与防过拟合”。这不是缺陷清单，而是该研究路线下一步必须回答的系统问题。</p>
+        <p>论文明确承认四个边界：实验直接注入所有活跃 Skill，没有测试大规模技能库的触发与检索；严格的验证门控拒绝短期中性但可能为未来铺路的修改；Wiki 只增不减，缺少自动剪枝；任务虽含长上下文和多步交互，却没有覆盖数百动作或数小时的超长程在线适应。</p>
+        <p>此外还有三项结构性假设。第一，验证集分数被当作程序知识质量的代理，小验证集和反复门控可能使搜索逐步适配评估噪声，尽管论文用三次完整运行与 bootstrap 缓解了测试报告的不确定性。第二，Wiki Maintainer 与 ReAct Proposer 引入约 10–20 个提案回合/轮的额外推理，论文给出了调用复杂度，却没有报告端到端 token、时延和美元成本，无法计算相对其他方法的收益回收点。第三，Wiki 持久化默认“旧模式仍有价值”；当工具、模型或任务分布变化时，未剪枝知识可能从资产变成错误先验。</p>
+        <div class="boundary">
+          <article><h3>最强反事实</h3><p>给平面历史基线同样的 ReAct 检索能力、调用预算和审计字段，只去掉结构化 Pattern Wiki。若性能仍落后，才能更干净地说明收益来自知识结构，而非更强 Proposer 与更多推理。</p></article>
+          <article><h3>最关键外部有效性</h3><p>把直接注入改为真实技能路由，在数十到数百 Skill、分布漂移和跨版本工具环境中测试：好 Skill 能否被正确触发，Wiki 能否及时淘汰陈旧知识。</p></article>
+          <article><h3>最重要成本测量</h3><p>报告完整演化成本、失败候选、维护与检索开销，并计算在多少次部署推理后可摊销；否则这里只证明更高准确率，不证明更优生命周期效率。</p></article>
+          <article><h3>最深开放问题</h3><p>如何让知识库既能永久吸收失败证据，又能在环境变化后主动遗忘？“持续记住”与“及时忘掉”将成为同一个学习控制问题。</p></article>
+        </div>
+        <div class="verdict"><b>综合判断：</b>WikiSkill 最可迁移的思想不是某个 Maintainer Prompt，而是“知识状态与执行状态分离，并允许程序回滚、知识保留”。论文用广泛主结果、迁移实验和角色权限消融建立了有力证据；但若要把它升级为长期运行的 Agent 知识基础设施，下一步必须同时解决真实路由、知识陈旧与成本对齐。</div>
+        <p class="source-note">来源与口径：基于 arXiv:2608.27454v1（2026-08-27）论文 PDF、附录与官方源文件整理；数值均来自论文表格。本文未独立复现实验；“最强反事实”“生命周期成本”和“知识陈旧”部分为基于论文证据的编辑性推断。</p>
+        <a class="back" href="#top">↑ 返回顶部</a>
+      </section>
+    </main>
+
+    <aside class="rail"><div class="rail-card"><h3>阅读抓手</h3><ul><li>研究对象是技能演化的知识状态，不是单纯 Skill 写作。</li><li>抓住“Skill 可回滚、Wiki 不回滚”的不对称设计。</li><li>主结果证明效用，权限消融才最接近机制验证。</li></ul></div><div class="rail-card"><h3>三个关键词</h3><p>知识编译 · 程序/知识解耦 · 跨模型技能迁移</p></div></aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
+    addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
+    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
+</body>
+</html>

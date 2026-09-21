@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Dream-RSI 中文深度解读：把历史发现树变成 replay world，在不重跑昂贵探索的前提下改进元探索策略，并分析其证据与结构性边界。">
+  <title>Dream-RSI：真正需要自我改进的，是探索如何分配计算｜论文精读</title>
+  <style>
+    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
+    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(108,151,213,.28),transparent 29%),radial-gradient(circle at 8% 100%,rgba(57,132,93,.2),transparent 30%),linear-gradient(125deg,#10223c,#173b51 56%,#40335f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1150px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}
+    .chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:820px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:820px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .cards,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--at)}.shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.shift article:nth-child(2){border-color:#c9deb3;background:var(--gt)}.shift article:nth-child(3){border-color:#d7caec;background:var(--pt)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--paper);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}.thesis-line{margin:18px 0;padding:17px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center;font-size:18px;font-weight:780;line-height:1.55}.thesis-line span{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}
+    .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:88px;padding:12px 8px;place-items:center;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:750;line-height:1.45}.flow div:nth-child(2),.flow div:nth-child(4){border-color:#d7caec;background:var(--pt)}.flow div:nth-child(3){border-color:#c9deb3;background:var(--gt)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.analysis,.warning,.verdict{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.verdict{border-color:var(--purple);color:#55426f;background:var(--pt)}
+    .paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
+    body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
+    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.flow{grid-template-columns:1fr}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero"><div class="hero-in">
+    <div class="eyebrow">PAPER REVIEW · arXiv:2609.14858v1</div>
+    <h1>Dream-RSI：真正需要自我改进的，是探索如何分配计算</h1>
+    <p class="subtitle"><span class="paper-name">Dream-RSI: Recursive Self-Improvement through Evolving Worlds</span>Tong Zheng、Xidong Wu、Zheng Zhang、Zhankui He、Chaoyi Zhang、Benjamin Coleman 等 · Google Research / Google DeepMind / UMD / UVA · 2026-09-14</p>
+    <div class="actions"><a class="action" href="https://arxiv.org/abs/2609.14858v1" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/38-dream-rsi/paper.pdf" target="_blank">本地 PDF ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="metrics">
+      <div class="metric"><small>研究对象</small><b>Meta-exploration</b><span>改进搜索调度器，不改发现 Agent</span></div>
+      <div class="metric"><small>核心循环</small><b>Online → Replay → Redeploy</b><span>历史搜索树成为经验世界</span></div>
+      <div class="metric"><small>评测范围</small><b>8 任务 · 3 领域</b><span>算法、数学与 GPU 内核工程</span></div>
+      <div class="metric"><small>Lasso · Pro</small><b>317 vs 550 calls</b><span>平均运行时 2931.0 vs 3587.1 ms</span></div>
+      <div class="metric"><small>Lasso · Flash</small><b>1879 vs 3200 calls</b><span>平均运行时 2350.6 vs 2516.7 ms</span></div>
+      <div class="metric"><small>结构性边界</small><b>仅覆盖已发生分支</b><span>不能重放未生成的反事实结果</span></div>
+    </div>
+  </div></header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
+      <li><a href="#s1">01 真问题：探索策略为何难学</a></li><li><a href="#s2">02 概念移动：历史变成世界</a></li><li><a href="#s3">03 机制：共享接口与递归循环</a></li><li><a href="#s4">04 证据：质量—计算权衡</a></li><li><a href="#s5">05 边界：Replay 不等于反事实</a></li>
+    </ol></nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>真正昂贵的不是产生候选，而是学会下一步把计算投到哪里</h2>
+        <p class="lead">Dream-RSI 把长时程科学发现拆成两层：底层 Agent 产生并评估候选；上层 exploration policy 决定开哪条分支、继续哪条分支、并行多少次、何时停止。论文真正要自我改进的是第二层。</p>
+        <p>自动算法设计、数学构造和 GPU 内核优化通常需要数百到数千次“生成—执行—评估”。一个固定的并行精炼策略会重复已经低效的分支，也无法在停滞时主动扩大探索。问题因此不只是模型能否写出好代码，而是有限调用预算如何在搜索树上分配。</p>
+        <p>直接在线学习这个调度器代价极高。一个策略好不好，往往要等完整长时程搜索结束才显现；每次评估新策略都重新调用发现 Agent、编译和运行候选，会把元优化成本叠加在原本昂贵的发现成本上。控制器空间又包含分支选择、批量并行、停止规则和历史利用，靠在线试错很难扩展。</p>
+        <p>现有系统常把历史轨迹压成提示词、成功经验或训练样本，告诉下一轮“应该往哪个方向走”。Dream-RSI 的分歧点是：历史不只描述过去，也保存了一个已经执行过的搜索空间。若把完整发现树保留下来，候选控制器就可以重新选择这些分支并立即看到既有结果，无需再次执行底层发现。</p>
+        <div class="thesis-line">核心概念移动：从“历史作为建议”转向“历史作为可交互的经验世界”。<span>它把元策略的反馈获取，从昂贵在线 rollout 搬到离线 replay。</span></div>
+        <p class="block-intro">去掉论文品牌名，这是一种面向昂贵搜索的控制器学习范式：固定候选生成器与评价器，只让计算分配策略根据历史树反馈进化。</p>
+        <div class="cards">
+          <article class="card"><h3>不是更强的代码 Agent</h3><p>底层 discovery agent、评价器和执行接口保持不变；变化的是何时、从哪里、以多大并发继续搜索。</p></article>
+          <article class="card"><h3>不是普通经验检索</h3><p>历史不是拼进 prompt 的语义提示，而是保留父子关系、工作区、结果、诊断和分数的可重放环境。</p></article>
+          <article class="card"><h3>不是无成本搜索</h3><p>“零执行成本”仅指 replay 不重新生成和执行候选；策略开发模型、存储、回放和调度仍有成本。</p></article>
+          <article class="card"><h3>贡献层级</h3><p>概念上重定义历史；方法上统一在线与回放接口；系统上递归部署；实验上验证质量—预算权衡。</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>一棵完成的搜索树，如何变成可以“做梦”的 replay world</h2>
+        <p class="lead">在线阶段得到的不只是最优答案，而是一棵含成功、失败和中间状态的 discovery tree。Dream-RSI 把它转成环境：控制器每次选叶子，环境就揭示历史上已经发生的下一个节点。</p>
+        <p>树根表示初始工作区；每个非根节点都保存从父节点恢复后的一次生成—评估尝试，包括文件系统快照、产物、诊断和分数。控制器能选择根节点以开启新分支，也能选择当前已揭示子树的叶子以继续既有分支。一次动作是至多 W 个节点组成的批次，因此同时编码了搜索位置和并发规模。</p>
+        <p>在线与离线共享同一决策接口，区别只在 transition。在线选择节点后，真实 discovery agent 生成新候选，结果具有随机性；离线 replay 则直接揭示记录在历史树中的子节点，结果确定且无需重新执行。控制器只能看到当前已经揭示的前缀，不能偷看最终赢家或未揭示分数。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>Discovery history as a replay simulator</span></div><a href="assets/paper-figures/38-dream-rsi/replay-world-crop.png" target="_blank"><img src="assets/paper-figures/38-dream-rsi/replay-world-crop.png" alt="历史发现树作为 replay simulator，替代策略在同一树上选择不同分支并获得质量、成本和时延反馈"></a><figcaption><strong>Replay 改变的是“如何走过旧树”，不是“旧树里发生过什么”</strong><p>替代策略可以更换分支选择、探索顺序、并发与停止规则，并用已存储的节点结果计算质量、调用数和轮次；它不能生成历史中不存在的子节点。</p><p class="figure-reading"><b>阅读要点：</b>这张图既解释了方法的效率，也暴露了核心偏差。离线反馈只在已实现的搜索支持集上有效，无法回答“若当时采用另一策略，底层 Agent 会不会生成完全不同的候选”。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/abs/2609.14858v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p>回放得分同时奖励最好结果、惩罚所揭示的非根节点数，并按“尝试数 ÷ 决策轮数”奖励有效并行。形式上可写成：最佳分数 − β₁·尝试数 + β₂·平均并行度。它把搜索质量、总调用量和顺序延迟压进一个可比较的控制器目标。</p>
+        <div class="warning"><b>不能忽略的语义边界：</b>论文说“off-policy evaluation”，但它不是能估计任意新策略价值的通用反事实模型。回放只对历史树中已记录的父子转移精确；一旦新策略会改变生成上下文、探索顺序或底层模型输出，历史节点只是代理结果。</div>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>递归自我改进：每轮扩张世界，也扩张下一轮可学习的策略</h2>
+        <p class="lead">系统以“在线产生世界—离线在世界中改策略—重新部署”为一个外循环。递归性不是模型修改自己的权重，而是可执行搜索控制器不断利用更大的经验世界集合重写自身代码。</p>
+        <div class="flow" aria-label="Dream-RSI 外循环"><div>① Online Explore<br>当前 policy 扩展新树</div><div>② Build Replay Worlds<br>记录节点与转移</div><div>③ Dream &amp; Evaluate<br>生成并回放候选 policy</div><div>④ Select &amp; Redeploy<br>最佳版本进入下一轮</div></div>
+        <p>每一轮在线 rollout 中，策略代码固定，底层 Agent 在被选节点的工作区继续生成；完成后，新树加入历史集合。离线阶段，固定的 LLM policy-development agent 读取每个候选策略的 replay 轨迹、分数与失败模式，提出新的可执行策略代码，再在全部历史树上评估。</p>
+        <p>最终从当前策略和若干修订版中选出平均 replay 得分最高者，因此论文可以保证：被选版本在这批固定历史世界上的分数不低于当前版本。这个保证很重要，也很窄——它是训练集式的历史回放单调性，不是新在线世界的性能单调性。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 1</span><span>Dream-RSI 三阶段闭环</span></div><a href="assets/paper-figures/38-dream-rsi/framework.png" target="_blank"><img src="assets/paper-figures/38-dream-rsi/framework.png" alt="Dream-RSI 在线探索、构建 replay simulator、dreaming-based policy improvement 并重新部署的系统框架"></a><figcaption><strong>自我改进发生在 exploration policy 层</strong><p>历史树不断扩充 simulator pool；策略开发 Agent 在池中提出、评估并修订控制器，然后把胜出版本部署到新的在线搜索。</p><p class="figure-reading"><b>阅读要点：</b>系统把“会发现什么”与“如何分配发现计算”分开。论文实验保持 discovery agent、evaluator、初始化和每轮资源上限一致，因此与固定探索基线的差异主要落在元探索策略的适应上。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/abs/2609.14858v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <div class="shift">
+          <article><small>被固定的层</small><h3>生成与评价</h3><p>同一 discovery agent、evaluator、执行接口、初始策略和单轮资源约束。</p></article>
+          <article><small>被学习的层</small><h3>搜索编排器</h3><p>选择分支、分配并发、决定继续或停止，并以可执行代码表示。</p></article>
+          <article><small>递归信号</small><h3>世界池扩大</h3><p>新在线树加入历史，使下一轮控制器在更多失败与成功轨迹上回放。</p></article>
+        </div>
+        <div class="analysis"><b>方法的精髓：</b>它用“覆盖偏差”交换“反馈成本”。历史世界不完整，但便宜、可重复且能提供细粒度决策反馈；在线世界更真实，却昂贵。闭环试图让两者互补。</div>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>证据：控制变量设计较强，结果支持更好的质量—计算权衡</h2>
+        <p class="lead">最有说服力的对照不是跨系统排行榜，而是 Recursive Fixed Exploration：双方使用同一底层 Agent、评价器、初始化、资源限制和首轮策略；第一轮行为相同，之后只有 Dream-RSI 会根据 replay 修改控制器。</p>
+        <p>论文覆盖 8 个任务、3 个领域。固定基线中，Gemini-3.1 Pro 每轮为 10 个并行工作区 × 11 步，即 110 次 discovery-agent 调用；Gemini-3.7 Flash 为 32 × 20，即 640 次。Dream-RSI 保留同样的每轮上限，但学习到的策略可以提前停止、改变并发或把尝试集中到更有价值的分支。</p>
+        <div class="table-wrap"><table><caption>主要实验结果：论文报告的质量与发现预算</caption><thead><tr><th>领域 / 任务</th><th>Dream-RSI</th><th>关键对照</th><th>可支持的结论</th></tr></thead><tbody>
+          <tr class="focus-row"><td>Lasso · Gemini-3.1 Pro</td><td>2931.0 ms；317 calls</td><td>Fixed：3587.1 ms；550 calls</td><td>更低下游平均运行时，同时少 42.4% 调用</td></tr>
+          <tr><td>Lasso · Gemini-3.7 Flash</td><td>2350.6 ms；1879 calls</td><td>Fixed：2516.7 ms；3200 calls</td><td>更低运行时，同时少 41.3% 调用</td></tr>
+          <tr><td>数学 · Sum–Difference</td><td>1.145427 ↑</td><td>Fixed 1.144047；SimpleTES 1.143975</td><td>在所列方法中取得最高分</td></tr>
+          <tr><td>数学 · Circle Packing</td><td>2.635983 ↑</td><td>多种系统同为 2.635983</td><td>追平最强报告结果，不构成独占优势</td></tr>
+          <tr><td>数学 · Autocorrelation</td><td>1.456375 ↓；&lt;1000 generations</td><td>SimpleTES 1.453675；51,200 generations</td><td>质量略逊，但预算低 50× 以上</td></tr>
+          <tr><td>GPU · VGG16 / LayerNorm</td><td>相近性能</td><td>2.43× / 1.79× 更少 generations</td><td>达到相近终点所需搜索更少</td></tr>
+          <tr><td>GPU · ConvDiv / ConvMax</td><td>2.09× / 1.44× 更高性能</td><td>相近发现预算的 Fixed</td><td>在两个任务上提高最终内核性能</td></tr>
+        </tbody></table></div>
+        <p class="source-note">来源：论文 Figure 3、Table 1、Figure 4 及正文。Lasso 的 ms 为六个 held-out 数据集平均运行时，越低越好；GPU 指标为 1/ms，越高越好。</p>
+        <p>Lasso 实验在 17 个合成发现实例上搜索，并在 6 个生物与非生物数据集上测泛化。两个 Dream-RSI 版本都在 6 个 held-out 数据集上胜过 sklearn 和 glmnet。论文还分析了发现出的求解器：它把 strong-rule screening 与基于 Cauchy–Schwarz 的 KKT pruning 结合，只在界无法完成认证时计算精确梯度，剪枝失效时退回全量刷新。这说明搜索不仅找到一个数字更好的黑箱，还产生了可解释的算法结构。</p>
+        <p>数学任务给出更有层次的结论：Sum–Difference 获得最高分，Circle Packing 追平最好结果，Autocorrelation 则不如 SimpleTES 的最佳质量，但用少于 1000 次 generation 对比 51,200 次。这里最合理的表述是“显著改善质量—预算前沿”，而不是“所有任务都达到最好质量”。</p>
+        <p>进一步分析显示，把历史抽象成 prompt 级语义指导，反而在 ConvDiv 上持续弱于不带 guidance 的版本；强方向性提示可能过度约束并行探索。另一项分析中，学到的策略先把每轮尝试从 110 降到 50，性能停滞后又主动增加探索，随后出现新提升。这与“控制器在学资源分配”相符。</p>
+        <div class="analysis"><b>证据链判断：</b>同起点、同 Agent、同 evaluator、同单轮上限的受控基线，较好隔离了自适应控制器的增量；跨领域结果又说明收益不只来自某个特定 Lasso 技巧。仍然缺少的是独立 held-out replay worlds 和完整成本账单。</div>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>结构性边界：Replay 能重排已发生的过去，却不能生成未发生的反事实</h2>
+        <p class="lead">Dream-RSI 的效率来自历史树的确定性，也因此受历史树支持集约束。论文证明了“在已有经验世界上筛出的控制器常能改善下一轮”，没有证明 replay 分数是新在线策略价值的无偏估计。</p>
+        <p>第一，存在 support bias。候选控制器只能选择历史中已经生成的分支。如果旧策略从未打开某类路线，replay 无法评估新策略在那里会发现什么。学到的策略可能擅长复用旧树拓扑，却错过真正需要新在线探索才能出现的区域。</p>
+        <p>第二，存在 off-policy mismatch。历史子节点由原策略下的工作区、提示上下文和随机生成过程产生；替代控制器在不同顺序、不同并发和不同已见历史下“揭示”同一个节点，并不等于真实在线运行会生成同样结果。底层 Agent 越随机、越依赖上下文，这个代理误差越大。</p>
+        <p>第三，候选策略反复在同一批历史世界上开发、评估和选择，容易 replay overfitting。论文保证胜出者在固定历史上的平均得分不下降，却没有用独立世界做控制器选择后的离线验证。随着版本数增加，策略可能逐渐利用特定树的偶然结构。</p>
+        <p>第四，“recursive self-improvement”在实验中表示多轮控制器更新，并不等于长期无限改进。论文未研究错误累积、世界池分布陈旧、长期性能饱和或策略复杂度增长；也没有证明离线 replay 的单调提升能转化成每一轮在线单调提升。</p>
+        <p>第五，“zero-execution-cost”是边界明确的局部说法。回放省掉候选生成、编译与评价，但 LLM policy development、轨迹存储、回放计算和编排仍然消耗 token、时间和基础设施。论文主要报告 discovery-agent calls，没有统一比较总 token、美元成本与端到端墙钟时间。</p>
+        <div class="boundary">
+          <article><h3>最强反事实</h3><p>在同一历史树和同一 LLM 策略开发预算下，比较手工启发式、离线超参搜索与 Dream-RSI；若简单调度器匹配收益，LLM 策略进化并非必要。</p></article>
+          <article><h3>Replay 泛化实验</h3><p>将历史树分成开发集与 held-out 世界，控制器只在开发树上迭代，再在未见树和全新在线 rollout 上盲评，测量 replay—online 排名相关性。</p></article>
+          <article><h3>支持集压力测试</h3><p>让候选策略选择历史中未覆盖的分支类型，并在真实在线环境执行；比较 replay 代理分数与实际结果，量化 support bias 和 off-policy mismatch。</p></article>
+          <article><h3>生命周期成本</h3><p>统一统计 discovery calls、策略开发 token、replay 计算、存储、墙钟时间与失败 rollout，把“少调用”换算成完整成本—质量前沿。</p></article>
+        </div>
+        <div class="verdict"><b>综合判断：</b>Dream-RSI 最重要的贡献，是把搜索历史从静态文本资产升级为元策略的交互式训练环境。这一设计在受控实验中确实改善了质量—计算权衡，并展示了控制器能随进展自适应收缩或扩大探索。但它的“世界”是经验性的、部分覆盖的、由旧策略生成的；真正决定该路线能否成为可靠通用方法的，是 replay 分数对新在线世界的校准能力，而这仍是论文留下的核心未解问题。</div>
+        <p class="source-note">来源与口径：基于 arXiv:2609.14858v1（2026-09-14）论文 PDF 与官方源文件整理；数值均来自论文正文、表格和图。本文未独立复现实验；关于支持集偏差、off-policy mismatch、选择过拟合与完整成本的内容，是基于方法结构作出的证据约束分析。</p>
+        <a class="back" href="#top">↑ 返回顶部</a>
+      </section>
+    </main>
+
+    <aside class="rail"><div class="rail-card"><h3>阅读抓手</h3><ul><li>改进的是搜索调度器，不是底层发现模型。</li><li>历史树只支持已记录分支内的 replay。</li><li>实验最强证据来自同首轮策略的固定探索基线。</li></ul></div><div class="rail-card"><h3>三个关键词</h3><p>Meta-exploration · Replay world · Recursive redeployment</p></div></aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
+    addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
+    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
+</body>
+</html>

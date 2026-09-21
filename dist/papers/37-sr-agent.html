@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="SR-Agent 中文深度解读：如何用 UserSim、诊断记忆、受限动作空间与四阶段验证闭环安全地改进电商后排序策略。">
+  <title>SR-Agent：生产自进化的关键不是放权，而是限制动作空间｜论文精读</title>
+  <style>
+    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
+    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(108,151,213,.28),transparent 29%),radial-gradient(circle at 8% 100%,rgba(57,132,93,.2),transparent 30%),linear-gradient(125deg,#10223c,#173b51 56%,#40335f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}
+    .chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:820px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:820px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .cards,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--at)}.shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.shift article:nth-child(2){border-color:#c9deb3;background:var(--gt)}.shift article:nth-child(3){border-color:#d7caec;background:var(--pt)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--paper);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}.thesis-line{margin:18px 0;padding:17px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center;font-size:18px;font-weight:780;line-height:1.55}.thesis-line span{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}
+    .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:88px;padding:12px 8px;place-items:center;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:750;line-height:1.45}.flow div:nth-child(2),.flow div:nth-child(4){border-color:#d7caec;background:var(--pt)}.flow div:nth-child(3){border-color:#c9deb3;background:var(--gt)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.analysis,.warning,.verdict{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.verdict{border-color:var(--purple);color:#55426f;background:var(--pt)}
+    .paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.paper-figure.compact img{width:auto;max-width:820px;max-height:none}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
+    body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
+    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.flow{grid-template-columns:1fr}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.paper-figure.compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero"><div class="hero-in">
+    <div class="eyebrow">PAPER REVIEW · arXiv:2607.17719v2</div>
+    <h1>SR-Agent：生产自进化的关键不是放权，而是限制动作空间</h1>
+    <p class="subtitle"><span class="paper-name">SR-Agent: An Experience-Driven Agentic Framework for Post-Ranking Strategy Refinement in E-Commerce Recommendation</span>Hanchen Yang、Kaiwen Yang、Junpeng Zhuang、Yang He、Keting Cen、Bochao Liu、Zhongbo Sun、An Liu、Zhongteng Han、Chenyi Lei · Kuaishou · 2026-07-21</p>
+    <div class="actions"><a class="action" href="https://arxiv.org/abs/2607.17719v2" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/37-sr-agent/paper.pdf" target="_blank">本地 PDF ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="metrics">
+      <div class="metric"><small>研究对象</small><b>后排序策略维护</b><span>冻结基础 Ranker，只改 Experience Controls</span></div>
+      <div class="metric"><small>闭环</small><b>Bad Case → Diagnosis → Action</b><span>三类记忆 + 四阶段验证</span></div>
+      <div class="metric"><small>线上实验</small><b>1 月 · 2.5% 流量</b><span>约 6,000 万用户 / 7,000 万商品</span></div>
+      <div class="metric"><small>业务结果</small><b>订单量 +0.707%</b><span>GMV +0.461%</span></div>
+      <div class="metric"><small>体验结果</small><b>浏览深度 +0.342%</b><span>7 日点击类目 +0.482%</span></div>
+      <div class="metric"><small>成本</small><b>3,600 万 Tokens / 轮</b><span>仍需约 1% 抽检与上线前人工审核</span></div>
+    </div>
+  </div></header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
+      <li><a href="#s1">01 为什么静态策略必然陈旧</a></li><li><a href="#s2">02 从感知缺陷到可操作诊断</a></li><li><a href="#s3">03 受限动作空间与验证闭环</a></li><li><a href="#s4">04 线上收益、检测与效率证据</a></li><li><a href="#s5">05 安全边界与未证实部分</a></li>
+    </ol></nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>静态后排序策略的问题不是写得不好，而是环境一定会把它写旧</h2>
+        <p class="lead">SR-Agent 研究的是一个经常被推荐模型论文忽略的运维层：最终列表里的类目、店铺、价格带、相似度与曝光规则，怎样在商品和用户状态持续变化时被发现、诊断并安全修正。</p>
+        <p>工业推荐不能只优化单品点击或购买概率。每件商品都“相关”，列表仍可能充斥视觉近似、功能等价或重复曝光的选择，让用户难以探索。后排序策略以低延迟、可解释和易部署见长，能通过阈值、配额、相似抑制与曝光上限修正最终列表，因此在大规模系统中很常见。</p>
+        <p>但这些策略依赖历史类目、商品关系、embedding 与人工阈值。商品会不断上新、下架、改价、换图或改标题；用户对相似商品的容忍度又随意图、会话阶段和近期曝光变化。同一组商品有时是有价值的比较，有时是令人疲劳的重复。静态配置不是偶尔失效，而是会随着环境变化系统性失配。</p>
+        <p>传统修正链路需要运营或产品抽查页面、专家定位原因、算法工程师把观察翻译成阈值或类目修改，再次人工验证和上线。慢的根源并非单一步骤，而是 case-level 观察无法稳定转化为可复用诊断，诊断又没有受治理的路径变成生产动作。</p>
+        <div class="thesis-line">论文的概念贡献是把“后排序维护”重新表述为受限控制问题。<span>Agent 负责发现与归纳，动作空间和验证门负责决定它能改变什么。</span></div>
+        <p class="block-intro">与相邻工作相比，SR-Agent 不是更通用，而是更窄。它用表达能力换来了可审计性和生产安全。</p>
+        <div class="cards">
+          <article class="card"><h3>重排 / DPP / MMR</h3><p>研究如何生成更好的多样化列表，通常不解决策略上线后如何从真实坏例中持续维护。</p></article>
+          <article class="card"><h3>LLM User Simulator</h3><p>生成偏好、反馈或交互轨迹，可做离线评估；但通常不会把缺陷直接翻译成可部署策略修改。</p></article>
+          <article class="card"><h3>通用推荐研发 Agent</h3><p>能改模型、目标或代码，搜索空间更大；SR-Agent 则固定 Ranker，只在后排序层做类型化调整。</p></article>
+          <article class="card"><h3>SR-Agent</h3><p>把用户视角检查、原因诊断、记忆积累、受限动作与真实 A/B 串成持续运维闭环。</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>先把“看着不舒服”拆成证据，再把证据压成可操作原因</h2>
+        <p class="lead">UserSim 与 Analysis Agent 被刻意分开：前者回答“有没有体验缺陷”，后者回答“当前策略为什么没拦住、最小应该改哪里”。</p>
+        <p>UserSim 并不模拟完整未来行为，而是近似用户如何感知已经展示的列表与会话。Exposure Profiler 找重复曝光和类目、店铺、价格带集中；Relation Extractor 识别视觉、语义、功能替代或互补关系，尤其补足类目标签遗漏；Experience Evaluator 再结合用户意图、近期行为和曝光历史，判断这些关系是有用比较还是冗余、同质化与疲劳。</p>
+        <p>输出被写成结构化 Bad Case：缺陷类型、涉及商品、三类证据与置信度。Analysis Agent 不直接接受单个判断，而是按缺陷、商品/类目、证据模式和场景聚类，从“共同现象”到“策略遗漏原因”再到“最小作用域与修正方向”逐层收窄。可能原因包括信号缺失、分组陈旧、阈值失准、曝光控制不足或容忍度与用户上下文不匹配。</p>
+        <p>三类记忆对应不同抽象层级：Bad-Case Memory 保存可重测的原始证据；Diagnosis Memory 保存跨案例的失败模式；Strategy Memory 保存提案、验证结果、上线或回滚状态。这样一次失败不会只留下“没通过 A/B”，而能在下次相似诊断时作为负面先例被检索。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>从展示列表到安全上线</span></div><a href="assets/paper-figures/37-sr-agent/framework.png" target="_blank"><img src="assets/paper-figures/37-sr-agent/framework.png" alt="SR-Agent 中固定推荐模型、UserSim、Analysis Agent、受限策略 Harness、三类记忆与四阶段 Reward Pipeline"></a><figcaption><strong>推理层开放，执行层封闭</strong><p>UserSim 与 Analysis Agent 可以做语义判断和跨案例归纳；真正影响线上展示的 Harness 只能从预定义动作空间选参数，并依次通过坏例重测、历史流量重放、人工审核与线上 A/B。</p><p class="figure-reading"><b>阅读要点：</b>系统安全并非来自 LLM 足够谨慎，而是来自“模型不能改代码、不能越权扩展动作、不能绕过验证”。自进化发生在记忆引导的提案选择，不发生在安全边界本身。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/abs/2607.17719v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="block-intro">去掉模块名后，本质是一条从不可直接执行的主观信号，到可审计控制变量的编译链。每一步都降低自由度，也丢失一部分问题覆盖。</p>
+        <div class="shift">
+          <article><small>感知层</small><h3>上下文坏例</h3><p>将用户对重复、同质或疲劳的感受转成带证据的结构化事件。</p></article>
+          <article><small>诊断层</small><h3>策略失配模式</h3><p>聚类多例，归因到信号、分组、阈值、曝光或上下文容忍度。</p></article>
+          <article><small>控制层</small><h3>白名单动作</h3><p>只在授权范围内改阈值、抑制强度、曝光上限或类目映射。</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>“自进化”的护城河：LLM 不能修改安全边界</h2>
+        <p class="lead">论文最成熟的工程判断，是不用一个自由 Agent 直接写生产策略，而用 Harness 把它限制在四类带步长、范围和白名单的动作里。</p>
+        <p>四类动作分别是：关系阈值调整，视觉/语义/替代关系每次只允许在 ±0.15 内按 0.01 移动；冗余抑制强度对授权商品组在 ±0.50 内按 0.05 移动；曝光限制只可选择预配置的维度、时间窗与上限；类目纠正只能对授权节点执行 merge、split 或 reassign。LLM 不能生成 serving code、改模型目标、访问未授权作用域或创造新操作。</p>
+        <p>对每个诊断，Harness 从 Strategy Memory 检索相似先例，生成少量候选，并由确定性 validator 检查字段、参数范围、作用域和策略版本。连续参数可在方向与范围兼容时合并并裁剪；冲突修改和类目操作升级给策略 Owner。固定安全封套不学习，只有“在什么诊断下优先提出什么候选”随历史 reward 变化。</p>
+        <div class="table-wrap"><table><caption>SR-Agent 的类型化动作空间</caption><thead><tr><th>动作</th><th>参数</th><th>允许域</th><th>解决的失配</th></tr></thead><tbody>
+          <tr><td>关系阈值调整</td><td>关系 r；Δτ</td><td>visual / semantic / substitute；±0.15，步长 0.01</td><td>相似或替代关系识别过松/过严</td></tr>
+          <tr><td>冗余抑制调整</td><td>授权组 g；Δλ</td><td>±0.50，步长 0.05</td><td>关系识别正确但抑制力度不合适</td></tr>
+          <tr><td>曝光限制调整</td><td>维度 d；时间窗 h；上限 k</td><td>类目 / 店铺 / 价格带；预配置组合</td><td>会话或列表内过度集中</td></tr>
+          <tr><td>类目纠正</td><td>操作 o；节点 n；目标组 g</td><td>merge / split / reassign；授权映射</td><td>功能等价商品被错误分组</td></tr>
+        </tbody></table></div>
+        <p class="source-note">来源：论文 Table 1。范围与白名单由策略 Owner 预先配置并版本化，不由 LLM 自行扩展。</p>
+        <p>候选随后通过四阶段 Reward Pipeline：先在诊断匹配的已标注坏例上重测，再在更大历史流量上回放以检查覆盖与副作用，之后由策略 Owner 审核，最后进入受控线上 A/B。任一早期阶段失败都会终止；线上护栏违规则回滚。最终 reward 是四元组，不被压成一个可相互抵消的标量。</p>
+        <div class="flow" aria-label="四阶段策略验证"><div>① Bad-case Retest<br>目标缺陷是否修复</div><div>② Traffic Replay<br>覆盖与回归风险</div><div>③ Human Review<br>业务语义与冲突</div><div>④ Online A/B<br>真实用户与商业结果</div></div>
+        <div class="analysis"><b>机制判断：</b>这套设计把 Goodhart 风险限制在动作选择层：坏例修复不能抵消线上护栏，线上收益也不能绕过 Owner 审核。代价是系统只能解决已被动作 schema 表达的问题；需要新信号、Ranker 更新或跨阶段协同的缺陷仍在边界外。</div>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>实验：线上指标一致为正，效率显著提升，但检测证据更像精度审计</h2>
+        <p class="lead">最强证据来自一个月线上 A/B：控制组保留人工配置策略，实验组冻结基础 Ranker，仅允许 SR-Agent 调整受限后排序策略。体验与订单指标均为正向。</p>
+        <p>实验使用 2.5% 流量，覆盖约 6,000 万用户和 7,000 万商品。论文报告点击类目数、浏览深度、点击数、订单量与 GMV 全部提升，说明系统并非用多样性换掉商业价值。由于论文没有给出置信区间、显著性阈值或逐指标方差，页面只将这些数字视为“论文报告的线上相对变化”，不额外推断统计强度。</p>
+        <div class="table-wrap"><table><caption>一个月线上 A/B：相对控制组变化</caption><thead><tr><th>指标组</th><th>指标</th><th>相对变化</th></tr></thead><tbody>
+          <tr><td>用户体验</td><td>人均点击类目数（1 日）</td><td class="positive">+0.425%</td></tr>
+          <tr><td>用户体验</td><td>人均点击类目数（7 日）</td><td class="positive">+0.482%</td></tr>
+          <tr><td>用户体验</td><td>浏览深度</td><td class="positive">+0.342%</td></tr>
+          <tr><td>用户体验</td><td>点击数</td><td class="positive">+0.554%</td></tr>
+          <tr class="focus-row"><td>订单</td><td>订单量</td><td class="positive">+0.707%</td></tr>
+          <tr><td>订单</td><td>GMV</td><td class="positive">+0.461%</td></tr>
+        </tbody></table></div>
+        <p class="source-note">来源：论文 Table 2；数值为相对控制组变化。基础排序模型保持不变。</p>
+        <p>坏例检测在 500 个生产页面上评估。人工检查找到 36 个坏例；不带用户意图的 UserSim 标记 114 个，验证率 91%；加入用户意图后标记 142 个，验证率 95%。这支持自动检查具有更高候选覆盖并保持较高审核通过率，但表中“人工 36 个”不是明确声明的穷尽真值集，因此无法从这些数字计算 Recall，也不能证明 Agent 找到的额外坏例覆盖了人工遗漏的全部真实缺陷。</p>
+        <div class="table-wrap"><table><caption>坏例检测与验证</caption><thead><tr><th>方法</th><th>标记案例</th><th>验证率</th><th>可支持的结论</th></tr></thead><tbody>
+          <tr><td>人工检查</td><td>36</td><td>100%</td><td>传统流程基线；并非明确穷尽标注</td></tr>
+          <tr><td>UserSim 无用户意图</td><td>114</td><td>91%</td><td>高吞吐，少量误报</td></tr>
+          <tr class="focus-row"><td>UserSim 有用户意图</td><td>142</td><td>95%</td><td>意图上下文提升审核通过率与候选数量</td></tr>
+        </tbody></table></div>
+        <p class="source-note">来源：论文 Table 3。“验证率”更接近抽查后的 precision-like 指标；论文未提供统一穷尽 ground truth 下的 recall。</p>
+        <p>运营效率方面，一轮使用 Claude Sonnet 4.6，所有调用合计约 3,600 万 tokens。检查 500 个案例由 7 天降为 50 分钟自动化加 1 个 reviewer-day；分析 500 个坏例由 2 天降为 90 分钟自动化加 1 个 reviewer-day；策略更新由 2 周降为 3 小时自动化加 1 个 reviewer-day；端到端从 2–3 周缩短为 3–5 个自然日。系统仍对约 1% 坏例和诊断随机抽检，并在上线前审核候选策略。</p>
+        <figure class="paper-figure compact"><div class="figure-head"><span>论文原图 · Figure 3</span><span>十次更新与一个月线上趋势</span></div><a href="assets/paper-figures/37-sr-agent/refinement-trend.png" target="_blank"><img src="assets/paper-figures/37-sr-agent/refinement-trend.png" alt="十次策略更新的坏例解决率从49.2%升至83.1%，同期点击和浏览深度相对基线总体上升"></a><figcaption><strong>坏例解决率上升，线上点击与浏览深度总体同向变化</strong><p>十次单策略更新中，坏例解决率由 49.2% 升至 83.1%；一个月内点击与浏览深度虽有波动，期末分别约 +0.55% 与 +0.34%。</p><p class="figure-reading"><b>谨慎解读：</b>两条趋势同时上升与机制叙事一致，但十次更新按时间顺序累积，缺少随机顺序或单更新隔离，因此不能从相关趋势判断每一轮提升都由记忆驱动的“自进化”造成。</p><div class="figure-source"><span>来源：论文 Figure 3</span><a href="https://arxiv.org/abs/2607.17719v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>边界：安全来自缩小问题，泛化也因此受限</h2>
+        <p class="lead">SR-Agent 的优势与限制来自同一个选择：冻结 Ranker、固定动作 schema、保留人工审核。它证明了窄域自进化可安全落地，没有证明通用 Agent 可以自主重写推荐系统。</p>
+        <p>论文源文件中曾准备一段局限性说明，核心边界也能从正式方法直接推出：需要新特征、新目标、Ranker 更新或跨阶段重构的体验缺陷不在当前动作空间内；测试集中在快手电商场景，尚未展示跨平台、跨布局或跨领域迁移。动作白名单越安全，对环境新型失配的表达能力越有限。</p>
+        <p>第二，Bad Case 与 Diagnosis 的可靠性依赖 Claude Sonnet 4.6、用户画像、多模态商品信息与约 1% 人工抽检。若流量分布或模型版本变化，95% 的既有验证率未必维持。论文没有按缺陷类型、长尾商品或用户分群报告误报与漏报，也没有给出审核者一致性，难以判断错误是否集中在最关键场景。</p>
+        <p>第三，3,600 万 tokens / 轮是显著成本。论文报告了人力与墙钟时间，却未给出模型成本、商品图像处理、历史回放、A/B 流量机会成本与策略维护的完整账单。对高频运行系统，是否值得取决于坏例频率、每次更新带来的长期收益，以及同一策略可以摊销多久。</p>
+        <p>第四，线上 A/B 能证明完整系统在测试窗口有效，却不能完全隔离 UserSim、Diagnosis Memory、Strategy Memory 和四阶段门控各自贡献。十轮解决率上升也可能部分来自“先解决容易高频问题”的自然排序、累计策略作用或案例分布变化。最强可信结论是端到端方案有效；“经验记忆导致持续自我改进”的因果强度仍需专门消融。</p>
+        <div class="boundary">
+          <article><h3>最强反事实</h3><p>使用同一动作空间与四阶段验证，比较人工规则检索、无记忆 LLM、仅成功记忆、成功+失败记忆和完整 SR-Agent，控制候选数与 token 预算。</p></article>
+          <article><h3>检测决胜实验</h3><p>构建独立、穷尽标注的坏例集，按缺陷类型报告 precision、recall、校准度和审核一致性，确认额外 106 个候选不是只扩大主观定义。</p></article>
+          <article><h3>演化决胜实验</h3><p>对新一批诊断随机屏蔽 Strategy Memory，比较候选通过率、回归率与线上效果，直接测量历史 reward 对下一轮策略质量的增量。</p></article>
+          <article><h3>生命周期决胜测量</h3><p>把 token、图像处理、回放、人工审核、线上流量和回滚成本统一到每个成功策略与每单位长期 GMV/留存增益。</p></article>
+        </div>
+        <div class="verdict"><b>综合判断：</b>SR-Agent 最可迁移的结论是“生产自进化应把可变部分和不可变安全封套明确分开”。语义 Agent 扩大观察与归纳能力，类型化 Harness 把它压回可审计动作，真实 A/B 决定最终价值。论文的线上证据足以支持这一窄域闭环有用；对坏例召回、记忆的独立贡献、跨域泛化和完整成本仍需更强证据。</div>
+        <p class="source-note">来源与口径：基于 arXiv:2607.17719v2（2026-07-21）论文 PDF 与官方源文件整理；数值均来自论文表格和图。本文未独立复现快手线上实验；关于检测口径、组件归因和生命周期成本的内容为证据约束下的编辑性推断。</p>
+        <a class="back" href="#top">↑ 返回顶部</a>
+      </section>
+    </main>
+
+    <aside class="rail"><div class="rail-card"><h3>阅读抓手</h3><ul><li>固定 Ranker，只让 Agent 修改受限后排序策略。</li><li>Bad Case、Diagnosis、Strategy 是三个不同抽象层。</li><li>线上 A/B 证明端到端效用，不等于各记忆模块被独立验证。</li></ul></div><div class="rail-card"><h3>三个关键词</h3><p>后排序维护 · 受限动作空间 · 四阶段 Reward Pipeline</p></div></aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
+    addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
+    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
+</body>
+</html>
