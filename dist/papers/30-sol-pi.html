@@ -6,12 +6,148 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="SoL-Pi 中文深度解读：Auto-Research 如何把 Agent Harness 本身作为研究对象，通过 Broad→Deep 搜索与 535 个可验证环境，从轨迹中发现可迁移系统机制，并进行 Performance—Token—Cost Pareto 优化。">
 
-  <title>SoL-Pi：让智能体先学会少花 Token，再递归改进自己｜论文精读</title>
+  <title>SoL-Pi：Agent Harness 的递归自动研究与效率优化｜论文精读</title>
   <style type="text/css">
   :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#4f8516;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#f0f7e7;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}.hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(118,185,0,.25),transparent 29%),radial-gradient(circle at 8% 100%,rgba(93,133,221,.18),transparent 30%),linear-gradient(125deg,#10223c,#173a5b 56%,#3e315f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1150px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}.layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}.chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:810px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:810px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}.cards,.steps,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.step,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2),.step:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3),.step:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n),.step:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.step h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.step p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:18px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.figure-wide img{width:100%;max-height:none}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}.table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:760px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.perf-row td{background:var(--pt)!important}.positive{color:var(--green);font-weight:750}.negative{color:var(--red);font-weight:750}.analysis,.warning{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.boundary article{border-color:#ead5b4;background:var(--at)}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#25351c;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .step p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}@media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.steps,.boundary{grid-template-columns:1fr}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.step,.boundary article{break-inside:avoid;background:#fff}}
     .comparison-table{min-width:980px}
-  </style>
+  
+
+    /* 2026-09 standardized research-report layout; original palette is retained. */
+    html{font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
+    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
+    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
+    .metric:nth-child(n+5){display:none}
+    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
+    .rail{display:none!important}
+    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
+    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
+    .chapter+.chapter{border-top:1px solid var(--line)}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
+    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
+    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
+    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
+    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
+    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+    .key-points>li strong{color:var(--ink)}
+    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
+    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
+    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
+    .analysis,.warning{box-shadow:none}
+    @media(max-width:820px){
+      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .layout{display:block;padding:14px 11px 54px}
+      main{border-radius:11px}
+      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
+      h1{font-size:clamp(27px,8.2vw,34px)}
+      h2{font-size:21px}
+      .section-intro,.lead{font-size:15.5px}
+    }
+    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+
+  
+
+    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
+    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
+    h2{margin-bottom:16px;padding-bottom:12px}
+    .subhead{margin:21px 0 8px}
+    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
+    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
+    .key-points{margin-bottom:14px}
+    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
+    .key-points>li::before{top:21px}
+    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
+    .process-sequence{counter-reset:step;margin:13px 0 16px;padding:0;list-style:none}
+    .process-sequence>li{counter-increment:step;position:relative;margin-left:14px;padding:7px 10px 11px 38px;border-left:2px solid var(--line);line-height:1.72}
+    .process-sequence>li::before{content:counter(step);position:absolute;left:-14px;top:7px;display:grid;width:26px;height:26px;place-items:center;border:2px solid var(--paper);border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800}
+    .process-sequence>li>strong{display:block;margin-bottom:1px;color:var(--ink)}
+    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
+    .paper-figure>a{padding:9px}
+    .paper-figure figcaption{padding:14px 18px 15px}
+    .table-wrap{margin:14px 0 8px}
+    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
+    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
+    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
+    .chapter>*:last-child{margin-bottom:0}
+    @media(max-width:820px){
+      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
+      .subhead{margin-top:18px}
+      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
+      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
+      .paper-figure{margin:14px 0 9px}
+      .paper-figure>a{padding:5px}
+    }
+
+    /* Collection typography contract: one Chinese-first face and stable body scale. */
+    html{font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    body{font-weight:400}
+    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
+    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
+    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+
+  
+/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
+:root{
+  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
+body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+body{font-size:15.5px;font-weight:400;line-height:1.84}
+.hero{background:
+  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
+  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
+  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
+.hero:after{opacity:.10;background-size:42px 42px}
+.hero-in{max-width:1240px;padding:52px 28px 42px}
+h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
+.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
+.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
+.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
+.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
+.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
+.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.chapter+.chapter{border-top:1px solid var(--line)}
+h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
+.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
+.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
+.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter .prose p{margin:0 0 13px}
+.block-intro{margin:18px 0 10px}
+.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
+.key-points{margin:10px 0 16px;padding:0;list-style:none}
+.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
+.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
+.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
+.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
+.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
+.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
+table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+.paper-figure,.figure{margin:16px 0}
+.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
+.rail{display:none!important}
+@media(max-width:820px){
+  .hero-in{padding:38px 18px 30px}
+  h1{font-size:clamp(31px,10vw,43px)}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .layout{display:block;padding:14px 10px 58px}
+  .layout>main{border-radius:13px}
+  .chapter{padding:23px 19px 27px}
+  h2{font-size:22px}
+  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
+  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
+  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
+}
+@media print{
+  .layout>main{border:0;box-shadow:none}
+  .chapter{padding:24px 0}
+}
+
+</style>
 </head>
 
 <body id="top">
@@ -25,7 +161,7 @@
         PAPER REVIEW · arXiv:2609.20519v1
       </div>
 
-      <h1>SoL-Pi：让智能体先学会少花 Token，再递归改进自己</h1>
+      <h1>SoL-Pi：Agent Harness 的递归自动研究与效率优化｜论文精读</h1>
 
       <p class="subtitle"><span class="paper-name">SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</span>Haozhe Liu、Tian Ye、Sensen Gao 等 14 位作者 · NVIDIA、NTU、MIT · 2026-09-17</p>
 
@@ -33,31 +169,15 @@
         <a class="action" href="https://arxiv.org/abs/2609.20519" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="https://github.com/NVlabs/SoL-Pi" target="_blank" rel="noreferrer">代码仓库 ↗</a><a class="action" href="https://nvlabs.github.io/SoL-Pi/" target="_blank" rel="noreferrer">项目主页 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button>
       </div>
 
-      <div class="metrics">
-        <div class="metric">
+      <div class="metrics"><div class="metric">
           <small>候选方向</small><b>152 → 4</b><span>自动研究筛选漏斗</span>
-        </div>
-
-        <div class="metric">
+        </div><div class="metric">
           <small>搜索环境</small><b>535</b><span>495 仓库任务 + 40 合成任务</span>
-        </div>
-
-        <div class="metric">
+        </div><div class="metric">
           <small>搜索规模</small><b>3000+ 次运行</b><span>6 万+ Agent—环境交互</span>
-        </div>
-
-        <div class="metric">
+        </div><div class="metric">
           <small>核心评测</small><b>51 个任务</b><span>EdgeBench 公开集合</span>
-        </div>
-
-        <div class="metric">
-          <small>Token 降幅</small><b>44.7–49.0%</b><span>完整四机制栈相对 Pi</span>
-        </div>
-
-        <div class="metric">
-          <small>论文版本</small><b>v1 · 15 页</b><span>8 图 · 4 表</span>
-        </div>
-      </div>
+        </div></div>
     </div>
   </header>
 
@@ -66,35 +186,49 @@
       <p class="side-title">阅读导航</p>
 
       <ol>
-        <li><a href="#s1">01 Harness 成为研究对象</a></li>
+        <li><a href="#s1">01 · 论文概览</a></li>
 
-        <li><a href="#s2">02 Broad → Deep 搜索</a></li>
+        <li><a href="#s2">02 · 研究背景与问题定义</a></li>
 
-        <li><a href="#s3">03 Environment Scaling</a></li>
+        <li><a href="#s3">03 · 方法与技术路线</a></li>
 
-        <li><a href="#s4">04 Trace → System Mechanism</a></li>
+        <li><a href="#s4">04 · 实验设计与结果分析</a></li>
 
-        <li><a href="#s5">05 Pareto 优化与结论</a></li>
+        <li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
       </ol>
     </nav>
 
     <main>
-      <section class="chapter" id="s1">
-        <h2><span class="num">01</span>核心问题：Harness 本身能不能被 Auto-Research 自动优化</h2>
+            <section class="chapter" id="s1">
+        <h2><span class="num">01</span>论文概览</h2>
 
-        <p class="lead">这篇论文最重要的概念移动，不是提出一种新的 Context Compression，而是把 Auto-Research 的搜索对象从代码、模型、算法与超参数，推进到承载 Agent 行为的整个 Harness。</p>
+<p class="section-intro">SoL-Pi 让自动研究系统直接改进 Agent 的运行框架。系统先分析 535 个环境中的执行记录，找出反复出现的浪费，再把这些发现改成可复用的工具和运行规则。论文同时比较任务表现、Token 用量和费用，而不是只追求最高分。</p>
 
-        <p>传统 Auto-Research 通常把 Agent 当作研究者：它修改目标代码、训练配置或算法实现，再通过实验结果获得反馈。SoL-Pi 把视角反过来——如果 Agent 的表现由“模型 + Harness”共同决定，那么研究者是否也能修改自己赖以行动的运行系统？这里的 Harness 不只是 System Prompt，而是 context 管理、工具接口、observation 处理、delegation、progress control、prompt / policy 与 execution loop 的组合。</p>
+        <h3 class="subhead">核心结论</h3>
+        <ul class="key-points">
+          <li><strong>研究对象：</strong>优化范围从任务代码和提示词扩展到整个运行框架，包括工具、上下文管理、结果处理和执行循环。</li>
+          <li><strong>核心方法：</strong>先广泛提出改进方向，再深入实现和验证。候选方案冻结后，还要在未参与搜索的任务和模型上接受测试。</li>
+          <li><strong>主要结论：</strong>四项机制一起使用时，Token 和费用明显下降，但任务得分略有损失。因此部署时要在能力与成本之间选择合适的折中点。</li>
+        </ul>
+      </section>
 
-        <p>因此，论文真正的问题可以写成：能否从大量 Agent Trajectory 中自动识别反复出现的系统性低效，把它们转化为可执行的 Harness Hypothesis，再经过实现、评审、多环境 Rollout 和成本—能力验证，沉淀成跨任务复用的系统机制？Token 效率是这次搜索采用的目标，但“让 Auto-Research 研究 Agent System 自身”才是更上位的研究定位。</p>
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>研究背景与问题定义</h2>
 
-        <p>这一区分很重要。上下文压缩方法通常预先认定问题位于历史太长；手工 Harness Engineering 则由人观察轨迹、修改工具和规则；任务特定 Harness Evolution 可能把某个 Benchmark 的反馈直接写进 Prompt 或代码。SoL-Pi 希望得到的不是更短的一段文本，也不是某项任务的定制策略，而是从多环境重复模式中发现的 Harness Primitive。</p>
+<h3 class="subhead">问题背景与相邻方法</h3>
+<p class="section-intro">以往的自动研究主要修改代码、模型、算法或超参数。SoL-Pi 进一步允许系统修改 Agent 的运行框架，例如工具如何组合、上下文何时压缩、长日志如何处理。论文真正研究的是：这些系统层改动能否跨任务复用。</p>
+
+        <ul class="key-points">
+          <li><strong>研究对象：</strong>传统自动研究修改代码、模型或配置；SoL-Pi 还允许修改 Agent 周围的工具和运行规则。</li>
+          <li><strong>研究问题：</strong>系统能否从大量轨迹中识别重复低效，将其转成可执行假设，并经实现、评审与多环境验证后沉淀为可迁移机制。</li>
+          <li><strong>与相邻方法的差别：</strong>上下文压缩只解决历史过长，人工工程依赖专家排查，单一任务上的演化又容易过拟合。SoL-Pi 希望找到能跨环境复用的系统功能。</li>
+        </ul>
 
         <div class="analysis">
-          <strong>从 Self-Evolution 到 System Evolution：</strong>传统路径常是 Trace → Memory / Skill，即让 Agent “记住什么”；SoL-Pi 展示的是 Trace → Harness Primitive，即让运行系统“改变什么”。Action Fusion 就来自对大量轨迹中 edit → test 相邻模式的观察，而不是一条自然语言经验。
+          <strong>从“记住经验”到“改造系统”：</strong>传统方法常把执行记录整理成记忆或技能，让 Agent 下次记得怎么做。SoL-Pi 则根据执行记录新增系统功能。例如，系统发现“修改文件后立即测试”反复出现，于是把两步合并成一次工具调用。
         </div>
 
-        <p class="block-intro">下面的比较用于定位研究对象，而不是给方法排总名次。SoL-Pi 与 Meta-Harness、AHE 等工作的距离最近；它的特征是把多环境搜索、任务级 Token 成本和能力约束同时放进 Harness Evolution。</p>
+        <p class="block-intro">下表只比较各方法“改什么”，不比较总体强弱。SoL-Pi 与 Meta-Harness、AHE 最接近；它的区别是同时使用大量环境，并把 Token 成本和能力下限纳入筛选条件。</p>
 
         <div class="table-wrap">
           <table class="comparison-table">
@@ -113,32 +247,31 @@
 
         <p class="source-note">来源：SoL-Pi Introduction / Related Work 及各相邻工作的原论文。不同工作的任务与指标不可直接做数值比较。</p>
 
-        <p>所以，四个具体机制不是论文的第一层贡献，而是对核心命题的经验性证明：Auto-Research 不仅能产生一个补丁或一段 Skill，还能从轨迹中发明新的运行时原语。论文由此把“Agent 学会了什么”扩展为“Agent 所处的系统应该如何变化”。</p>
+        <p>因此，四项具体机制只是论文用来验证主张的实例。更重要的结论是：自动研究不只能生成补丁或技能，还能根据大量执行记录改造 Agent 的运行系统。</p>
       </section>
 
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>核心方法：Broad → Deep 的递归 Auto-Research 搜索</h2>
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>方法与技术路线</h2>
 
-        <p class="lead">SoL-Pi 把 Harness Evolution 组织成多层研究循环：外层扩展假设覆盖面，内层沿独立谱系反复实现、实验、分析和修订，直到候选被淘汰或冻结。</p>
+<h3 class="subhead">递归自动研究流程</h3>
+<p class="section-intro">SoL-Pi 把研究分成“广泛探索”和“深入验证”两层。前者寻找值得研究的方向，后者围绕每个方向反复实现、测试和修订，直到候选被淘汰或冻结。</p>
 
-        <p>搜索从已有执行轨迹开始。Oracle Analysis 不直接提出“再压缩一点”之类泛化建议，而是寻找可定位的系统开销：相邻动作是否高度稳定、上下文何时增长、哪些大型 Observation 会反复进入后续请求、诊断证据是否被长日志淹没。每个 Research Direction 都必须同时指出开销来源与可能改变的 Harness 边界。</p>
+        <ul class="key-points">
+          <li><strong>诊断执行记录：</strong>先定位重复动作、上下文膨胀、大型输出和日志噪声，并说明每种浪费发生在哪个环节。</li>
+          <li><strong>广泛探索：</strong>围绕六类系统边界生成 152 个方向，先扩大覆盖面，再选出值得深入验证的假设。</li>
+          <li><strong>深入验证：</strong>每个方向独立完成实现、实验、分析和修订，并由不同角色检查结果，减少自我确认偏差。</li>
+          <li><strong>递归边界：</strong>论文验证了多轮改进流程，但尚未证明“改进后的系统能以更快速度继续改进自身”。</li>
+        </ul>
 
-        <p><strong>Broad Search</strong> 负责探索空间。论文从 context、progress、tools、delegation、prompt / policy、improvement / evaluation 六类来源生成 152 个方向，先判断哪类问题具有足够大的机制空间，而不是一开始就围绕某个手工假设微调阈值。广度的意义在于增加发现不同类型系统规律的概率。</p>
-
-        <p><strong>Deep Search</strong> 负责把一个方向变成可靠机制。每条谱系反复执行 Hypothesis → Implementation → Experiment → Analysis → Revision；实现者要满足明确完成条件，独立 Reviewer 再检查改动。一次实验可产生多条轨迹，独立 Analyzer 分别定位重复动作、上下文增长或诊断缺口，Reducer 汇总为下一轮提案依据。</p>
-
-        <p>“Recursive” 体现在多个嵌套层级：Agent 在环境中迭代解决任务，Research Agent 根据轨迹迭代机制，同一机制又在多轮实现—评审—验证中逐渐稳定；成功机制合并进更高效的 Harness 后，还可以成为下一轮 Auto-Research 的起点。论文实验证明的是前面几层搜索流程，最后这一层“更高效 Harness 继续寻找更高效 Harness”仍是未来愿景。</p>
-
-        <p class="block-intro">流程中的关键不是让研究 Agent 无限尝试，而是让每条谱系可隔离、可停止、可审查。Broad 阶段问“哪里值得研究”，Deep 阶段问“这个机制能否稳定实现并通过证据门槛”，两者共同避免把预算全压在最早出现的局部想法上。</p>
-
-        <div class="steps">
-          <article class="step"><h3>1 · Observe</h3><p>收集基线 Harness 的执行轨迹，定位重复动作、上下文压力、大型观测和薄弱诊断信号。</p></article>
-          <article class="step"><h3>2 · Propose</h3><p>把观察转成可证伪的 Harness Hypothesis，明确修改位置、预期收益与能力风险。</p></article>
-          <article class="step"><h3>3 · Implement & Review</h3><p>实现候选并由独立 Reviewer 检查；未达到完成条件的版本返回修订。</p></article>
-          <article class="step"><h3>4 · Rollout & Analyze</h3><p>在固定环境中运行，多 Analyzer 分析轨迹，结果再汇总为下一轮修改依据。</p></article>
-          <article class="step"><h3>5 · Capability Gate</h3><p>所有能力指标必须落在事先声明的容差内，防止把少做任务误认成效率。</p></article>
-          <article class="step"><h3>6 · Efficiency Gate</h3><p>至少一项成本或 Token 指标改善，并在合格候选中保留非支配点。</p></article>
-        </div>
+        <p class="block-intro">关键不是让研究 Agent 无限尝试，而是让每个方向都能独立运行、及时停止并接受审查。广泛探索阶段判断哪里值得研究，深入验证阶段确认方案能否稳定生效。下面六步构成同一条连续流程。</p>
+        <ol class="process-sequence" aria-label="SoL-Pi 深度研究流程">
+          <li><strong>Observe｜观察轨迹</strong>收集基线 Harness 的执行轨迹，定位重复动作、上下文压力、大型观测和薄弱诊断信号。</li>
+          <li><strong>Propose｜提出假设</strong>把观察转成可证伪的 Harness Hypothesis，明确修改位置、预期收益与能力风险。</li>
+          <li><strong>Implement &amp; Review｜实现与审查</strong>实现候选并由独立 Reviewer 检查；未达到完成条件的版本返回修订。</li>
+          <li><strong>Rollout &amp; Analyze｜运行与分析</strong>在固定环境中执行，由多个 Analyzer 检查轨迹，再把证据汇总为下一轮修改依据。</li>
+          <li><strong>Capability Gate｜能力门槛</strong>所有能力指标必须落在事先声明的容差内，防止把少做任务误认成效率。</li>
+          <li><strong>Efficiency Gate｜效率门槛</strong>至少一项成本或 Token 指标改善，并在合格候选中保留非支配点。</li>
+        </ol>
 
         <figure class="paper-figure figure-wide">
           <div class="figure-head"><span>论文原图 · Figure 1</span><span>Broad → Deep 自动研究漏斗</span></div>
@@ -152,18 +285,15 @@
         </figure>
 
         <div class="analysis"><strong>标题中的 Recursive：</strong>已经被实验展示的是“轨迹内执行循环 + 机制开发循环 + 多谱系搜索循环”；把 SoL-Pi 用作下一轮研究 Harness、形成效率递归复利，则是作者提出的长期愿景，而非本文已经测得的结论。</div>
-      </section>
 
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>核心基础设施：Environment Scaling 才让 Harness 规律有机会泛化</h2>
+        <h3 class="subhead">可验证环境与泛化控制</h3>
+<p class="block-intro">SoL-Pi 的关键基础设施不是某个 Prompt，而是 535 个多样、可执行、可自动验证的研究环境。作者的核心假设是：只有跨越足够多环境仍反复出现的交互模式，才更可能成为可迁移 Harness 机制。</p>
 
-        <p class="lead">SoL-Pi 的关键基础设施不是某个 Prompt，而是 535 个多样、可执行、可自动验证的研究环境。作者的核心假设是：只有跨越足够多环境仍反复出现的交互模式，才更可能成为可迁移 Harness 机制。</p>
-
-        <p>如果只在几十个公开 Benchmark Case 上改 Harness，优化器很容易学到题集结构、验证器偏好或固定工作流。Harness 又直接控制工具、上下文、终止和恢复，因此这种过拟合比普通 Prompt Tuning 更隐蔽：分数可能上升，但改动并未形成可以跨仓库复用的系统规律。</p>
-
-        <p>论文因此构造两类研究环境。495 个 Repository-derived Environment 来自 GitHub issue–PR 对：保留修复前代码和离线依赖，向 Agent 隐藏已合并补丁与回归测试，并确认测试在补丁前失败、补丁后通过。它们提供真实软件变更中的多语言、多仓库与多工具轨迹。</p>
-
-        <p>另外 40 个 Verifier-driven Environment 先定义可执行成功条件，再围绕验证器构造任务。这类环境不要求复现某个参考 Patch，允许多条有效解法，用来补充仓库历史无法覆盖的开放式问题。两类环境共同承担“发现规律”，EdgeBench 则被留到机制冻结后承担“检查迁移”。</p>
+        <ul class="key-points">
+          <li><strong>过拟合风险：</strong>少量公开任务容易把题集结构、验证器偏好或固定工作流写入 Harness，使分数上涨却不能形成跨仓库规律。</li>
+          <li><strong>仓库派生环境：</strong>495 个 issue–PR 环境保留修复前代码与离线依赖，并用补丁前失败、补丁后通过的测试提供真实可执行证据。</li>
+          <li><strong>验证器驱动环境：</strong>40 个任务只规定成功条件而不限定参考补丁，用来覆盖开放式多解问题；机制冻结后再进入 EdgeBench。</li>
+        </ul>
 
         <figure class="paper-figure figure-wide">
           <div class="figure-head"><span>论文原图 · Figure 3</span><span>535 个搜索环境与 Held-out EdgeBench 的隔离</span></div>
@@ -176,14 +306,8 @@
           </figcaption>
         </figure>
 
-        <p class="block-intro">这套环境设计同时解决三件事：真实任务提供自然轨迹，多解验证器避免把“唯一 Patch”误当能力，搜索—评测隔离减少 Benchmark Hack。三者缺一，自动研究都可能把局部反馈错误地固化进 Harness。</p>
-
-        <div class="cards">
-          <article class="card"><h3>真实失败—修复对</h3><p>Issue 提供任务语义，pre-fix repository 提供初始状态，fail-before / pass-after 测试提供可执行证据。</p></article>
-          <article class="card"><h3>允许多条解法</h3><p>Verifier-driven 环境只规定成功条件，不要求复制参考轨迹，使优化器能观察不同策略下的共同开销。</p></article>
-          <article class="card"><h3>隔离候选谱系</h3><p>每个方向在一次性研究实例中独立演化；失败实现与临时编排代码不会污染其他机制。</p></article>
-          <article class="card"><h3>冻结后外测</h3><p>EdgeBench 结果只接受或拒绝冻结候选，不触发针对性修补，从因果上切断验证反馈回流。</p></article>
-        </div>
+        <p>这套环境设计同时解决三件事：Issue 与修复前仓库提供自然任务语义，fail-before / pass-after 测试提供可执行证据；Verifier-driven 环境只规定成功条件，不要求复制唯一参考轨迹；候选谱系彼此隔离，失败实现与临时编排不会污染其他方向。</p>
+        <p>机制冻结后才进入 EdgeBench，结果只用于接受或拒绝候选，不触发针对性修补。真实轨迹、多解验证和搜索—评测隔离共同降低了把局部题集偏好固化进 Harness 的风险。</p>
 
         <p>评测口径仍需谨慎：EdgeBench 公开 51 个任务，其中 11 个用于冻结候选的一次性接受，余下 40 个用于最终泛化评估；论文主表报告 51 个任务的总体结果。因此，11 个任务和 40 个任务的证据角色并不完全相同。论文也没有与简单 Test-time Scaling 做严格等反馈、等推理预算对照。</p>
 
@@ -191,9 +315,10 @@
       </section>
 
       <section class="chapter" id="s4">
-        <h2><span class="num">04</span>核心产物：把 Trace 中的重复规律编译成 System Mechanism</h2>
+        <h2><span class="num">04</span>实验设计与结果分析</h2>
 
-        <p class="lead">四个最终机制最值得学习的不是具体阈值，而是它们如何把轨迹观察变成运行系统的结构变化：压缩交互拓扑、对 Context 做成本决策、把 Observation 外置成可寻址对象，以及只委派阅读而不委派推理。</p>
+<h3 class="subhead">机制组合与 Pareto 结果</h3>
+<p class="section-intro">四个最终机制最值得学习的不是具体阈值，而是它们如何把轨迹观察变成运行系统的结构变化：压缩交互拓扑、对 Context 做成本决策、把 Observation 外置成可寻址对象，以及只委派阅读而不委派推理。 以下先说明评测设置，再结合主结果、消融与边界判断证据强度。</p>
 
         <figure class="paper-figure figure-wide">
           <div class="figure-head"><span>论文原图 · Figure 4</span><span>四类 Harness Mechanism 的触发点与回退边界</span></div>
@@ -206,18 +331,16 @@
           </figcaption>
         </figure>
 
-        <p class="block-intro">从系统角度看，四个 Mechanism 分别改变不同的信息流。Action Fusion 减少模型回合；Online Compact 决定何时值得重写 Context；ObservationPack 改变大输出的存储位置；Reducer 改变谁负责从日志中找证据。</p>
-
-        <div class="steps">
-          <article class="step"><h3>① Action Fusion · 压缩交互拓扑</h3><p>基线常执行 edit → 模型读取结果 → 决定 run test；新工具把修改与确定性的后续命令合并，典型流程从 3 次 API 调用降到 2 次。需要先检查修改结果时仍保持分离。</p></article>
-          <article class="step"><h3>② Online Context Compact · 成本收益决策</h3><p>在计划步骤完成的语义边界估计剩余请求、增长速率与缓存重写成本；只有 Future Saving &gt; Rewrite Cost，或接近窗口上限时才压缩。</p></article>
-          <article class="step"><h3>③ ObservationPack · 外部记忆 + Pointer</h3><p>超过 10 KiB 的输出先归档，前两次请求发送全文；从第三次起改为稳定句柄、原始大小和 1 KB 头尾摘录，需要时再精确分页取回。</p></article>
-          <article class="step"><h3>④ Evidence-Preserving Reducer · 委派阅读</h3><p>低价模型从至少 4 KiB 的构建 / 测试日志中提取证据；确定性验证 schema、hash、exit status 与 exact quote。验证失败、疑似凭据或未缩短时退回原文。</p></article>
-        </div>
+        <p class="block-intro">从系统角度看，四个 Mechanism 分别改变不同的信息流。Action Fusion 减少模型回合；Online Compact 决定何时值得重写 Context；ObservationPack 改变大输出的存储位置；Reducer 改变谁负责从日志中找证据。</p>        <ul class="key-points">
+          <li><strong>① Action Fusion · 压缩交互拓扑：</strong> 基线常执行 edit → 模型读取结果 → 决定 run test；新工具把修改与确定性的后续命令合并，典型流程从 3 次 API 调用降到 2 次。需要先检查修改结果时仍保持分离。</li>
+          <li><strong>② Online Context Compact · 成本收益决策：</strong> 在计划步骤完成的语义边界估计剩余请求、增长速率与缓存重写成本；只有 Future Saving &gt; Rewrite Cost，或接近窗口上限时才压缩。</li>
+          <li><strong>③ ObservationPack · 外部记忆 + Pointer：</strong> 超过 10 KiB 的输出先归档，前两次请求发送全文；从第三次起改为稳定句柄、原始大小和 1 KB 头尾摘录，需要时再精确分页取回。</li>
+          <li><strong>④ Evidence-Preserving Reducer · 委派阅读：</strong> 低价模型从至少 4 KiB 的构建 / 测试日志中提取证据；确定性验证 schema、hash、exit status 与 exact quote。验证失败、疑似凭据或未缩短时退回原文。</li>
+        </ul>
 
         <p>Reducer 先处理工具结果，ObservationPack 再决定投影到主模型 Context 的形式；后者识别已经验证的 Receipt 并跳过再次打包。文件读取和搜索结果不进入 Reducer，辅助模型只负责选证据，主 Agent 仍负责诊断和决策——也就是 <strong>delegate reading, not reasoning</strong>。</p>
 
-        <h3 class="subhead">机制不是越多越好：先看它们落在 Pareto Front 的什么位置</h3>
+        <h3 class="subhead">机制组合的 Pareto 工作点</h3>
 
         <p class="block-intro">论文同时报告两种工作点：SoL-Pi [Efficiency] 是固定四机制完整栈；SoL-Pi [Performance] 则在每个后端上选择平均分最高的单机制配置。前者追求最低绝对成本，后者追求最高任务分数，不能混成一个“最好版本”。</p>
 
@@ -473,7 +596,7 @@
           </figcaption>
         </figure>
 
-        <h3 class="subhead">跨基准：节省较稳定，能力代价并不总是可忽略</h3>
+        <h3 class="subhead">跨基准的效率与能力权衡</h3>
 
         <p>Terminal-Bench 4 的 63 个 CPU 任务上，Codex 与 Pi 都解出 18 个，SoL-Pi 只解出 15 个；与此同时，SoL-Pi 相对 Pi 的总模型成本低 26.3%，每个解出任务成本低 11.6%。这不是“同等能力纯降本”，而是明确的解题率—成本交换。IMO 2026 的 6 道 Lean 4 验证题中，SoL-Pi 与 Pi 都通过 3 道，SoL-Pi 总成本更低；Codex 通过 5 道，但总成本最高。</p>
 
@@ -575,36 +698,37 @@
       </section>
 
       <section class="chapter" id="s5">
-        <h2><span class="num">05</span>核心结论：Harness Evolution 是 Pareto 优化，而非机制堆叠</h2>
+        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
+<h3 class="subhead epistemic-heading">论文贡献</h3>
 
-        <p class="lead">论文最重要的实验结论不是“完整 SoL-Pi 赢了”，而是 Performance、Token 与 Cost 之间存在多目标权衡：完整栈更省，某些单机制配置却能同时降低成本并提高分数。</p>
+<p class="section-intro">论文最重要的实验结论不是“机制越多越好”。四项机制一起使用时成本最低，但某些单项机制反而取得更高分。方法的价值在于展示能力、Token 和费用之间的真实取舍。</p>
 
         <p>在 GPT-5.6 Sol 上，完整四机制栈相对 Pi 将 Token 流量降低 49.0%、成本降低 33.2%，但平均分从 44.833 降到 42.003；ObservationPack 单独使用则把平均分提高到 47.208，同时 Token 流量低 6.1%。在 Opus 5 上，Action Fusion 得到最高平均分 50.482，而 ObservationPack 得到最佳成本 / 得分 0.4899 美元。机制数量因此不是单调收益变量。</p>
 
-        <p>这意味着未来 Harness Auto-Research 不应寻找唯一“最佳 Harness”，而应搜索 Pareto Front：在给定能力下最低成本、在给定预算下最高性能，或在部署约束下最稳定的触发组合。论文的 Capability Gate + Efficiency Gate 已经体现这一思想，但最终完整栈仍是作者选定的效率工作点，不是对所有使用场景的普遍最优解。</p>
+        <p>因此，未来不应寻找一个适合所有场景的“最佳运行框架”，而应保留多种折中方案：能力相同时选成本更低的，预算固定时选得分更高的。论文已经用能力门槛和效率门槛体现这一思路，但作者选出的完整配置只代表一种偏重效率的选择。</p>
 
-        <p class="block-intro">如果把整篇论文再压缩一层，真正值得迁移的是下面三个大思想。它们分别回答研究对象、泛化来源和自进化产物三个问题，四个具体 Mechanism 则是这些思想的实例。</p>
+        <p class="block-intro">把全文再压缩一层，可以得到四个可迁移的判断。它们分别回答研究对象、泛化来源、改进产物和部署选择。</p>        <ul class="key-points">
+          <li><strong>运行系统也能被研究：</strong>模型和运行框架共同决定 Agent 的行为，因此工具、上下文和执行规则都可以成为优化对象。</li>
+          <li><strong>环境越多，越容易发现共性：</strong>从大量不同环境中寻找反复出现的问题，比在少量公开题目上反复调参更可能得到可迁移机制。</li>
+          <li><strong>执行记录可以改变系统：</strong>轨迹不只能整理成记忆或技能，还能转化为新的工具、上下文规则和结果处理方式。</li>
+          <li><strong>部署需要明确取舍：</strong>任务表现、Token 和费用必须一起比较，不能默认把所有机制全部开启。</li>
+        </ul>
 
-        <div class="cards">
-          <article class="card"><h3>AutoResearch(Agent System)</h3><p>Harness 与模型共同决定 Agent 行为，因此运行系统本身也应成为可观察、可修改、可验证的研究对象。</p></article>
-          <article class="card"><h3>Environment Scaling → Generalization</h3><p>从大量异质可执行环境中寻找 recurring pattern，比在少量公开题目上反复调参更可能得到可迁移机制。</p></article>
-          <article class="card"><h3>Trace → System Mechanism</h3><p>轨迹不仅能蒸馏成 Memory / Skill，还能编译成新的 Tool Primitive、Context Policy 与 Observation Protocol。</p></article>
-          <article class="card"><h3>Pareto-optimal Harness</h3><p>Performance、Token 与 Cost 必须联合优化；部署时应按预算和能力容差选择工作点，而不是默认全开。</p></article>
-        </div>
+        <div class="analysis"><strong>记忆主线：</strong>把运行系统作为研究对象；从多环境记录中找共性；把共性变成系统功能；按能力与成本选择部署方案。</div>
 
-        <div class="analysis"><strong>五个记忆关键词：</strong>Auto-Research Harness、Environment Scaling、Trace → System Mechanism、Pareto Optimization、Recursive Harness Improvement。</div>
+        <h3 class="subhead epistemic-heading">证据边界与局限</h3>
 
-        <h3 class="subhead">证据边界：论文展示了可行性，但还没有建立递归加速定律</h3>
-
-        <p>首先，Harness 只从 GPT-5.6 Sol 轨迹更新，Opus 5 上四个机制的触发率和强度普遍下降。尽管触发任务上的效率仍有改善，这表明机制何时启动与底层模型行为强相关。作者将多后端训练列为未来方向，而当前证据只能支持“在一个额外后端上初步迁移”。</p>
-
-        <p>其次，完整自动研究循环成本高，论文没有在固定预算下系统比较搜索广度与深度，也没有给出搜索本身的总计算成本与净回收期。搜索用了 535 个环境、3000+ 次运行和 6 万+ 次交互，但这些投入是否优于更小的人工工程团队或更窄的搜索空间，仍无对照实验。</p>
-
-        <p>再次，核心数值多为单次点估计。论文没有报告 EdgeBench 多随机种子方差或显著性；集群实验每种配置仅运行一次；API 成本还依赖 2026-08-17 的价格。因而复现时应同时记录任务得分、总 Token、缓存读写、模型价格、机制触发情况和失败回退，而不能只复核一张成本表。</p>
+        <ul class="key-points">
+          <li><strong>模型依赖：</strong>机制只由 GPT-5.6 Sol 轨迹开发，在 Opus 5 上触发率和强度下降；现有证据仅支持一个额外后端的初步迁移。</li>
+          <li><strong>搜索成本：</strong>535 个环境、3000+ 次运行和 6 万+ 次交互投入可观，但论文未给出固定预算下的广度—深度对照或净回收期。</li>
+          <li><strong>统计不确定性：</strong>EdgeBench 缺少多随机种子方差，集群配置只运行一次，成本还依赖特定日期价格；点估计不足以证明统计等价。</li>
+        </ul>
 
         <p class="block-intro">如果要把论文转成自己的 Harness 工程计划，最值得迁移的不是四个具体阈值，而是“可逆、可验证、可归因”的设计原则。优先测量浪费，再引入最小机制，并为压缩失败与信息需求保留明确退路。</p>
 
-        <div class="boundary">
+        
+
+<div class="boundary">
           <article>
             <h3>已被实验支持</h3>
 
@@ -625,39 +749,8 @@
         <p class="source-note">主要来源：Haozhe Liu 等，<em>SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</em>，arXiv:2609.20519v1，提交于 2026-09-17。本文依据论文 PDF、作者公开源码与项目页整理，未独立运行代码或复现实验；派生百分比均按论文表格点估计计算。</p><a class="back" href="#top">↑ 返回顶部</a>
       </section>
     </main>
-
-    <aside class="rail">
-      <div class="rail-card">
-        <h3>一句话概括</h3>
-
-        <p>在大量可验证环境中分析轨迹、提出并迭代 Harness Hypothesis，把 recurring pattern 变成兼顾能力与成本的通用系统机制。</p>
-      </div>
-
-      <div class="rail-card">
-        <h3>五个关键词</h3>
-
-        <ul>
-          <li>Auto-Research Harness</li>
-
-          <li>Environment Scaling</li>
-
-          <li>Trace → System Mechanism</li>
-
-          <li>Pareto Optimization</li>
-
-          <li>Recursive Harness Improvement</li>
-        </ul>
-      </div>
-
-      <div class="rail-card">
-        <h3>尚缺的证据</h3>
-
-        <p>与简单 Test-time Scaling 的严格等预算对照，以及搜索投入的总成本与净回收期。</p>
-      </div>
-    </aside>
   </div><script type="text/javascript">
 const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');addEventListener('scroll',()=>{const h=document.documentElement,d=h.scrollHeight-h.clientHeight;bar.style.width=`${d?Math.min(100,100*h.scrollTop/d):0}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
   </script>
-  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="SR-Agent 中文深度解读：如何用 UserSim、诊断记忆、受限动作空间与四阶段验证闭环安全地改进电商后排序策略。">
-  <title>SR-Agent：生产自进化的关键不是放权，而是限制动作空间｜论文精读</title>
+  <title>SR-Agent：受约束动作空间中的推荐策略自进化｜论文精读</title>
   <style>
     :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
@@ -17,53 +17,198 @@
     .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
     body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
     @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.flow{grid-template-columns:1fr}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.paper-figure.compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}}
-  </style>
+  
+
+    /* 2026-09 standardized research-report layout; original palette is retained. */
+    html{font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
+    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
+    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
+    .metric:nth-child(n+5){display:none}
+    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
+    .rail{display:none!important}
+    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
+    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
+    .chapter+.chapter{border-top:1px solid var(--line)}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
+    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
+    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
+    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
+    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
+    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+    .key-points>li strong{color:var(--ink)}
+    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
+    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
+    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
+    .analysis,.warning{box-shadow:none}
+    @media(max-width:820px){
+      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .layout{display:block;padding:14px 11px 54px}
+      main{border-radius:11px}
+      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
+      h1{font-size:clamp(27px,8.2vw,34px)}
+      h2{font-size:21px}
+      .section-intro,.lead{font-size:15.5px}
+    }
+    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+
+  
+
+    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
+    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
+    h2{margin-bottom:16px;padding-bottom:12px}
+    .subhead{margin:21px 0 8px}
+    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
+    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
+    .key-points{margin-bottom:14px}
+    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
+    .key-points>li::before{top:21px}
+    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
+    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
+    .paper-figure>a{padding:9px}
+    .paper-figure figcaption{padding:14px 18px 15px}
+    .table-wrap{margin:14px 0 8px}
+    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
+    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
+    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
+    .chapter>*:last-child{margin-bottom:0}
+    @media(max-width:820px){
+      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
+      .subhead{margin-top:18px}
+      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
+      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
+      .paper-figure{margin:14px 0 9px}
+      .paper-figure>a{padding:5px}
+    }
+
+    /* Collection typography contract: one Chinese-first face and stable body scale. */
+    html{font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    body{font-weight:400}
+    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
+    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
+    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+
+  
+/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
+:root{
+  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
+body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+body{font-size:15.5px;font-weight:400;line-height:1.84}
+.hero{background:
+  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
+  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
+  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
+.hero:after{opacity:.10;background-size:42px 42px}
+.hero-in{max-width:1240px;padding:52px 28px 42px}
+h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
+.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
+.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
+.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
+.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
+.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
+.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.chapter+.chapter{border-top:1px solid var(--line)}
+h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
+.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
+.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
+.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter .prose p{margin:0 0 13px}
+.block-intro{margin:18px 0 10px}
+.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
+.key-points{margin:10px 0 16px;padding:0;list-style:none}
+.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
+.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
+.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
+.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
+.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
+.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
+table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+.paper-figure,.figure{margin:16px 0}
+.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
+.rail{display:none!important}
+@media(max-width:820px){
+  .hero-in{padding:38px 18px 30px}
+  h1{font-size:clamp(31px,10vw,43px)}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .layout{display:block;padding:14px 10px 58px}
+  .layout>main{border-radius:13px}
+  .chapter{padding:23px 19px 27px}
+  h2{font-size:22px}
+  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
+  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
+  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
+}
+@media print{
+  .layout>main{border:0;box-shadow:none}
+  .chapter{padding:24px 0}
+}
+
+</style>
 </head>
 <body id="top">
   <div class="progress" aria-hidden="true"><span id="progress"></span></div>
   <header class="hero"><div class="hero-in">
     <div class="eyebrow">PAPER REVIEW · arXiv:2607.17719v2</div>
-    <h1>SR-Agent：生产自进化的关键不是放权，而是限制动作空间</h1>
+    <h1>SR-Agent：受约束动作空间中的推荐策略自进化｜论文精读</h1>
     <p class="subtitle"><span class="paper-name">SR-Agent: An Experience-Driven Agentic Framework for Post-Ranking Strategy Refinement in E-Commerce Recommendation</span>Hanchen Yang、Kaiwen Yang、Junpeng Zhuang、Yang He、Keting Cen、Bochao Liu、Zhongbo Sun、An Liu、Zhongteng Han、Chenyi Lei · Kuaishou · 2026-07-21</p>
     <div class="actions"><a class="action" href="https://arxiv.org/abs/2607.17719v2" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/37-sr-agent/paper.pdf" target="_blank">本地 PDF ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-    <div class="metrics">
-      <div class="metric"><small>研究对象</small><b>后排序策略维护</b><span>冻结基础 Ranker，只改 Experience Controls</span></div>
-      <div class="metric"><small>闭环</small><b>Bad Case → Diagnosis → Action</b><span>三类记忆 + 四阶段验证</span></div>
-      <div class="metric"><small>线上实验</small><b>1 月 · 2.5% 流量</b><span>约 6,000 万用户 / 7,000 万商品</span></div>
-      <div class="metric"><small>业务结果</small><b>订单量 +0.707%</b><span>GMV +0.461%</span></div>
-      <div class="metric"><small>体验结果</small><b>浏览深度 +0.342%</b><span>7 日点击类目 +0.482%</span></div>
-      <div class="metric"><small>成本</small><b>3,600 万 Tokens / 轮</b><span>仍需约 1% 抽检与上线前人工审核</span></div>
-    </div>
+    <div class="metrics"><div class="metric"><small>研究对象</small><b>后排序策略维护</b><span>冻结基础 Ranker，只改 Experience Controls</span></div><div class="metric"><small>闭环</small><b>Bad Case → Diagnosis → Action</b><span>三类记忆 + 四阶段验证</span></div><div class="metric"><small>线上实验</small><b>1 月 · 2.5% 流量</b><span>约 6,000 万用户 / 7,000 万商品</span></div><div class="metric"><small>业务结果</small><b>订单量 +0.707%</b><span>GMV +0.461%</span></div></div>
   </div></header>
 
   <div class="layout">
     <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
-      <li><a href="#s1">01 为什么静态策略必然陈旧</a></li><li><a href="#s2">02 从感知缺陷到可操作诊断</a></li><li><a href="#s3">03 受限动作空间与验证闭环</a></li><li><a href="#s4">04 线上收益、检测与效率证据</a></li><li><a href="#s5">05 安全边界与未证实部分</a></li>
+      <li><a href="#s1">01 · 论文概览</a></li><li><a href="#s2">02 · 研究背景与问题定义</a></li><li><a href="#s3">03 · 方法与技术路线</a></li><li><a href="#s4">04 · 实验设计与结果分析</a></li><li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
     </ol></nav>
 
     <main>
-      <section class="chapter" id="s1">
-        <h2><span class="num">01</span>静态后排序策略的问题不是写得不好，而是环境一定会把它写旧</h2>
-        <p class="lead">SR-Agent 研究的是一个经常被推荐模型论文忽略的运维层：最终列表里的类目、店铺、价格带、相似度与曝光规则，怎样在商品和用户状态持续变化时被发现、诊断并安全修正。</p>
-        <p>工业推荐不能只优化单品点击或购买概率。每件商品都“相关”，列表仍可能充斥视觉近似、功能等价或重复曝光的选择，让用户难以探索。后排序策略以低延迟、可解释和易部署见长，能通过阈值、配额、相似抑制与曝光上限修正最终列表，因此在大规模系统中很常见。</p>
-        <p>但这些策略依赖历史类目、商品关系、embedding 与人工阈值。商品会不断上新、下架、改价、换图或改标题；用户对相似商品的容忍度又随意图、会话阶段和近期曝光变化。同一组商品有时是有价值的比较，有时是令人疲劳的重复。静态配置不是偶尔失效，而是会随着环境变化系统性失配。</p>
-        <p>传统修正链路需要运营或产品抽查页面、专家定位原因、算法工程师把观察翻译成阈值或类目修改，再次人工验证和上线。慢的根源并非单一步骤，而是 case-level 观察无法稳定转化为可复用诊断，诊断又没有受治理的路径变成生产动作。</p>
-        <div class="thesis-line">论文的概念贡献是把“后排序维护”重新表述为受限控制问题。<span>Agent 负责发现与归纳，动作空间和验证门负责决定它能改变什么。</span></div>
-        <p class="block-intro">与相邻工作相比，SR-Agent 不是更通用，而是更窄。它用表达能力换来了可审计性和生产安全。</p>
-        <div class="cards">
-          <article class="card"><h3>重排 / DPP / MMR</h3><p>研究如何生成更好的多样化列表，通常不解决策略上线后如何从真实坏例中持续维护。</p></article>
-          <article class="card"><h3>LLM User Simulator</h3><p>生成偏好、反馈或交互轨迹，可做离线评估；但通常不会把缺陷直接翻译成可部署策略修改。</p></article>
-          <article class="card"><h3>通用推荐研发 Agent</h3><p>能改模型、目标或代码，搜索空间更大；SR-Agent 则固定 Ranker，只在后排序层做类型化调整。</p></article>
-          <article class="card"><h3>SR-Agent</h3><p>把用户视角检查、原因诊断、记忆积累、受限动作与真实 A/B 串成持续运维闭环。</p></article>
-        </div>
+            <section class="chapter" id="s1">
+        <h2><span class="num">01</span>论文概览</h2>
+
+<p class="section-intro">SR-Agent 用于持续维护电商推荐的后排序规则。系统先从有问题的推荐页面中找出原因，再从一组预先批准的动作中提出修改、验证效果并上线。生产安全主要来自“只允许改有限的内容”。</p>
+
+        <h3 class="subhead">核心结论</h3>
+        <ul class="key-points">
+          <li><strong>研究对象：</strong>系统优化的是类目、店铺、价格带、相似度和曝光等后排序规则，不修改已经冻结的排序模型参数。</li>
+          <li><strong>核心方法：</strong>系统依次完成坏例发现、原因诊断、历史策略检索和候选验证，并用人工审核与线上 A/B 测试保留最终控制权。</li>
+          <li><strong>主要结论：</strong>窄动作空间带来可审计的线上增益与效率提升，同时也限制了对新特征、新目标和跨阶段问题的表达能力。</li>
+        </ul>
       </section>
 
       <section class="chapter" id="s2">
-        <h2><span class="num">02</span>先把“看着不舒服”拆成证据，再把证据压成可操作原因</h2>
-        <p class="lead">UserSim 与 Analysis Agent 被刻意分开：前者回答“有没有体验缺陷”，后者回答“当前策略为什么没拦住、最小应该改哪里”。</p>
-        <p>UserSim 并不模拟完整未来行为，而是近似用户如何感知已经展示的列表与会话。Exposure Profiler 找重复曝光和类目、店铺、价格带集中；Relation Extractor 识别视觉、语义、功能替代或互补关系，尤其补足类目标签遗漏；Experience Evaluator 再结合用户意图、近期行为和曝光历史，判断这些关系是有用比较还是冗余、同质化与疲劳。</p>
-        <p>输出被写成结构化 Bad Case：缺陷类型、涉及商品、三类证据与置信度。Analysis Agent 不直接接受单个判断，而是按缺陷、商品/类目、证据模式和场景聚类，从“共同现象”到“策略遗漏原因”再到“最小作用域与修正方向”逐层收窄。可能原因包括信号缺失、分组陈旧、阈值失准、曝光控制不足或容忍度与用户上下文不匹配。</p>
-        <p>三类记忆对应不同抽象层级：Bad-Case Memory 保存可重测的原始证据；Diagnosis Memory 保存跨案例的失败模式；Strategy Memory 保存提案、验证结果、上线或回滚状态。这样一次失败不会只留下“没通过 A/B”，而能在下次相似诊断时作为负面先例被检索。</p>
+        <h2><span class="num">02</span>研究背景与问题定义</h2>
+
+<h3 class="subhead">问题背景与相邻方法</h3>
+<p class="section-intro">SR-Agent 研究的是一个经常被推荐模型论文忽略的运维层：最终列表里的类目、店铺、价格带、相似度与曝光规则，怎样在商品和用户状态持续变化时被发现、诊断并安全修正。 以下从问题成因、既有方法缺口与论文假设三个层面界定研究问题。</p>
+        <ul class="key-points">
+          <li><strong>列表级问题：</strong>单品都相关时，最终列表仍可能出现视觉近似、功能等价或重复曝光；后排序用阈值、配额和相似抑制修正整体体验。</li>
+          <li><strong>策略陈旧：</strong>商品、关系和用户容忍度持续变化，使固定类目、embedding 与阈值从偶发失效演变为系统性失配。</li>
+          <li><strong>人工链路：</strong>案例观察、原因诊断、规则修改、复核和上线依赖多角色串行交接，且 case-level 经验难以稳定沉淀为可复用策略。</li>
+        </ul>
+        <div class="thesis-line">论文的概念贡献是把“后排序维护”重新表述为受限控制问题。<span>Agent 负责发现与归纳，动作空间和验证门负责决定它能改变什么。</span></div>
+        <p class="block-intro">与相邻工作相比，SR-Agent 不是更通用，而是更窄。它用表达能力换来了可审计性和生产安全。</p>        <ul class="key-points">
+          <li><strong>重排 / DPP / MMR：</strong> 研究如何生成更好的多样化列表，通常不解决策略上线后如何从真实坏例中持续维护。</li>
+          <li><strong>LLM User Simulator：</strong> 生成偏好、反馈或交互轨迹，可做离线评估；但通常不会把缺陷直接翻译成可部署策略修改。</li>
+          <li><strong>通用推荐研发 Agent：</strong> 能改模型、目标或代码，搜索空间更大；SR-Agent 则固定 Ranker，只在后排序层做类型化调整。</li>
+          <li><strong>SR-Agent：</strong> 把用户视角检查、原因诊断、记忆积累、受限动作与真实 A/B 串成持续运维闭环。</li>
+        </ul>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>方法与技术路线</h2>
+
+<h3 class="subhead">坏例诊断与证据压缩</h3>
+<p class="section-intro">UserSim 与 Analysis Agent 被刻意分开：前者回答“有没有体验缺陷”，后者回答“当前策略为什么没拦住、最小应该改哪里”。 以下按总体流程、关键机制与实现约束说明技术路线。</p>
+        <ul class="key-points">
+          <li><strong>体验证据：</strong>UserSim 近似用户对当前列表的感知；Profiler、Relation Extractor 与 Evaluator 分别定位集中曝光、商品关系及其上下文价值。</li>
+          <li><strong>结构化坏例：</strong>Bad Case 记录缺陷、商品、证据与置信度；Analysis Agent 再按场景和证据聚类，逐层收窄到最小修正范围。</li>
+          <li><strong>分层记忆：</strong>Bad-Case Memory 保存原始证据，Diagnosis Memory 保存失败模式，Strategy Memory 保存提案、验证与回滚状态。</li>
+        </ul>
         <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>从展示列表到安全上线</span></div><a href="assets/paper-figures/37-sr-agent/framework.png" target="_blank"><img src="assets/paper-figures/37-sr-agent/framework.png" alt="SR-Agent 中固定推荐模型、UserSim、Analysis Agent、受限策略 Harness、三类记忆与四阶段 Reward Pipeline"></a><figcaption><strong>推理层开放，执行层封闭</strong><p>UserSim 与 Analysis Agent 可以做语义判断和跨案例归纳；真正影响线上展示的 Harness 只能从预定义动作空间选参数，并依次通过坏例重测、历史流量重放、人工审核与线上 A/B。</p><p class="figure-reading"><b>阅读要点：</b>系统安全并非来自 LLM 足够谨慎，而是来自“模型不能改代码、不能越权扩展动作、不能绕过验证”。自进化发生在记忆引导的提案选择，不发生在安全边界本身。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/abs/2607.17719v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
         <p class="block-intro">去掉模块名后，本质是一条从不可直接执行的主观信号，到可审计控制变量的编译链。每一步都降低自由度，也丢失一部分问题覆盖。</p>
         <div class="shift">
@@ -71,13 +216,11 @@
           <article><small>诊断层</small><h3>策略失配模式</h3><p>聚类多例，归因到信号、分组、阈值、曝光或上下文容忍度。</p></article>
           <article><small>控制层</small><h3>白名单动作</h3><p>只在授权范围内改阈值、抑制强度、曝光上限或类目映射。</p></article>
         </div>
-      </section>
 
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>“自进化”的护城河：LLM 不能修改安全边界</h2>
-        <p class="lead">论文最成熟的工程判断，是不用一个自由 Agent 直接写生产策略，而用 Harness 把它限制在四类带步长、范围和白名单的动作里。</p>
-        <p>四类动作分别是：关系阈值调整，视觉/语义/替代关系每次只允许在 ±0.15 内按 0.01 移动；冗余抑制强度对授权商品组在 ±0.50 内按 0.05 移动；曝光限制只可选择预配置的维度、时间窗与上限；类目纠正只能对授权节点执行 merge、split 或 reassign。LLM 不能生成 serving code、改模型目标、访问未授权作用域或创造新操作。</p>
-        <p>对每个诊断，Harness 从 Strategy Memory 检索相似先例，生成少量候选，并由确定性 validator 检查字段、参数范围、作用域和策略版本。连续参数可在方向与范围兼容时合并并裁剪；冲突修改和类目操作升级给策略 Owner。固定安全封套不学习，只有“在什么诊断下优先提出什么候选”随历史 reward 变化。</p>
+        <h3 class="subhead">受约束策略自进化</h3>
+<p class="block-intro">论文最成熟的工程判断，是不用一个自由 Agent 直接写生产策略，而用 Harness 把它限制在四类带步长、范围和白名单的动作里。</p>
+        <p>系统只允许四类受控修改：调整关系阈值、改变冗余抑制强度、限制曝光，以及修正类目。每类动作都有固定步长、范围和白名单。大模型不能直接生成线上代码、修改模型目标、访问未授权范围或创造新操作。</p>
+        <p>每次诊断后，系统先从策略记忆中查找相似案例，再生成少量候选。固定校验器会检查字段、参数范围、作用域和版本；冲突修改与类目操作必须交给负责人审核。安全边界始终固定，系统只学习“遇到哪类问题时优先提出哪种候选”。</p>
         <div class="table-wrap"><table><caption>SR-Agent 的类型化动作空间</caption><thead><tr><th>动作</th><th>参数</th><th>允许域</th><th>解决的失配</th></tr></thead><tbody>
           <tr><td>关系阈值调整</td><td>关系 r；Δτ</td><td>visual / semantic / substitute；±0.15，步长 0.01</td><td>相似或替代关系识别过松/过严</td></tr>
           <tr><td>冗余抑制调整</td><td>授权组 g；Δλ</td><td>±0.50，步长 0.05</td><td>关系识别正确但抑制力度不合适</td></tr>
@@ -91,8 +234,10 @@
       </section>
 
       <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验：线上指标一致为正，效率显著提升，但检测证据更像精度审计</h2>
-        <p class="lead">最强证据来自一个月线上 A/B：控制组保留人工配置策略，实验组冻结基础 Ranker，仅允许 SR-Agent 调整受限后排序策略。体验与订单指标均为正向。</p>
+        <h2><span class="num">04</span>实验设计与结果分析</h2>
+
+<h3 class="subhead">线上效果与研发效率</h3>
+<p class="section-intro">最强证据来自一个月线上 A/B：控制组保留人工配置策略，实验组冻结基础 Ranker，仅允许 SR-Agent 调整受限后排序策略。体验与订单指标均为正向。 以下先说明评测设置，再结合主结果、消融与边界判断证据强度。</p>
         <p>实验使用 2.5% 流量，覆盖约 6,000 万用户和 7,000 万商品。论文报告点击类目数、浏览深度、点击数、订单量与 GMV 全部提升，说明系统并非用多样性换掉商业价值。由于论文没有给出置信区间、显著性阈值或逐指标方差，页面只将这些数字视为“论文报告的线上相对变化”，不额外推断统计强度。</p>
         <div class="table-wrap"><table><caption>一个月线上 A/B：相对控制组变化</caption><thead><tr><th>指标组</th><th>指标</th><th>相对变化</th></tr></thead><tbody>
           <tr><td>用户体验</td><td>人均点击类目数（1 日）</td><td class="positive">+0.425%</td></tr>
@@ -110,36 +255,40 @@
           <tr class="focus-row"><td>UserSim 有用户意图</td><td>142</td><td>95%</td><td>意图上下文提升审核通过率与候选数量</td></tr>
         </tbody></table></div>
         <p class="source-note">来源：论文 Table 3。“验证率”更接近抽查后的 precision-like 指标；论文未提供统一穷尽 ground truth 下的 recall。</p>
-        <p>运营效率方面，一轮使用 Claude Sonnet 4.6，所有调用合计约 3,600 万 tokens。检查 500 个案例由 7 天降为 50 分钟自动化加 1 个 reviewer-day；分析 500 个坏例由 2 天降为 90 分钟自动化加 1 个 reviewer-day；策略更新由 2 周降为 3 小时自动化加 1 个 reviewer-day；端到端从 2–3 周缩短为 3–5 个自然日。系统仍对约 1% 坏例和诊断随机抽检，并在上线前审核候选策略。</p>
+        <p>运营效率提升明显，但仍保留人工审核。检查 500 个案例从 7 天缩短到 50 分钟自动处理加 1 个审核人日；分析 500 个坏例从 2 天缩短到 90 分钟自动处理加 1 个审核人日；策略更新从 2 周缩短到 3 小时自动处理加 1 个审核人日。</p>
+        <p>端到端周期因此从 2–3 周降到 3–5 个自然日。一轮使用 Claude Sonnet 4.6，所有调用合计约 3,600 万 Token。系统仍随机抽检约 1% 的坏例和诊断，并在上线前审核候选策略。</p>
         <figure class="paper-figure compact"><div class="figure-head"><span>论文原图 · Figure 3</span><span>十次更新与一个月线上趋势</span></div><a href="assets/paper-figures/37-sr-agent/refinement-trend.png" target="_blank"><img src="assets/paper-figures/37-sr-agent/refinement-trend.png" alt="十次策略更新的坏例解决率从49.2%升至83.1%，同期点击和浏览深度相对基线总体上升"></a><figcaption><strong>坏例解决率上升，线上点击与浏览深度总体同向变化</strong><p>十次单策略更新中，坏例解决率由 49.2% 升至 83.1%；一个月内点击与浏览深度虽有波动，期末分别约 +0.55% 与 +0.34%。</p><p class="figure-reading"><b>谨慎解读：</b>两条趋势同时上升与机制叙事一致，但十次更新按时间顺序累积，缺少随机顺序或单更新隔离，因此不能从相关趋势判断每一轮提升都由记忆驱动的“自进化”造成。</p><div class="figure-source"><span>来源：论文 Figure 3</span><a href="https://arxiv.org/abs/2607.17719v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
       </section>
 
       <section class="chapter" id="s5">
-        <h2><span class="num">05</span>边界：安全来自缩小问题，泛化也因此受限</h2>
-        <p class="lead">SR-Agent 的优势与限制来自同一个选择：冻结 Ranker、固定动作 schema、保留人工审核。它证明了窄域自进化可安全落地，没有证明通用 Agent 可以自主重写推荐系统。</p>
-        <p>论文源文件中曾准备一段局限性说明，核心边界也能从正式方法直接推出：需要新特征、新目标、Ranker 更新或跨阶段重构的体验缺陷不在当前动作空间内；测试集中在快手电商场景，尚未展示跨平台、跨布局或跨领域迁移。动作白名单越安全，对环境新型失配的表达能力越有限。</p>
-        <p>第二，Bad Case 与 Diagnosis 的可靠性依赖 Claude Sonnet 4.6、用户画像、多模态商品信息与约 1% 人工抽检。若流量分布或模型版本变化，95% 的既有验证率未必维持。论文没有按缺陷类型、长尾商品或用户分群报告误报与漏报，也没有给出审核者一致性，难以判断错误是否集中在最关键场景。</p>
-        <p>第三，3,600 万 tokens / 轮是显著成本。论文报告了人力与墙钟时间，却未给出模型成本、商品图像处理、历史回放、A/B 流量机会成本与策略维护的完整账单。对高频运行系统，是否值得取决于坏例频率、每次更新带来的长期收益，以及同一策略可以摊销多久。</p>
-        <p>第四，线上 A/B 能证明完整系统在测试窗口有效，却不能完全隔离 UserSim、Diagnosis Memory、Strategy Memory 和四阶段门控各自贡献。十轮解决率上升也可能部分来自“先解决容易高频问题”的自然排序、累计策略作用或案例分布变化。最强可信结论是端到端方案有效；“经验记忆导致持续自我改进”的因果强度仍需专门消融。</p>
-        <div class="boundary">
-          <article><h3>最强反事实</h3><p>使用同一动作空间与四阶段验证，比较人工规则检索、无记忆 LLM、仅成功记忆、成功+失败记忆和完整 SR-Agent，控制候选数与 token 预算。</p></article>
-          <article><h3>检测决胜实验</h3><p>构建独立、穷尽标注的坏例集，按缺陷类型报告 precision、recall、校准度和审核一致性，确认额外 106 个候选不是只扩大主观定义。</p></article>
-          <article><h3>演化决胜实验</h3><p>对新一批诊断随机屏蔽 Strategy Memory，比较候选通过率、回归率与线上效果，直接测量历史 reward 对下一轮策略质量的增量。</p></article>
-          <article><h3>生命周期决胜测量</h3><p>把 token、图像处理、回放、人工审核、线上流量和回滚成本统一到每个成功策略与每单位长期 GMV/留存增益。</p></article>
-        </div>
+        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
+<h3 class="subhead epistemic-heading">论文贡献</h3>
+
+<p class="section-intro">SR-Agent 的优势与限制来自同一个选择：冻结 Ranker、固定动作 schema、保留人工审核。它证明了窄域自进化可安全落地，没有证明通用 Agent 可以自主重写推荐系统。 以下区分概念贡献、方法价值、主要局限与后续验证方向。</p>
+        
+
+<h3 class="subhead epistemic-heading">证据边界与局限</h3>
+<ul class="key-points">
+          <li><strong>动作空间：</strong>新特征、新目标、Ranker 更新或跨阶段重构不在白名单内；测试又集中于快手电商，安全边界同时限制了跨域表达能力。</li>
+          <li><strong>诊断可靠性：</strong>系统依赖 Claude Sonnet 4.6、多模态商品信息和约 1% 抽检；缺少分缺陷、长尾商品和用户群的误报漏报分析。</li>
+          <li><strong>完整成本：</strong>每轮 3,600 万 Token 之外，论文未报告图像处理、历史回放、A/B 机会成本和长期策略维护费用。</li>
+          <li><strong>因果归因：</strong>线上 A/B 支持端到端有效，却不能隔离 UserSim、两类记忆与四阶段门控；十轮上升也可能受问题排序和累计策略影响。</li>
+        </ul>
+        <h3 class="subhead epistemic-heading">独立研究启发</h3>
+        <p><strong>最强反事实：</strong>在相同动作空间、四阶段验证、候选数和 Token 预算下，比较人工规则检索、无记忆 LLM、仅成功记忆、成功与失败双记忆，以及完整 SR-Agent。<strong>检测检验：</strong>另建穷尽标注的坏例集，按缺陷类型报告 precision、recall、校准度和审核一致性。</p>
+        <p><strong>演化与成本：</strong>对新一批诊断随机屏蔽 Strategy Memory，比较候选通过率、回归率与线上效果，直接测量历史奖励的增量；同时把 Token、图像处理、回放、人工审核、线上流量和回滚统一折算到每个成功策略及长期业务收益。</p>
         <div class="verdict"><b>综合判断：</b>SR-Agent 最可迁移的结论是“生产自进化应把可变部分和不可变安全封套明确分开”。语义 Agent 扩大观察与归纳能力，类型化 Harness 把它压回可审计动作，真实 A/B 决定最终价值。论文的线上证据足以支持这一窄域闭环有用；对坏例召回、记忆的独立贡献、跨域泛化和完整成本仍需更强证据。</div>
-        <p class="source-note">来源与口径：基于 arXiv:2607.17719v2（2026-07-21）论文 PDF 与官方源文件整理；数值均来自论文表格和图。本文未独立复现快手线上实验；关于检测口径、组件归因和生命周期成本的内容为证据约束下的编辑性推断。</p>
+        
+
+<p class="source-note">来源与口径：基于 arXiv:2607.17719v2（2026-07-21）论文 PDF 与官方源文件整理；数值均来自论文表格和图。本文未独立复现快手线上实验；关于检测口径、组件归因和生命周期成本的内容为证据约束下的编辑性推断。</p>
         <a class="back" href="#top">↑ 返回顶部</a>
       </section>
     </main>
-
-    <aside class="rail"><div class="rail-card"><h3>阅读抓手</h3><ul><li>固定 Ranker，只让 Agent 修改受限后排序策略。</li><li>Bad Case、Diagnosis、Strategy 是三个不同抽象层。</li><li>线上 A/B 证明端到端效用，不等于各记忆模块被独立验证。</li></ul></div><div class="rail-card"><h3>三个关键词</h3><p>后排序维护 · 受限动作空间 · 四阶段 Reward Pipeline</p></div></aside>
   </div>
   <script>
     const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
     addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
     theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
   </script>
-  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
 </body>
 </html>

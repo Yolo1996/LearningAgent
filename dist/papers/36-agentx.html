@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="AgentX 中文深度解读：工业推荐研发如何从人工串行流程转向以真实 A/B 奖励、受约束代码执行与轨迹驱动 Harness 演化组成的闭环。">
-  <title>AgentX：把推荐研发的瓶颈从工程师工时迁移到实验治理｜论文精读</title>
+  <title>AgentX：面向推荐系统研发的闭环智能体优化｜论文精读</title>
   <style>
     :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
@@ -17,36 +17,176 @@
     .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
     body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
     @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.flow{grid-template-columns:1fr}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.paper-figure.compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}}
-  </style>
+  
+
+    /* 2026-09 standardized research-report layout; original palette is retained. */
+    html{font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
+    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
+    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
+    .metric:nth-child(n+5){display:none}
+    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
+    .rail{display:none!important}
+    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
+    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
+    .chapter+.chapter{border-top:1px solid var(--line)}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
+    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
+    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
+    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
+    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
+    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+    .key-points>li strong{color:var(--ink)}
+    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
+    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
+    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
+    .analysis,.warning{box-shadow:none}
+    @media(max-width:820px){
+      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .layout{display:block;padding:14px 11px 54px}
+      main{border-radius:11px}
+      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
+      h1{font-size:clamp(27px,8.2vw,34px)}
+      h2{font-size:21px}
+      .section-intro,.lead{font-size:15.5px}
+    }
+    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+
+  
+
+    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
+    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
+    h2{margin-bottom:16px;padding-bottom:12px}
+    .subhead{margin:21px 0 8px}
+    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
+    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
+    .key-points{margin-bottom:14px}
+    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
+    .key-points>li::before{top:21px}
+    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
+    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
+    .paper-figure>a{padding:9px}
+    .paper-figure figcaption{padding:14px 18px 15px}
+    .table-wrap{margin:14px 0 8px}
+    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
+    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
+    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
+    .chapter>*:last-child{margin-bottom:0}
+    @media(max-width:820px){
+      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
+      .subhead{margin-top:18px}
+      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
+      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
+      .paper-figure{margin:14px 0 9px}
+      .paper-figure>a{padding:5px}
+    }
+
+    /* Collection typography contract: one Chinese-first face and stable body scale. */
+    html{font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    body{font-weight:400}
+    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
+    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
+    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
+    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+
+  
+/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
+:root{
+  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
+body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+body{font-size:15.5px;font-weight:400;line-height:1.84}
+.hero{background:
+  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
+  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
+  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
+.hero:after{opacity:.10;background-size:42px 42px}
+.hero-in{max-width:1240px;padding:52px 28px 42px}
+h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
+.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
+.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
+.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
+.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
+.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
+.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.chapter+.chapter{border-top:1px solid var(--line)}
+h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
+.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
+.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
+.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter .prose p{margin:0 0 13px}
+.block-intro{margin:18px 0 10px}
+.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
+.key-points{margin:10px 0 16px;padding:0;list-style:none}
+.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
+.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
+.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
+.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
+.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
+.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
+table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+.paper-figure,.figure{margin:16px 0}
+.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
+.rail{display:none!important}
+@media(max-width:820px){
+  .hero-in{padding:38px 18px 30px}
+  h1{font-size:clamp(31px,10vw,43px)}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .layout{display:block;padding:14px 10px 58px}
+  .layout>main{border-radius:13px}
+  .chapter{padding:23px 19px 27px}
+  h2{font-size:22px}
+  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
+  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
+  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
+}
+@media print{
+  .layout>main{border:0;box-shadow:none}
+  .chapter{padding:24px 0}
+}
+
+</style>
 </head>
 <body id="top">
   <div class="progress" aria-hidden="true"><span id="progress"></span></div>
   <header class="hero"><div class="hero-in">
     <div class="eyebrow">PAPER REVIEW · arXiv:2606.26859v2</div>
-    <h1>AgentX：把推荐研发的瓶颈从工程师工时迁移到实验治理</h1>
+    <h1>AgentX：面向推荐系统研发的闭环智能体优化｜论文精读</h1>
     <p class="subtitle"><span class="paper-name">AgentX: Towards Agent-Driven Self-Iteration of Industrial Recommender Systems</span>Changxin Lao 等 62 位作者 · Kuaishou · arXiv v2，2026-06-26</p>
     <div class="actions"><a class="action" href="https://arxiv.org/abs/2606.26859v2" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/36-agentx/paper.pdf" target="_blank">本地 PDF ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-    <div class="metrics">
-      <div class="metric"><small>研究对象</small><b>推荐研发生产函数</b><span>从人工串行交接变为 Agent 闭环</span></div>
-      <div class="metric"><small>系统闭环</small><b>Idea → Code → A/B</b><span>轨迹再反哺 Harness</span></div>
-      <div class="metric"><small>生产部署</small><b>3 周 · 3 Workers</b><span>主 Feed + 生活服务</span></div>
-      <div class="metric"><small>漏斗结果</small><b>374 → 10 LR</b><span>端到端转化约 2.67%</span></div>
-      <div class="metric"><small>单 Worker 并发</small><b>12 vs 1.5</b><span>论文报告约 8×</span></div>
-      <div class="metric"><small>最深瓶颈</small><b>线上评估带宽</b><span>不是代码生成，而是实验准入与归因</span></div>
-    </div>
+    <div class="metrics"><div class="metric"><small>研究对象</small><b>推荐研发生产函数</b><span>从人工串行交接变为 Agent 闭环</span></div><div class="metric"><small>系统闭环</small><b>Idea → Code → A/B</b><span>轨迹再反哺 Harness</span></div><div class="metric"><small>生产部署</small><b>3 周 · 3 Workers</b><span>主 Feed + 生活服务</span></div><div class="metric"><small>漏斗结果</small><b>374 → 10 LR</b><span>端到端转化约 2.67%</span></div></div>
   </div></header>
 
   <div class="layout">
     <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
-      <li><a href="#s1">01 从自动化到生产函数重构</a></li><li><a href="#s2">02 四段闭环与真实奖励</a></li><li><a href="#s3">03 SGPO：让 Harness 可演化</a></li><li><a href="#s4">04 生产证据与漏斗解读</a></li><li><a href="#s5">05 归因、成本与可迁移边界</a></li>
+      <li><a href="#s1">01 · 论文概览</a></li><li><a href="#s2">02 · 研究背景与问题定义</a></li><li><a href="#s3">03 · 方法与技术路线</a></li><li><a href="#s4">04 · 实验设计与结果分析</a></li><li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
     </ol></nav>
 
     <main>
-      <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文真正重构的不是某个模型，而是研发的生产函数</h2>
-        <p class="lead">AgentX 的中心命题是：当提出想法、改生产代码、上线 A/B、读结果和沉淀经验都能成为可追踪的机器流程，推荐研发的上限便不再线性绑定工程师人数，而转向 Agent 能力、实验资源和治理质量。</p>
+            <section class="chapter" id="s1">
+        <h2><span class="num">01</span>论文概览</h2>
+
+<p class="section-intro">AgentX 把推荐系统研发改造成一条可追踪、可并行的机器流程，并以真实线上结果作为最终反馈。论文既关心系统能完成多少实验，也关心它能否从历史实验中改进自己的工作方式。</p>
+
+        <h3 class="subhead">核心结论</h3>
+        <ul class="key-points">
+          <li><strong>研究对象：</strong>论文改造的是从提出想法、编写代码、部署、A/B 测试到结果复盘的整条研发流程，而不是某一个推荐模型。</li>
+          <li><strong>核心方法：</strong>不同角色的 Agent 并行推进实验，线上指标和安全规则负责最终验收；系统只在受限范围内修改局部工作规则。</li>
+          <li><strong>主要结论：</strong>自动化显著扩大实验吞吐，但线上正向率、实验资源和治理质量成为新瓶颈；自进化的独立贡献仍需更强消融。</li>
+        </ul>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>研究背景与问题定义</h2>
+
+<h3 class="subhead">问题背景与相邻方法</h3>
+<p class="section-intro">AgentX 的中心命题是：当提出想法、改生产代码、上线 A/B、读结果和沉淀经验都能成为可追踪的机器流程，推荐研发的上限便不再线性绑定工程师人数，而转向 Agent 能力、实验资源和治理质量。 以下从问题成因、既有方法缺口与论文假设三个层面界定研究问题。</p>
         <p>传统工业推荐迭代横跨数据分析、特征与模型开发、部署、A/B 测试和归因复盘，周期以周计算。最稀缺的本应是高质量假设与失败解释，但工程师时间大量消耗在拉数、改配置、维护流水线和人工交接上。扩团队或增强底层平台，只是在同一串行流程上增加劳动力，并没有改变每个实验都必须由人贯穿的结构。</p>
-        <p>已有 LLM AutoML 从预定义流水线自动化，发展到能改代码、跑实验的 ML Engineering Agent，再到提出和验证研究问题的 Research Agent。然而工业推荐还有三道门槛：最终奖励来自延迟且受护栏约束的真实线上 A/B；生产系统包含十亿级样本、多目标与多业务线；单次任务结束后，系统还必须把执行轨迹变成下一次可复用的能力。</p>
+        <p>现有自动机器学习系统已经能改代码、跑实验，甚至提出研究问题。但工业推荐还要跨过三道门槛：真正的结果来自延迟且受安全约束的线上 A/B 测试；生产系统包含十亿级样本、多目标和多业务线；一次任务结束后，系统还要把经验变成下次可复用的能力。</p>
         <div class="thesis-line">AgentX 的单位产物不是一段代码，而是一条“可上线、可评估、可归因、可复用”的实验轨迹。<span>因此它更像研发操作系统，而不是更大的 Coding Agent。</span></div>
         <p class="block-intro">去掉论文品牌后，控制边界发生了三次移动。每次移动都会释放一种规模效应，同时把瓶颈推到下一层。</p>
         <div class="shift">
@@ -57,35 +197,38 @@
         <div class="warning"><b>概念边界：</b>论文把“自动化研发闭环”与“自我进化”放在同一系统叙事里，但两者证据负担不同。生产漏斗能证明自动化闭环有用；要证明持续增益来自 Harness 演化，还需把并行化、模板成熟、人工运维与 SGPO 的贡献拆开。</div>
       </section>
 
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>四段闭环：真实奖励比更自由的 Agent 更重要</h2>
-        <p class="lead">AgentX 将一次工业实验拆成 Brainstorm、Developing、Evaluation 与 Harness Evolution。每一段都用确定性检查、知识库或人工门控收窄 LLM 的自由度。</p>
-        <p>Brainstorm Agent 不追求生成最多创意，而是把模糊业务意图压缩为少量可执行提案。它从历史 Experiment KB、系统结构与代码边界、实时数据分析和论文研究四类证据取材，并把候选分为 Ready-to-implement、Probe-first 和 Moonshot-backlog。被拒方向进入 avoid set，下一轮搜索剩余空间，避免反复改写同一想法。</p>
-        <p>Developing Agent 有在线策略和离线模型两条轨道。在线轨道用 schema 查询、DSL 检查、C++ 静态检查、默认关闭的 feature flag 与 dryrun 防止“代码能编译但语义错误”。离线轨道要求先声明因果机制与可观测量，再由确定性程序从训练日志抽取 AUC；即便指标上涨，只要因果链无法验证，也被标记为刹车信号，不写入成功知识。</p>
-        <p>Evaluation Agent 则把线上 A/B 当作权威奖励。它负责流量桶分配、灰度、统计方法选择与业务域护栏，并输出 KEEP、EXTEND 或 DISCARD。负结果会按阶段、目标、用户/内容分群与失败原因资产化，成为下一轮提案的禁区或待验证区域。这里最重要的设计不是自动读数，而是把“未上线”和“失败上线”都变成可查询的决策记忆。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Overall Framework</span><span>Agent 工作流与数据底座</span></div><a href="assets/paper-figures/36-agentx/workflow.png" target="_blank"><img src="assets/paper-figures/36-agentx/workflow.png" alt="AgentX 由 Brainstorm、Developing、Evaluation、Trajectory Memory、Data Layer 与 Monitoring Platform 组成的闭环"></a><figcaption><strong>三个业务 Agent 执行实验，第四层专门改进“如何执行”</strong><p>Brainstorm、Developing 与 Evaluation 把一个想法送到真实 A/B；Trajectory Memory 收集全程证据；数据层保存论文、代码样例、领域知识与实验记录；监控平台提供指标、追踪、告警与审计。</p><p class="figure-reading"><b>阅读要点：</b>A/B 成功不是唯一输出。失败路径返回 Trajectory Memory，随后既可约束业务搜索，也可用来修改子 Agent 的 Harness。系统的“复利”依赖这条回路是否能可靠区分环境失败、实现失败与假设失败。</p><div class="figure-source"><span>来源：论文 Overall Framework</span><a href="https://arxiv.org/abs/2606.26859v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
-        <p class="block-intro">四段闭环对应四种不同的失败，它们不能用同一个大模型自评解决。AgentX 的系统贡献恰恰在于按失败类型安排不同证据和准入门。</p>
-        <div class="cards">
-          <article class="card"><h3>提案失败：缺边界或证据</h3><p>用任务合同、系统知识、数据分析、历史实验与人工短名单约束，不让不成熟方向直接进入编码。</p></article>
-          <article class="card"><h3>实现失败：仓库事实不对</h3><p>属性、DSL、代码差异、指标抽取和平台故障尽量交给确定性工具，LLM 只负责需要判断的部分。</p></article>
-          <article class="card"><h3>上线失败：真实目标受损</h3><p>线上 A/B、业务域护栏和例外审查共同决定是否保留，不以离线分数或 Agent 自信替代。</p></article>
-          <article class="card"><h3>系统失败：重复犯同类错误</h3><p>把轨迹诊断成语义梯度，通过成对重放更新单个子 Agent 的规则，而非一次性重写整个系统。</p></article>
-        </div>
-      </section>
-
       <section class="chapter" id="s3">
-        <h2><span class="num">03</span>SGPO：自我进化不是自我改写，而是受控的局部系统优化</h2>
-        <p class="lead">AgentX 对 Harness 的定义非常保守：每次只修改一个子 Agent 的指令、校验规则、输出契约或工具纪律，其他模型、工具和总编排保持冻结。</p>
-        <p>SGPO-I 从会话轨迹抽取任务约束与失败诊断，把“缺少需求、步骤顺序错误、证据不足、交接合同破裂”等自然语言损失写成语义梯度，再生成局部 Harness 候选。新旧 Harness 在相同重放任务与相同量表下对比，只有分数提升且不破坏安全边界才接受。一次 Brainstorm 子 Agent 的五轮演化中，归一化重放分数从 75.15% 升至 98.00%，接受的修改包括任务合同显式化、证据索引、候选质量 schema、拒绝原因记录与可评估交接。</p>
-        <p>SGPO-II 面向长程编码，把证据源换成历史已合并的代码变更。系统隐藏落地 patch，让 Developing Agent 从需求重新实现，再按语义正确性、需求覆盖、文件覆盖、默认安全与代码风格评分。论文案例中，一个异步多文件模块从 2.60 提升到 4.90；同时也保留了 3.67 降至 1.80 的回归案例，说明 Judge 会误诊，可靠性来自成对重放的拒绝门，而不是评估器永不出错。</p>
+        <h2><span class="num">03</span>方法与技术路线</h2>
+
+<h3 class="subhead">角色化研发闭环</h3>
+<p class="section-intro">AgentX 把一次工业实验拆成提出想法、开发实现、线上评估和运行框架改进四个阶段。每个阶段都用固定检查、知识库或人工审核限制大模型的自由度。</p>
+        <ul class="key-points">
+          <li><strong>提案生成：</strong>Brainstorm Agent 将业务意图压缩为少量可执行提案，并结合实验知识、代码边界、实时数据和论文证据分级；被拒方向进入 avoid set。</li>
+          <li><strong>双轨开发：</strong>在线轨道用 schema、DSL、静态检查与 feature flag 控制代码风险；离线轨道要求先声明因果机制，再由确定性程序读取训练指标。</li>
+          <li><strong>线上验收：</strong>Evaluation Agent 以线上 A/B 和业务护栏输出 KEEP、EXTEND 或 DISCARD，并把未上线与失败上线原因写入决策记忆。</li>
+        </ul>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Overall Framework</span><span>Agent 工作流与数据底座</span></div><a href="assets/paper-figures/36-agentx/workflow.png" target="_blank"><img src="assets/paper-figures/36-agentx/workflow.png" alt="AgentX 由 Brainstorm、Developing、Evaluation、Trajectory Memory、Data Layer 与 Monitoring Platform 组成的闭环"></a><figcaption><strong>三个业务 Agent 执行实验，第四层专门改进“如何执行”</strong><p>Brainstorm、Developing 与 Evaluation 把一个想法送到真实 A/B；Trajectory Memory 收集全程证据；数据层保存论文、代码样例、领域知识与实验记录；监控平台提供指标、追踪、告警与审计。</p><p class="figure-reading"><b>阅读要点：</b>A/B 成功不是唯一输出。失败路径返回 Trajectory Memory，随后既可约束业务搜索，也可用来修改子 Agent 的 Harness。系统的“复利”依赖这条回路是否能可靠区分环境失败、实现失败与假设失败。</p><div class="figure-source"><span>来源：论文 Overall Framework</span><a href="https://arxiv.org/abs/2606.26859v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="block-intro">四段闭环对应四种不同的失败，它们不能用同一个大模型自评解决。AgentX 的系统贡献恰恰在于按失败类型安排不同证据和准入门。</p>        <ul class="key-points">
+          <li><strong>提案失败：缺边界或证据：</strong> 用任务合同、系统知识、数据分析、历史实验与人工短名单约束，不让不成熟方向直接进入编码。</li>
+          <li><strong>实现失败：仓库事实不对：</strong> 属性、DSL、代码差异、指标抽取和平台故障尽量交给确定性工具，LLM 只负责需要判断的部分。</li>
+          <li><strong>上线失败：真实目标受损：</strong> 线上 A/B、业务域护栏和例外审查共同决定是否保留，不以离线分数或 Agent 自信替代。</li>
+          <li><strong>系统失败：重复犯同类错误：</strong> 把轨迹诊断成语义梯度，通过成对重放更新单个子 Agent 的规则，而非一次性重写整个系统。</li>
+        </ul>
+
+        <h3 class="subhead">SGPO 与受控局部优化</h3>
+<p class="block-intro">AgentX 对 Harness 的定义非常保守：每次只修改一个子 Agent 的指令、校验规则、输出契约或工具纪律，其他模型、工具和总编排保持冻结。</p>
+        <p>SGPO-I 根据会话记录找出缺少需求、顺序错误、证据不足或交接失败等问题，再生成局部修改。新旧版本在相同任务和评分标准下重放，只有得分提高且不破坏安全边界，修改才会被接受。论文案例中，五轮改进让重放分数从 75.15% 升至 98.00%。</p>
+        <p>SGPO-II 用同样思路改进长程编码。系统隐藏历史上已经合并的补丁，让开发 Agent 根据需求重新实现，再从正确性、需求覆盖、文件覆盖、安全性和代码风格五方面评分。案例既有从 2.60 升到 4.90 的改进，也有从 3.67 降到 1.80 的回归。这说明评估器会误判，可靠性来自“新版本不如旧版本就拒绝”的成对重放机制。</p>
         <div class="flow" aria-label="SGPO 演化流程"><div>① 抽样轨迹<br>构建任务量表</div><div>② 诊断失败<br>形成语义梯度</div><div>③ 局部编辑<br>生成候选 Harness</div><div>④ 成对重放<br>提升且安全才接受</div></div>
         <p>论文还把“如何研究”与“研究什么”分成两条进化轴。SGPO 修改 Agent 的工作方式；模型研究漏斗则持续改变搜索空间：先复现论文，再做模块消融，最后跨论文组合。失败若推翻论文核心前提，会剪掉整条分支；经至少两次独立运行与对抗审查确认的经验，才进入 playbook 或 anti-pattern。</p>
         <figure class="paper-figure compact"><div class="figure-head"><span>论文原图 · Figure 11</span><span>SGPO 非单调演化</span></div><a href="assets/paper-figures/36-agentx/sgpo-sensitivity.png" target="_blank"><img src="assets/paper-figures/36-agentx/sgpo-sensitivity.png" alt="四组 SGPO 运行中三个 Brainstorm 子模块随轮次变化的分数曲线"></a><figcaption><strong>SGPO 更像带准入门的搜索，而不是保证单调的梯度下降</strong><p>不同子 Agent 会出现持续增长、提前饱和、短期回退和噪声恢复。每轮都会重采轨迹并生成新量表，因此候选分数波动是系统属性。</p><p class="figure-reading"><b>谨慎解读：</b>图证明“候选演化路径有噪声”，也说明门控必要；它不证明接受后的生产 Harness 在未来分布上必然单调变好，因为重放任务仍来自历史轨迹池。</p><div class="figure-source"><span>来源：论文 Figure 11</span><a href="https://arxiv.org/abs/2606.26859v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
       </section>
 
       <section class="chapter" id="s4">
-        <h2><span class="num">04</span>生产证据：吞吐显著扩大，但最终瓶颈仍是线上正向率</h2>
-        <p class="lead">三周部署证明 AgentX 能把大量提案送过实现与上线；更值得注意的是漏斗在哪里收缩：代码并不是主要障碍，只有 9.9% 的已上线实验成为正向 Launchable Result。</p>
+        <h2><span class="num">04</span>实验设计与结果分析</h2>
+
+<h3 class="subhead">生产实验与吞吐结果</h3>
+<p class="section-intro">三周部署证明 AgentX 能把大量提案送过实现与上线；更值得注意的是漏斗在哪里收缩：代码并不是主要障碍，只有 9.9% 的已上线实验成为正向 Launchable Result。 以下先说明评测设置，再结合主结果、消融与边界判断证据强度。</p>
         <p>生产研究由 3 个 AgentX Worker 在快手主 Feed 与生活服务两条业务线上并发运行。374 个想法中，106 个通过提案审核，100 个完成编码与上线，最终 10 个达到可全量发布的 LR。主 Feed 贡献 8 个，生活服务贡献 2 个。论文将结果统一记录在追加式事件日志中，以固定快照计算相邻转化率。</p>
         <div class="table-wrap"><table><caption>三周生产漏斗：每一步都以上一步成功为条件</caption><thead><tr><th>业务场景</th><th>Ideas</th><th>Idea Pass</th><th>Code & Launch</th><th>Positive Eval.</th><th>LR</th></tr></thead><tbody>
           <tr><td>Main Feed</td><td>361</td><td>27.7%</td><td>95.0%</td><td>8.4%</td><td>8</td></tr>
@@ -106,30 +249,33 @@
       </section>
 
       <section class="chapter" id="s5">
-        <h2><span class="num">05</span>更高阶判断：这篇论文证明了闭环可行，却尚未隔离“复利来自哪里”</h2>
-        <p class="lead">AgentX 最强的贡献是生产系统与真实奖励证据；最弱的环节是自我进化的因果归因。系统同时改变了并行度、知识库、验证工具、人工角色与 Harness，很难从三周曲线辨认每一部分的独立贡献。</p>
-        <p>论文没有单列 Limitations，但证据中已经暴露边界。首先，AgentX 与 Engineer 的比较不是随机同期对照：人类想法更少但经过预筛，AgentX 以大量自动候选换取更多最终 LR，任务分布和选择机制并不对齐。其次，10 个 LR 与业务增益证明系统产出有价值，却不能说明如果保留同样的并行平台、知识库和确定性检查，只冻结 Harness，结果会差多少。</p>
-        <p>第三，真实线上奖励也不是无偏真理。A/B 资源冲突导致大量合理提案根本无法测试，护栏与人工例外审查决定哪些效用可以进入奖励，短期 App 时长或收入也未必代表长期生态价值。系统没有消除实验治理，而是把治理从工程师逐项执行迁移到流量准入、指标设计、归因审查与知识资产质量上。</p>
-        <p>第四，论文强调吞吐可随 Worker 数近线性增长，但没有报告完整 LLM token、训练算力、A/B 机会成本、工程维护和人工审查负担。对工业系统而言，边际部署收益与完整生命周期回报必须分开：代码自动化可能便宜，线上实验带宽与错误机会成本却最昂贵。不同公司若没有成熟的流量平台、可查询仓库规范和统一事件日志，难以直接复制这条曲线。</p>
-        <div class="boundary">
-          <article><h3>最强反事实</h3><p>同一生产平台、同样 3 个 Worker 与任务池，比较固定 Harness、仅记忆更新、SGPO 更新三组；再与拥有相同并行工具的人类团队对齐实验资源。</p></article>
-          <article><h3>归因决胜实验</h3><p>冻结 Brainstorm/Developing/Evaluation 的其余部分，只随机切换某一子 Agent 是否采用 SGPO 接受的更新，比较后续盲测任务与真实漏斗。</p></article>
-          <article><h3>成本决胜测量</h3><p>报告每个候选、每个 LR 和每单位线上增益的模型调用、计算、人工审查、流量占用与失败恢复成本，建立完整 ROI 曲线。</p></article>
-          <article><h3>治理决胜问题</h3><p>当线上目标、多业务护栏与长期用户价值冲突时，谁定义奖励？Agent 规模越大，指标与准入政策越接近系统真正的“模型”。</p></article>
-        </div>
+        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
+<h3 class="subhead epistemic-heading">论文贡献</h3>
+
+<p class="section-intro">AgentX 最强的贡献是生产系统与真实奖励证据；最弱的环节是自我进化的因果归因。系统同时改变了并行度、知识库、验证工具、人工角色与 Harness，很难从三周曲线辨认每一部分的独立贡献。 以下区分概念贡献、方法价值、主要局限与后续验证方向。</p>
+        
+
+<h3 class="subhead epistemic-heading">证据边界与局限</h3>
+<ul class="key-points">
+          <li><strong>对照局限：</strong>AgentX 与 Engineer 不是随机同期对照，候选数量与筛选机制也不一致；现有结果不能隔离并行平台、知识库和 Harness 演化的贡献。</li>
+          <li><strong>奖励代理：</strong>A/B 准入、护栏和人工例外决定哪些效用进入奖励，短期时长或收入也未必代表长期生态价值；治理只是被迁移而非消除。</li>
+          <li><strong>生命周期成本：</strong>论文未统一报告 LLM Token、训练算力、A/B 机会成本、工程维护与人工审查；实验带宽可能比代码自动化更昂贵。</li>
+        </ul>
+        <h3 class="subhead epistemic-heading">独立研究启发</h3>
+        <p><strong>最强反事实：</strong>在同一生产平台、3 个 Worker、任务池和总预算下，比较固定 Harness、仅记忆更新与 SGPO 更新，并与拥有相同并行工具的人类团队对齐实验资源。<strong>归因检验：</strong>冻结其余环节，只随机切换某一子 Agent 是否采用 SGPO 接受的更新，再比较后续盲测任务与真实漏斗。</p>
+        <p><strong>成本与治理：</strong>完整 ROI 应同时计入模型调用、计算、人工审查、流量占用与失败恢复，并报告每个候选、每个 LR 和每单位线上增益的成本。当短期线上目标、多业务护栏与长期用户价值冲突时，奖励和准入政策本身就是系统最重要的治理层。</p>
         <div class="verdict"><b>综合判断：</b>AgentX 把 Agent 研究从沙箱任务推进到真实、延迟、受约束的工业闭环，这是比单个模型指标更重要的贡献。它最可迁移的原则是“确定性事实交给程序，语义判断交给 Agent，真实价值交给受治理的线上反馈”；但论文关于自我进化和超线性成熟的因果表述，应在固定平台与对照 Harness 下进一步验证。</div>
-        <p class="source-note">来源与口径：基于 arXiv:2606.26859v2（2026-06-26）论文 PDF、附录与官方源文件整理；生产数字均按论文报告。本文未独立复现或审计快手内部日志；反事实、成本和归因部分为基于论文证据的编辑性推断。</p>
+        
+
+<p class="source-note">来源与口径：基于 arXiv:2606.26859v2（2026-06-26）论文 PDF、附录与官方源文件整理；生产数字均按论文报告。本文未独立复现或审计快手内部日志；反事实、成本和归因部分为基于论文证据的编辑性推断。</p>
         <a class="back" href="#top">↑ 返回顶部</a>
       </section>
     </main>
-
-    <aside class="rail"><div class="rail-card"><h3>阅读抓手</h3><ul><li>研究对象是研发生产函数，而非单个推荐模型。</li><li>真实 A/B 是奖励，流量与护栏是系统边界。</li><li>漏斗证明闭环效用，不自动证明 SGPO 的独立贡献。</li></ul></div><div class="rail-card"><h3>三个关键词</h3><p>工业研发闭环 · 真实线上奖励 · Harness 受控演化</p></div></aside>
   </div>
   <script>
     const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
     addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
     theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
   </script>
-  <script src="../library-nav.js?v=20260920-2" data-material-type="paper"></script>
 </body>
 </html>
