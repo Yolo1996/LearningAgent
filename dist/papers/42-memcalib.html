@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="《MemCalib》中文深度解读：把 Agent Memory 从检索正确性推进到逐条影响校准，解析 benchmark、MemCalib-RL 的反事实信用分配、实验边界与长程 Agent 启示。">
+  <title>记住不等于会用：Agent Memory 的真正难题是影响力校准｜论文精读</title>
+  <style>
+    :root{--bg:#f4f1ec;--surface:#fffefa;--surface-2:#f7f8fa;--ink:#192330;--muted:#647387;--line:#dcdad3;--blue:#3269ae;--purple:#7652a9;--green:#337d64;--amber:#a46a22;--red:#a74d4d;--bt:#edf4fb;--pt:#f4f0fb;--gt:#edf7f2;--at:#fff5e8;--shadow:0 12px 30px rgba(30,43,55,.06);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.9;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+    .progress{position:fixed;inset:0 0 auto;z-index:20;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green))}
+    .hero{color:#f6faff;background:radial-gradient(circle at 84% 10%,rgba(92,194,160,.21),transparent 30%),radial-gradient(circle at 13% 90%,rgba(118,82,169,.2),transparent 32%),linear-gradient(125deg,#13243d,#1d4061 58%,#47365f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e3;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1150px;margin:11px 0 0;font-size:clamp(31px,4.1vw,53px);line-height:1.15;letter-spacing:-.03em}.subtitle{max-width:1100px;margin:14px 0 0;color:#d8e1ec;font-size:15px;line-height:1.7}.paper-name{display:block;color:#fff;font-weight:760}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.23);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:11px;background:rgba(5,16,37,.3)}.metric small,.metric span{display:block;color:#b9c7d7;font-size:11px;line-height:1.45}.metric b{display:block;margin:4px 0;color:#fff;font-size:17px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:215px minmax(0,960px) 195px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}main,.chapter,.table-wrap{min-width:0}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-left-color:var(--blue);color:var(--blue);background:var(--bt);font-weight:750}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.68}.rail-card ul{margin:0;padding-left:17px}
+    .chapter{--accent:var(--blue);--tint:var(--bt);margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--surface) 155px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.33}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.36));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.bridge):not(.source-note):not(.callout):not(.verdict){max-width:810px;margin:0 0 14px;font-size:16px;line-height:1.92;text-indent:2em;text-align:justify}.bridge{max-width:810px;margin:20px 0 16px;color:#43546a;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:25px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .thesis{margin:18px 0;padding:17px 19px;border:1px solid #d6cbe8;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));font-size:18px;font-weight:770;line-height:1.62;text-align:center}.thesis span{display:block;margin-top:6px;color:var(--muted);font-size:12.5px;font-weight:520}.card-grid,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cbdbea;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d8cdeb;background:var(--pt)}.card:nth-child(4n+3){border-color:#c8e0d6;background:var(--gt)}.card:nth-child(4n){border-color:#ead7b9;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4b5c70;font-size:14px;line-height:1.72}.boundary article{border-color:#ead7b9;background:var(--at)}
+    .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow.seven{grid-template-columns:repeat(7,minmax(0,1fr))}.flow div{position:relative;display:grid;min-height:88px;padding:11px 8px;place-items:center;border:1px solid #cbdbea;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:735;line-height:1.48}.flow div:nth-child(3n+2){border-color:#d8cdeb;background:var(--pt)}.flow div:nth-child(3n){border-color:#c8e0d6;background:var(--gt)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.formula{margin:17px 0;padding:16px 18px;border:1px solid #d8cdeb;border-radius:12px;background:var(--pt);overflow-x:auto}.formula .eq{white-space:pre-wrap;text-align:center;font-size:15.5px;font-weight:720;line-height:1.8}.formula p{margin:8px 0 0;color:#584971;font-size:13px;line-height:1.72}
+    .paper-figure{margin:26px 0 12px;border:1px solid var(--line);border-radius:15px;background:#faf9f7;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ec;font-size:11px;font-weight:800}.paper-figure>a{display:flex;align-items:center;justify-content:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:780px;margin:auto;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.76}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--blue);background:var(--bt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11px}.figure-compact>a{padding:20px}.figure-compact img{max-width:870px}.subfigure-grid{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(360px,1.35fr);gap:12px;padding:14px;background:#fff}.subfigure{min-width:0;border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}.subfigure:last-child{grid-column:1/-1;max-width:640px;justify-self:center}.subfigure h4{margin:0;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);font-size:13px}.subfigure a{display:flex;align-items:center;justify-content:center;padding:8px;background:#fff}.subfigure img{display:block;width:100%;height:auto;max-height:none}.subfigure p{margin:0;padding:9px 12px 11px;color:#59687c;font-size:12.5px;line-height:1.62}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:17px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px}.table-wrap table{width:100%;min-width:720px;border-collapse:collapse;background:var(--surface);font-size:13.5px;line-height:1.62}caption{padding:12px 13px;color:var(--ink);background:#fafbfd;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#334d69;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:#eef5ff!important;font-weight:700}.danger{color:var(--red);font-weight:780}.safe{color:var(--green);font-weight:770}.source-note{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.72}.callout,.verdict{margin:16px 0;padding:14px 16px;border-left:4px solid var(--amber);border-radius:0 10px 10px 0;color:#6d4e25;background:var(--at);font-size:14px;line-height:1.78}.verdict{border-left-color:var(--purple);color:#55446a;background:var(--pt)}.back{display:inline-block;margin-top:18px;font-size:13px;font-weight:760}
+    body.dark{--bg:#0e1520;--surface:#151e2c;--surface-2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#19362f;--at:#382c1d;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--surface) 155px)}body.dark .lead{background:linear-gradient(90deg,var(--tint),var(--surface))}body.dark .card p,body.dark .boundary p,body.dark .bridge,body.dark .paper-figure figcaption p,body.dark .subfigure p{color:#bfcbda}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap,body.dark .subfigure-grid,body.dark .subfigure,body.dark .subfigure a{background:#172230}body.dark .figure-head,body.dark caption,body.dark .subfigure h4{color:#d7e2ef;background:#1b2635}body.dark .paper-figure figcaption{background:linear-gradient(var(--surface),var(--bt))}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark th{color:#d5e5f5}body.dark .focus-row td{color:var(--ink);background:#20334e!important}body.dark .callout{color:#f2d8af}body.dark .verdict,body.dark .formula p{color:#e0d1f2}body.dark .danger{color:#eeaaa6}body.dark .safe{color:#9ad0b6}
+    @media(max-width:1210px){.layout{grid-template-columns:205px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}.flow.seven{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.chapter{padding:22px 19px 26px}.card-grid,.boundary,.flow,.flow.seven,.subfigure-grid{grid-template-columns:1fr}.subfigure:last-child{grid-column:auto;max-width:none}.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.bridge):not(.source-note):not(.callout):not(.verdict),.bridge{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}.table-wrap table{min-width:690px}}@media print{body{color:#111;background:#fff;font-size:11pt}.progress,.toc,.rail,.actions,.back{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.flow div,.subfigure{break-inside:avoid;background:#fff}.paper-figure figcaption,.card,.boundary article,.formula,th,.focus-row td,.subfigure h4,.subfigure p{color:#111;background:#fff!important}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero"><div class="hero-in">
+    <div class="eyebrow">PAPER REVIEW · arXiv:2609.24259v2</div>
+    <h1>记住不等于会用：Agent Memory 的真正难题是影响力校准</h1>
+    <p class="subtitle"><span class="paper-name">MemCalib: Benchmarking and Optimizing Memory Use in LLM Agents</span>Ruike Cao、Fanyu Zhao、Fugen Yao 等 · USTC / Alibaba Qwen / Fudan · arXiv v2，2026-09-22</p>
+    <div class="actions"><a class="action" href="https://arxiv.org/abs/2609.24259v2" target="_blank" rel="noreferrer">论文原文 ↗</a><a class="action" href="assets/42-memcalib/paper.pdf" target="_blank">本地 PDF ↗</a><a class="action" href="https://github.com/Quark-Medical/memcalib" target="_blank" rel="noreferrer">官方代码与数据 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="metrics">
+      <div class="metric"><small>研究对象</small><b>Memory Influence</b><span>不是检索到没有，而是每条该影响多少</span></div>
+      <div class="metric"><small>校准等级</small><b>Ignore / Bound / Control</b><span>从二分类升级为有序影响强度</span></div>
+      <div class="metric"><small>Benchmark</small><b>15,000 样本</b><span>74,800 blocks · 234,220 atoms</span></div>
+      <div class="metric"><small>最佳 Qwen3-8B</small><b>SCS 79.54</b><span>Exact 67.89；三次随机种子均值</span></div>
+      <div class="metric"><small>外部迁移</small><b>RPEval 78.12</b><span>Micro；但 Under-use 偏差仍上升</span></div>
+      <div class="metric"><small>关键机制</small><b>反事实信用定位</b><span>把通道级 advantage 定位到相关 token</span></div>
+    </div>
+  </div></header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
+      <li><a href="#s1">01 从检索到影响校准</a></li>
+      <li><a href="#s2">02 Benchmark 如何测“用多少”</a></li>
+      <li><a href="#s3">03 反事实信用分配</a></li>
+      <li><a href="#s4">04 证据、消融与迁移</a></li>
+      <li><a href="#s5">05 本质、边界与长程启示</a></li>
+    </ol></nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>论文真正改变的不是 Memory 的存取，而是“取出之后谁有决定权”</h2>
+        <p class="lead">MemCalib 的核心问题可以压缩成一句话：检索系统把记忆放进上下文后，LLM 能否让每条命题以恰当强度影响回答？这把 Agent Memory 的评测对象从 retrieval correctness 推进到了 influence calibration。</p>
+        <p>传统管线习惯把问题分解为写入、存储、检索和生成，并把“检索到正确内容”视为记忆系统成功的近似终点。论文指出，这个终点设得太早：检索结果仍可能包含过时信息、轻度相关事实和彼此作用范围不同的约束；一个 summary、profile 或 trajectory 里还会同时混合多条命题。模型即便完整读到了这些文字，也可能让朋友的偏好取代用户本人的偏好，或者忽略本应决定结论的硬约束。</p>
+        <div class="thesis">Retrieved ≠ Useful ≠ Should Control the Decision<span>成功取回 + 错误使用，可能比没有取回更糟；真正目标是 Right Memory × Right Influence × Right Time。</span></div>
+        <p>作者把每个 memory block 拆成 atomic propositions，并为当前 query 赋予三级理想影响：<b>Ignore</b> 不应在回答中留下针对性痕迹，<b>Bound</b> 只能提供局部支持，<b>Control</b> 应决定关键结论、约束或推荐。这一有序尺度比“Use / Ignore”更贴近真实决策：喜欢清淡可以调整调味，素食约束却必须改变菜品类别；二者都相关，但决策权完全不同。</p>
+        <p>由此出现两类对称但机制不同的错误：<b>Over-use</b> 是实际影响高于目标，容易造成过度个性化、旧信息覆盖新证据或轻度偏好劫持结论；<b>Under-use</b> 是实际影响低于目标，使硬约束、偏好和已有经验未能进入决策。论文进一步观察到，多数模型不是逐 atom 精确判断，而更像持有一个全局“信任 Memory”先验：有的总体激进，有的总体保守。</p>
+        <p class="bridge">这项工作和相邻 benchmark 的差异，不在于首次发现个性化过度或偏好忽略，而在于评测单位与优化对象同时下沉：从整段回答或单条偏好，细化到自然复合 memory block 内的原子命题，并要求实际影响匹配有序目标。下面这张论文原图把问题和所谓 calibration seesaw 放在同一坐标系中。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 1</span><span>Memory use and optimization</span></div><a href="assets/paper-figures/42-memcalib/overview.png" target="_blank"><img src="assets/paper-figures/42-memcalib/overview.png" alt="MemCalib 论文图：同一记忆块中包含 Ignore、Bound、Control 命题，模型同时过度使用朋友爱吃牛排的无关信息并忽略用户素食约束；右图展示过用与少用的权衡"></a><figcaption><strong>同一回答可以同时过用一条记忆、少用另一条记忆</strong><p>左图中“朋友喜欢牛排”应被忽略，却进入了推荐；“我是素食者”本应控制结论，却没有发挥作用。右图用示意轨迹表达普通优化容易在两种错误之间摆动，MemCalib-RL 试图同时向左下角移动。</p><p class="figure-reading"><b>谨慎解读：</b>右侧是概念示意，不是实验散点或真实优化路径。是否真的缓解 seesaw，要看三种模型的方向性指标，而不能只看这张图。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/html/2609.24259v2#S1.F1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="block-intro bridge">把贡献分层后，论文的主次会更清楚。最容易被误读成主贡献的是“把 advantage 分给 token”，但那只是为问题定义服务的机制；即使未来出现更便宜的归因算法，下面第一层仍然成立。</p>
+        <div class="card-grid">
+          <article class="card"><h3>概念贡献</h3><p>把 Memory 质量从“取没取对”重写为“每条命题拥有的决策影响是否校准”。</p></article>
+          <article class="card"><h3>研究基础设施</h3><p>构造 atom 级理想标签、rubric 与六类指标，使过用、少用和整体校准可以同时测量。</p></article>
+          <article class="card"><h3>机制贡献</h3><p>九通道奖励 + 双向反事实 token 定位 + 保均值 advantage 重分配。</p></article>
+          <article class="card"><h3>经验发现</h3><p>模型规模不保证校准能力；常见后训练方法会出现方向性 seesaw。</p></article>
+        </div>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>MemCalib 如何把“用得对不对”变成可评测对象</h2>
+        <p class="lead">Benchmark 的关键不是样本量，而是为每个 atom 同时提供“理想使用等级”和可观察的回答文本 rubric。Judge 先判模型实际使用等级，再比较理想与实际的有序距离，因而能区分方向与严重度。</p>
+        <p>数据来自八个公开问答数据集，覆盖 Health、General Assistance 与 Coding。构造管线先从原始 QA 中筛出适合拆分的样本，把上下文中的事实、偏好、约束和过往事件抽成 memory atoms，并生成不泄漏这些信息的新 query；随后为 source atoms 标注 Bound 或 Control，再加入看似同主题、同用户合理却不应影响当前决策的 hard Ignore distractor。</p>
+        <p>这里的 hard Ignore 很重要。随机噪声只测模型能否识别离题内容，而真实污染往往“看上去有关”：同属饮食主题、确实来自该用户、甚至语义相近，却不应该决定当前回答。论文要区分的是 topical relevance 与 decision relevance，而非简单的相关性检索。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Appendix Figure 3</span><span>Six-stage construction pipeline</span></div><a href="assets/paper-figures/42-memcalib/construction.png" target="_blank"><img src="assets/paper-figures/42-memcalib/construction.png" alt="MemCalib 六阶段数据构造流程：来源筛选、查询与记忆拆分、原子标注、受控干扰项和 rubric、复合块自然化、双模型质量审查及人工迭代"></a><figcaption><strong>从公开 QA 重构出“查询 + 复合记忆 + atom 级目标”</strong><p>完整流程含确定性检查、Qwen3.7-Max 与 DeepSeek-V4-Pro 的独立语义审查，以及正式构造前的多轮 50 样本人工 pilot；只有双模型均通过的样本才进入 benchmark。</p><p class="figure-reading"><b>阅读要点：</b>质量控制能降低构造错误，却不能把合成样本变成真实 Agent trajectory。它证明的是标签流程受控，不是部署分布与 benchmark 分布相同。</p><div class="figure-source"><span>来源：论文 Appendix Figure 3</span><a href="https://arxiv.org/html/2609.24259v2#A2.F3" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="bridge">规模数字说明这个任务为何不能退化成 block 级过滤：几乎每个样本都含 mixed-target block，同一个自然段里必须同时保留、限制和忽略不同信息。另一方面，Ignore 的比例极高，也构成后续解释结果时必须正视的分布偏置。</p>
+        <div class="table-wrap"><table>
+          <caption>MemCalib 数据构成与结构</caption>
+          <thead><tr><th>统计项</th><th>数值</th><th>解释</th></tr></thead>
+          <tbody>
+            <tr><td>样本</td><td>15,000</td><td>Train 13,500；Test 1,500。训练集内另留 1,500 做超参数选择。</td></tr>
+            <tr><td>Memory blocks / atoms</td><td>74,800 / 234,220</td><td>每个 block 1–20 atoms；每个样本 6–63 atoms。</td></tr>
+            <tr><td>领域</td><td>Health 7,500；General 3,750；Coding 3,750</td><td>Coding 被改写为自然语言规划、行为预测、理解与诊断任务。</td></tr>
+            <tr><td>理想等级分布</td><td>Ignore 84.3%；Bound 8.1%；Control 7.6%</td><td>明显偏向抗污染；方向指标与分类别分析用于防止“全忽略”投机。</td></tr>
+            <tr class="focus-row"><td>含 mixed-target block 的样本</td><td>14,949（99.66%）</td><td>要求模型在同一复合块内部做细粒度影响分配。</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Appendix Tables 5–6。百分比按 atom 计；mixed-target 指同一 block 至少含两种理想等级。</p>
+        <p>评测时，DeepSeek-V4-Pro 根据 atom-specific rubric，把回答中每个 atom 的实际使用等级判为 Ignore、Bound 或 Control。令三档的 rank 分别为 0、1、2；实际等级高于目标的距离累加为 O，低于目标的距离累加为 U。这样，Ignore→Control 的过用比 Ignore→Bound 更严重，Control→Ignore 的少用也比 Control→Bound 更严重。</p>
+        <div class="formula"><div class="eq">O = Σ max(rank(actual) − rank(target), 0)
+U = Σ max(rank(target) − rank(actual), 0)
+SCS = mean(0.5^(O+U))　　Exact = mean[O+U=0]</div><p>SCS 对每多一单位错误按 0.5 几何衰减；Exact 要求样本内所有 atoms 全部校准正确。sMOS / sMUS 表示过用和少用严重度，AOR / AUR 表示至少出现一次相应错误的样本比例；论文统一缩放到 0–100。</p></div>
+        <p>Judge 不是无需怀疑的真值。论文用 150 个自然抽样 judgment 做人工复核，协议一致率 96.7%，Wilson 95% CI 为 92.4%–98.6%，Cohen’s κ=0.872，分歧集中在 Bound / Control 边界；换用 Qwen3.8-Max 后，八种方法的 SCS 排名 Spearman 相关为 0.976、Exact 为 1.000。它支持“方法排序较稳”，但样本量与同类 LLM Judge 仍不足以完全消除 evaluator dependency。</p>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>MemCalib-RL：先拆开错误方向，再把信用定位到相关 token</h2>
+        <p class="lead">Calibration seesaw 的根因假设是信用分配太粗：一个回答可同时正确使用、过用和少用不同 atoms，普通 GRPO 却把聚合后的 response-level advantage 均匀给所有 token。模型更容易学到“整体少信”或“整体多信”，而非逐条校准。</p>
+        <p>第一步是把理想等级 A/B/C 与实际等级 A/B/C 的笛卡尔积拆成九个 reward channels。对角线 A⁺、B⁺、C⁺奖励正确使用；偏离一档给 −1，偏离两档给 −2。GDPO 已经比 GRPO 更进一步：它按通道分别做 group normalization，但仍将每个通道的 advantage 均匀分给整段回答。MemCalib-RL 的新增动作，是继续追问“这个通道的记忆究竟影响了哪些 token”。</p>
+        <p>第二步是在固定已生成回答的前提下做 teacher forcing：一次输入完整 memory M，另一次移除该回答中属于通道 h 的 atom 集合，得到 M̃<sup>(h)</sup>。两次对同一 token 的 log likelihood 之差 d<sub>t</sub>，被当作 memory influence 的局部 proxy。这里需要精确说明：论文评测标签是 atom 级，但训练时反事实消融按通道 atom 集合执行，并非始终为每个 atom 单独跑一次前向。</p>
+        <div class="formula"><div class="eq">dₜ⁽ʰ⁾ = log p(yₜ | x, M, y&lt;ₜ) − log p(yₜ | x, M̃⁽ʰ⁾, y&lt;ₜ)</div><p>d&gt;0 表示被移除 atoms 提高了该 token 的概率，即“支持它出现”；d&lt;0 表示这些 atoms 原本压低该 token 的概率，即“抑制它出现”。这是一种固定输出下的反事实敏感度，不等同于严格因果效应。</p></div>
+        <p>“Bidirectional”来自少用与过用不能共用同一符号。对实际影响不低于目标的通道，包括正确使用与过用，定位 d&gt;0 的 supported tokens；对 actual&lt;target 的少用通道，若仍惩罚 d&gt;0，反而会打击已经实现的正确影响，因此转而定位 d&lt;0：记忆试图抑制、模型却依然生成的违约 token。经过裁剪、绝对门槛和通道自适应阈值后，只有正的定位信号进入分配。</p>
+        <p>第三步是保均值重分配。定位权重 w 在回答内归一化，并乘以长度 T，使 token multiplier 的平均值为 1；最终 advantage 混合均匀序列信用与局部信用。η=0 退化为通道级均匀分配，η=1 完全依赖定位。实验最佳 η=0.75，意味着局部 attribution 有用，但仍不足以取代 response-level 信号。</p>
+        <div class="formula"><div class="eq">Ãₜ⁽ʰ⁾ = A⁽ʰ⁾ · [(1−η) + η · T · wₜ⁽ʰ⁾]</div><p>方法还设置重分配 gate：定位信号存在，且通道 reward 与 advantage 同号时才局部化，避免错误定位反转原本更新方向；否则回退为均匀序列信用。</p></div>
+        <p class="bridge">原论文 Figure 2 是 3.2:1 的长幅图。下面按原有 (a)(b)(c) 面板边界拆分以便阅读，顺序和数值均未改变；点击任一面板可查看完整原图。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2（按原面板拆分）</span><span>Ordered bidirectional credit assignment</span></div><div class="subfigure-grid">
+          <article class="subfigure"><h4>(a) 九个有序奖励通道</h4><a href="assets/paper-figures/42-memcalib/method.png" target="_blank"><img src="assets/paper-figures/42-memcalib/method-a.png" alt="Figure 2a：Ignore、Bound、Control 的理想与实际等级构成九个奖励通道"></a><p>先分离正确、过用与少用，避免方向相反的信号在一个 scalar reward 中抵消。</p></article>
+          <article class="subfigure"><h4>(b) 固定回答的反事实定位</h4><a href="assets/paper-figures/42-memcalib/method.png" target="_blank"><img src="assets/paper-figures/42-memcalib/method-b.png" alt="Figure 2b：完整记忆与移除通道 atoms 的记忆对同一回答进行 teacher forcing，计算 token 级对数似然差"></a><p>输出 y 不变，只改变 memory 条件；因此测到的是当前策略对该删减的局部敏感度。</p></article>
+          <article class="subfigure"><h4>(c) 按方向重分配 advantage</h4><a href="assets/paper-figures/42-memcalib/method.png" target="_blank"><img src="assets/paper-figures/42-memcalib/method-c.png" alt="Figure 2c：过用和正确使用定位 memory-supported tokens，少用定位 memory-suppressed tokens，再重分配 advantage"></a><p>支持类通道看 d&gt;0，少用通道看 d&lt;0；回答平均 credit 规模保持不变。</p></article>
+        </div><figcaption><strong>方法与问题结构高度匹配：方向分离解决 seesaw，局部定位解决 token 信用混合</strong><p>九通道不是装饰性分类，它决定要寻找哪一侧的反事实信号；保均值和 fallback 则承担稳定训练的工程职责。</p><p class="figure-reading"><b>谨慎解读：</b>删去 memory 会改变整段 hidden-state 条件，dₜ 也可能包含间接交互与分布变化。论文把它称为 proxy，并用人工定位审计、消融和 η&lt;1 来证明实用性，而没有宣称获得严格因果归因。</p><div class="figure-source"><span>来源：论文 Figure 2；为可读性按既有面板边界拆分</span><a href="https://arxiv.org/html/2609.24259v2#S3.F2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>实验最强的结论是“平衡改善”，不是某一个方向做到极致</h2>
+        <p class="lead">基础模型的 Exact 普遍很低，且大模型不保证更会校准；后训练后，MemCalib-RL 在三种模型上获得最高 SCS 与 Exact，并且是唯一相对同一 Cold-start 在三种模型上都同时降低过用和少用的方法。</p>
+        <p>零训练诊断先证明问题存在。九个代表模型中，GPT-5.6-SOL 最强，但 SCS 仅 46.25、Exact 28.40；Qwen3-8B 的 SCS 31.17 反而高于 Qwen3.5-35B-A3B 的 26.54。这个结果支持“Memory calibration 不是通用能力规模的简单函数”，但由于两个 Qwen 模型的架构、训练分布和推理配置并非只差参数量，不能据此推出普遍的负 scaling law。</p>
+        <div class="table-wrap"><table>
+          <caption>代表性基础模型的 Memory 校准表现（测试集，三次随机种子均值）</caption>
+          <thead><tr><th>Model</th><th>SCS ↑</th><th>Exact ↑</th><th>sMOS ↓</th><th>sMUS ↓</th></tr></thead>
+          <tbody>
+            <tr class="focus-row"><td>GPT-5.6-SOL</td><td>46.25</td><td>28.40</td><td>38.45</td><td>22.92</td></tr>
+            <tr><td>Claude Sonnet 4.6</td><td>36.44</td><td>19.09</td><td>48.89</td><td>24.77</td></tr>
+            <tr><td>Kimi-K2.6</td><td>35.54</td><td>20.00</td><td>53.83</td><td>19.94</td></tr>
+            <tr><td>DeepSeek-V4-Flash</td><td>33.72</td><td>16.96</td><td>55.64</td><td>20.86</td></tr>
+            <tr><td>Qwen3-8B</td><td>31.17</td><td>15.29</td><td>37.19</td><td>45.66</td></tr>
+            <tr><td>Qwen3.5-35B-A3B</td><td>26.54</td><td>12.24</td><td>64.76</td><td>19.93</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Table 1，节选六个模型；指标均为 0–100。sMOS / sMUS 越低越好。</p>
+        <p class="bridge">主实验在 Qwen3-8B、Ministral-3-8B-Instruct 与 Qwen3.5-35B-A3B 上比较 SFT、两种 OPSD、GRPO、GDPO 和 MemCalib-RL。所有 RL 类方法从相同 Cold-start 出发，使用 8,000 个样本继续训练；因此“相对 Cold-start 的双向变化”比只看最终 SCS 更能检验 seesaw。</p>
+        <div class="table-wrap"><table>
+          <caption>主结果：SCS / Exact（%，三次随机种子均值）</caption>
+          <thead><tr><th>Method</th><th>Qwen3-8B</th><th>Ministral-3-8B</th><th>Qwen3.5-35B-A3B</th></tr></thead>
+          <tbody>
+            <tr><td>Cold-start</td><td>51.98 / 33.87</td><td>66.87 / 50.62</td><td>71.52 / 56.56</td></tr>
+            <tr><td>SFT</td><td>65.72 / 49.49</td><td>70.94 / 55.89</td><td>75.68 / 61.87</td></tr>
+            <tr><td>GRPO</td><td>67.61 / 52.18</td><td>77.21 / 65.44</td><td>78.25 / 66.60</td></tr>
+            <tr><td>GDPO</td><td>72.25 / 57.91</td><td>76.98 / 63.84</td><td>79.39 / 67.51</td></tr>
+            <tr class="focus-row"><td>MemCalib-RL</td><td>79.54 / 67.89</td><td>79.00 / 66.31</td><td>81.12 / 70.16</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Table 2。相对每个模型的最强基线，SCS 提升 1.73–7.29 点，Exact 提升 0.87–9.98 点；“点”是绝对百分点，不是相对百分比。</p>
+        <p>方向性完整结果让结论更细。以 Qwen3-8B 为例，Cold-start 的 sMOS / sMUS 为 21.97 / 33.41；SFT 把过用压到 13.58，却仍有 24.04 的少用；GRPO 把少用压到 11.27，却把过用推到 23.91。MemCalib-RL 达到 14.98 / 6.81，确实同时低于 Cold-start。Ministral 上它并非每个单项最低：GRPO 的 sMUS 5.73 优于 13.19；但 GRPO 的 sMOS 18.38 明显更差，而 MemCalib-RL 用 9.31 / 13.19 获得更好的综合 operating point。所谓“最佳”因此是双目标平衡，不是每列统治。</p>
+        <p>对 Ignore 占 84.3% 的担忧，论文用按目标等级归一化的 channel proportions 回应。Qwen3-8B 从 Cold-start 到 MemCalib-RL，A⁺ 从 96.66% 升至 97.69%，B⁺ 从 62.92% 升至 92.01%，C⁺ 从 74.24% 升至 94.54%，三类 macro accuracy 从 77.94% 升至 94.75%。这排除了“主要靠全忽略得分”的简单解释；不过 B→C 过用从 2.19% 微增到 2.28%，并非所有通道都改善。</p>
+        <p class="bridge">消融和机制分析分别回答“方向信息是否必要”“token 粒度是否必要”“定位到底落在哪里”。它们比主表更接近方法的因果主张，但仍是组件贡献证据，而不是严格证明反事实分数等于真实因果责任。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 3</span><span>Sensitivity and mechanism analyses</span></div><a href="assets/paper-figures/42-memcalib/mechanism.png" target="_blank"><img src="assets/paper-figures/42-memcalib/mechanism.png" alt="MemCalib-RL 机制分析图：η 敏感性、各奖励通道触发率、定位率、奖励组退化、阈值变化、credit multiplier 和人工标注的 token 与 credit 分布"></a><figcaption><strong>局部信用有效，但必须和序列信用共存</strong><p>(a) η 从 0 增至 0.75 时 SCS 由 72.25 升至 79.54、Exact 由 57.91 升至 67.89，η=1 又回落；(h) Key 句只占 34.6% token，却获得 61.9% credit，Irrelevant 句占 48.0% token，仅获 24.7% credit。</p><p class="figure-reading"><b>阅读要点：</b>人工审计每个可定位通道抽 20 个 response-channel pair；Top-3 命中率在 support-targeting 通道为 99.0%，在 under-use 通道为 96.7%。样本量不大，但与 token/句级消融共同支持“定位确实抓到相关区域”。</p><div class="figure-source"><span>来源：论文 Figure 3 与 Appendix I/J</span><a href="https://arxiv.org/html/2609.24259v2#S4.F3" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p>最有区分力的消融是方向 × 粒度的 2×2：句级 Absolute→Ordered 的 SCS / Exact 增加 1.59 / 1.80，token 级增加 4.84 / 6.76；Token-Ordered 最好。η=0 与 GDPO 等价，η=0.75 最优，η=1 回落到 77.94 / 65.62。这既支持 ordered bidirectional localization，也暴露 proxy 的上限：完全相信局部信号并不理想。</p>
+        <p>外部 RPEval 的 150-query explicit multi-preference subset 上，MemCalib-RL 无额外训练取得 Macro 33.78、Micro 78.12，均为最好，且 OPB 与 RII 最低。但所有训练后模型的 UPB 都高于 Base；MemCalib-RL 的 UPB 为 8.84，Base 仅 3.53。总体准确率提升来自过度支配和不当局部影响下降，代价是更容易把本该 Support / Dominate 的偏好留在未使用状态。这是“迁移有效但方向偏差未消失”的更准确表述。</p>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>本质不是多存 Memory，而是把历史信息的决策权变成可校准资源</h2>
+        <p class="lead">去掉论文品牌后，它做的是：在“检索内容已经给定”的单轮生成设置里，把原本隐式、整体化的记忆信任策略改成逐命题的有序控制目标，再用 Judge 反馈和反事实敏感度训练策略，以额外前向与评估成本换取更平衡的决策影响。</p>
+        <p>它没有解决“什么值得被写入”“何时更新或失效”“未来应检索什么”，也没有验证多步行动中的因果链。论文把系统边界刻意放在 post-retrieval use：query 与 memory blocks 已经准备好，模型只生成一次回答。因此它测的是 memory utilization / calibration，而非完整的 long-horizon memory management。</p>
+        <p class="bridge">把这篇论文放进完整 Agent Memory 生命周期，能够看出它补上的环节，也能避免把结论外推过头。您关心的 cross-agent handoff state 位于更下游：它首先决定哪些未完成意图值得持久化，之后才轮到“当前 Agent 应让它影响决策多少”。</p>
+        <div class="flow seven" aria-label="完整 Agent Memory 生命周期">
+          <div>1 · Write<br>什么值得记</div><div>2 · Represent<br>如何表达与溯源</div><div>3 · Retrieve<br>当前取什么</div><div>4 · Calibrate<br><b>取到后信多少</b></div><div>5 · Decide / Act<br>形成行动</div><div>6 · Follow-up<br>哪些仍未完成</div><div>7 · Handoff<br>交给未来 Agent</div>
+        </div>
+        <p>因此，MemCalib 与“经营知识进入独立知识库、Memory 保存跨步执行状态”的观点并不冲突。前者回答 Given Memory, how much should it influence the current output；后者回答 What deserves to become persistent execution state，以及 unfinished intent 如何跨 Agent 生存。真正的长程系统需要两者串联：先控制写入与交接，再校准读出后的决策权。</p>
+        <p class="bridge">论文自身只明确承认 token attribution 是 proxy。下面的五项边界综合了作者说明、表格暴露的问题与独立结构性推论；每项都对应一个会改变中心结论的检验，而不是泛泛要求“更多数据”。</p>
+        <div class="boundary">
+          <article><h3>① 单轮生成，不是长程闭环</h3><p><b>状态：</b>结构性边界。没有 Action<sub>t</sub>→State<sub>t+1</sub>→write→future retrieval。<b>决定性检验：</b>在可回滚环境中测 memory 对后续动作、状态与长期奖励的影响校准。</p></article>
+          <article><h3>② 合成 Memory 缺少生命周期故障</h3><p><b>状态：</b>证据与构造边界。QA 重构未自然覆盖 stale/contradictory memory、错误摘要、provenance、延迟失效和 unresolved tasks。<b>决定性检验：</b>从真实 trajectory 采样并保留时间、来源与写入错误。</p></article>
+          <article><h3>③ 目标分布偏向 Ignore</h3><p><b>状态：</b>论文显式统计，独立解释。方向指标与 macro analysis 防住了全忽略投机，但 84.3% Ignore 仍可能塑造训练先验。<b>决定性检验：</b>在多种 A/B/C 先验和真实部署频率下重训与迁移。</p></article>
+          <article><h3>④ Counterfactual 仍是敏感度 proxy</h3><p><b>状态：</b>作者承认。移除一组 atoms 会改变 hidden-state 分布，dₜ 混合直接影响与交互效应。<b>决定性检验：</b>与可控合成因果真值、逐 atom Shapley 近似或可解释中介干预对照。</p></article>
+          <article><h3>⑤ 成本边界没有闭合</h3><p><b>状态：</b>结构性推论。每批 64 queries×8 rollouts，还要 Judge 与可定位通道的 ablated teacher forcing；论文未给 wall time、token 或美元成本。<b>决定性检验：</b>报告完整训练 FLOPs/延迟，并与简单外部 gate、规则校准器和两阶段 reranker 做 Pareto 比较。</p></article>
+          <article><h3>最强反事实：先别训练生成器</h3><p><b>状态：</b>编辑性推论。一个结构化 pre-generation controller 先为 atoms 预测 A/B/C，再只把 Control/Bound 以不同权重送入 LLM，可能更便宜、更可审计。论文未与这一系统级替代方案在对齐预算下比较。</p></article>
+        </div>
+        <p>目标链条也值得审计：现实目标是“历史信息恰当地改善决策”，benchmark 将其代理为 atom rubric 下的三级文本影响，Judge 再把实际回答压成三级标签，训练则使用九通道 reward 与 dₜ 定位。每次离散化都有好处——可测、可优化——也有 Goodhart 风险：模型可能学会生成更容易被 rubric 判为 Bound 的表面措辞，而不是在真实行动中形成恰当信念。</p>
+        <div class="verdict"><strong>最值得保留的思想：</strong>Memory 不是被动上下文，而是一组应被分配“决策权”的状态变量。未来即使不用九通道或 log-likelihood ablation，任何长程 Agent 都应回答：哪条历史在当前时刻只能提供证据，哪条必须成为硬约束，哪条应该彻底失效。</div>
+        <p>对 Long-Horizon Agent，更自然的推广不是继续优化“Memory→Response Token”，而是 <b>Decision-State Calibration</b>：历史 observation、action、wrong belief、unresolved intention 与 handoff state，在当前决策中各自应该拥有多大权重，并且这种权重如何随新证据、状态变化和任务完成而失效。它直接连接 Decision-State Drift、Wrong Belief Contamination 与 Premature No-op / Abandonment。</p>
+        <p>什么结果会真正削弱本文中心论点？如果一个对齐预算的简单外部 gate 能匹配 MemCalib-RL；如果真实 trajectory 上三级 rubric 与行动质量弱相关；如果计算完整生命周期成本后收益无法摊销；或如果换到真正 held-out 的记忆分布后双向改善消失。反过来，最有价值的下一实验，是在带环境状态和后续行动的长程任务上，把 atom 级影响标签扩展为“对当前动作与未来状态的因果约束”，并同时报告成功率、错误传播和全生命周期成本。</p>
+        <div class="callout"><strong>最终评价：</strong>这篇论文的高价值首先来自问题定义，其次才是算法。它让研究者停止把“检索成功”当作记忆系统终点，并给出第一套较完整的 atom 级校准、方向诊断与优化闭环；但它尚未证明真实长程 Agent 能管理会演化的执行状态，也没有关闭训练成本与 Judge 依赖的系统边界。</div>
+        <p class="source-note">主要来源：arXiv:2609.24259v2（2026-09-22）正文与附录、官方代码仓库。本文未独立复现实验；所有数值均按论文表格抄录或明确标注为解释性归纳，用户提供的 long-horizon / handoff 观点已在本节作为扩展框架融合。</p>
+        <a class="back" href="index.html">← 返回论文精读合集</a>
+      </section>
+    </main>
+
+    <aside class="rail">
+      <div class="rail-card"><h3>三个阅读抓手</h3><ul><li>别把“检索到”与“应该控制结论”混为一谈。</li><li>主结果看过用与少用是否同时下降，不只看 SCS。</li><li>反事实差分是信用定位 proxy，不是严格因果归因。</li></ul></div>
+      <div class="rail-card"><h3>三条可迁移结论</h3><ul><li>Memory 需要有序影响等级。</li><li>混合目标需要细粒度 credit assignment。</li><li>长程系统还需校准状态、行动与交接。</li></ul></div>
+      <div class="rail-card"><h3>关键词</h3><p>Memory Calibration<br>Over / Under-use<br>Counterfactual Credit<br>Decision-State Calibration</p></div>
+    </aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
+    addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
+    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+</body>
+</html>

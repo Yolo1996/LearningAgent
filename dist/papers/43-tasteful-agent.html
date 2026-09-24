@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="《The Tasteful Agent》中文深度解读：如何把长程任务中的中途方向选择变成可自动标注的决策分叉，测量模型在结果出现前的判断力，并分析蒸馏与端到端增益的证据边界。">
+  <title>在结果出现之前做对选择：如何测量与训练长程 Agent 的“品味”｜论文精读</title>
+  <style>
+    :root{--bg:#f4f1ec;--surface:#fffefa;--surface-2:#f7f8fa;--ink:#192330;--muted:#647387;--line:#dcdad3;--blue:#3269ae;--purple:#7652a9;--green:#337d64;--amber:#a46a22;--red:#a74d4d;--bt:#edf4fb;--pt:#f4f0fb;--gt:#edf7f2;--at:#fff5e8;--shadow:0 12px 30px rgba(30,43,55,.06);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.9;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+    .progress{position:fixed;inset:0 0 auto;z-index:20;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green))}
+    .hero{color:#f6faff;background:radial-gradient(circle at 82% 11%,rgba(87,185,151,.2),transparent 29%),radial-gradient(circle at 12% 92%,rgba(118,82,169,.21),transparent 32%),linear-gradient(125deg,#12253d,#173b5c 60%,#3f396f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e3;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:11px 0 0;font-size:clamp(31px,4.1vw,53px);line-height:1.15;letter-spacing:-.03em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d8e1ec;font-size:15px;line-height:1.7}.paper-name{display:block;color:#fff;font-weight:760}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.23);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:11px;background:rgba(5,16,37,.3)}.metric small,.metric span{display:block;color:#b9c7d7;font-size:11px;line-height:1.45}.metric b{display:block;margin:4px 0;color:#fff;font-size:17px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:215px minmax(0,960px) 195px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}main,.chapter,.table-wrap{min-width:0}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-left-color:var(--blue);color:var(--blue);background:var(--bt);font-weight:750}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.68}.rail-card ul{margin:0;padding-left:17px}
+    .chapter{--accent:var(--blue);--tint:var(--bt);margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--surface) 155px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.33}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.36));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.bridge):not(.source-note):not(.callout):not(.verdict){max-width:810px;margin:0 0 14px;font-size:16px;line-height:1.92;text-indent:2em;text-align:justify}.bridge{max-width:810px;margin:20px 0 16px;color:#43546a;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:25px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .thesis{margin:18px 0;padding:17px 19px;border:1px solid #d6cbe8;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));font-size:18px;font-weight:770;line-height:1.62;text-align:center}.thesis span{display:block;margin-top:6px;color:var(--muted);font-size:12.5px;font-weight:520}.card-grid,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cbdbea;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d8cdeb;background:var(--pt)}.card:nth-child(4n+3){border-color:#c8e0d6;background:var(--gt)}.card:nth-child(4n){border-color:#ead7b9;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4b5c70;font-size:14px;line-height:1.72}.boundary article{border-color:#ead7b9;background:var(--at)}
+    .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:88px;padding:11px 8px;place-items:center;border:1px solid #cbdbea;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:735;line-height:1.48}.flow div:nth-child(2){border-color:#d8cdeb;background:var(--pt)}.flow div:nth-child(3){border-color:#c8e0d6;background:var(--gt)}.flow div:nth-child(4){border-color:#ead7b9;background:var(--at)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.formula{margin:17px 0;padding:16px 18px;border:1px solid #d8cdeb;border-radius:12px;background:var(--pt);overflow-x:auto}.formula .eq{white-space:pre-wrap;text-align:center;font-size:15.5px;font-weight:720;line-height:1.8}.formula p{margin:8px 0 0;color:#584971;font-size:13px;line-height:1.72}
+    .paper-figure{margin:26px 0 12px;border:1px solid var(--line);border-radius:15px;background:#faf9f7;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ec;font-size:11px;font-weight:800}.paper-figure>a{display:flex;align-items:center;justify-content:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:780px;margin:auto;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.76}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--blue);background:var(--bt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11px}.figure-compact>a{padding:20px}.figure-compact img{max-width:870px}.figure-portrait img{width:auto;max-width:690px}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:17px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px}.table-wrap table{width:100%;min-width:720px;border-collapse:collapse;background:var(--surface);font-size:13.5px;line-height:1.62}caption{padding:12px 13px;color:var(--ink);background:#fafbfd;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#334d69;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:#eef5ff!important;font-weight:700}.danger{color:var(--red);font-weight:780}.safe{color:var(--green);font-weight:770}.source-note{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.72}.callout,.verdict{margin:16px 0;padding:14px 16px;border-left:4px solid var(--amber);border-radius:0 10px 10px 0;color:#6d4e25;background:var(--at);font-size:14px;line-height:1.78}.verdict{border-left-color:var(--purple);color:#55446a;background:var(--pt)}.back{display:inline-block;margin-top:18px;font-size:13px;font-weight:760}
+    body.dark{--bg:#0e1520;--surface:#151e2c;--surface-2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#19362f;--at:#382c1d;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--surface) 155px)}body.dark .lead{background:linear-gradient(90deg,var(--tint),var(--surface))}body.dark .card p,body.dark .boundary p,body.dark .bridge,body.dark .paper-figure figcaption p{color:#bfcbda}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head,body.dark caption{color:#d7e2ef;background:#1b2635}body.dark .paper-figure figcaption{background:linear-gradient(var(--surface),var(--bt))}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark th{color:#d5e5f5}body.dark .focus-row td{color:var(--ink);background:#20334e!important}body.dark .callout{color:#f2d8af}body.dark .verdict,body.dark .formula p{color:#e0d1f2}body.dark .danger{color:#eeaaa6}body.dark .safe{color:#9ad0b6}
+    @media(max-width:1210px){.layout{grid-template-columns:205px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.chapter{padding:22px 19px 26px}.card-grid,.boundary,.flow{grid-template-columns:1fr}.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.bridge):not(.source-note):not(.callout):not(.verdict),.bridge{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.figure-portrait img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}.table-wrap table{min-width:690px}}@media print{body{color:#111;background:#fff;font-size:11pt}.progress,.toc,.rail,.actions,.back{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.flow div{break-inside:avoid;background:#fff}.paper-figure figcaption,.card,.boundary article,.formula,th,.focus-row td{color:#111;background:#fff!important}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero"><div class="hero-in">
+    <div class="eyebrow">PAPER REVIEW · arXiv:2609.25804v2</div>
+    <h1>在结果出现之前做对选择：如何测量与训练长程 Agent 的“品味”</h1>
+    <p class="subtitle"><span class="paper-name">The Tasteful Agent: Measuring and Improving Taste in Long-Horizon Tasks</span>Wenbo Pan、Zhichao Liu、Shujie Liu、Jingying Zeng、Chin-Yew Lin、Xianfeng Tang、Yan Lu、Qi He、Xiaohua Jia · City University of Hong Kong / Microsoft · arXiv v2，2026-09-23</p>
+    <div class="actions"><a class="action" href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">论文原文 ↗</a><a class="action" href="assets/43-tasteful-agent/paper.pdf" target="_blank">本地 PDF ↗</a><a class="action" href="https://github.com/wbopan/tastebench" target="_blank" rel="noreferrer">代码 ↗</a><a class="action" href="https://huggingface.co/datasets/wenbopan/taste-bench" target="_blank" rel="noreferrer">数据集 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="metrics">
+      <div class="metric"><small>研究对象</small><b>中途方向判断</b><span>结果尚未出现时选择更优分支</span></div>
+      <div class="metric"><small>Benchmark</small><b>502 个分叉</b><span>工程 390 · 研究 112</span></div>
+      <div class="metric"><small>评测规模</small><b>14 个模型</b><span>候选顺序正反各测一次</span></div>
+      <div class="metric"><small>最佳一致准确率</small><b>59.7%</b><span>GPT-5.6 Sol；随机基线 25%</span></div>
+      <div class="metric"><small>长时距退化</small><b>62.3 → 21.0%</b><span>证据从前缀内推迟到后续工作</span></div>
+      <div class="metric"><small>端到端结果</small><b>14.6 → 33.7%</b><span>41 个 SWE-bench Pro 留出任务</span></div>
+    </div>
+  </div></header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
+      <li><a href="#s1">01 真问题：成功率看不见判断</a></li>
+      <li><a href="#s2">02 方法：从轨迹挖决策分叉</a></li>
+      <li><a href="#s3">03 证据：时距比思考预算更关键</a></li>
+      <li><a href="#s4">04 训练：把事后判断蒸馏进模型</a></li>
+      <li><a href="#s5">05 贡献、边界与下一实验</a></li>
+    </ol></nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>真正缺失的指标，不是“最后做成没有”，而是“当时是否选对了方向”</h2>
+        <p class="lead">长程任务的终局成功率把至少三件事混在一起：方向判断、后续执行质量和环境随机性。论文把其中第一项单独抽出，称为 Agent 的“品味”——在结果尚不可见时，能否选择未来更可能带来好结果的方向。</p>
+        <p>软件 Agent 可能在两个实现方案之间选择，研究 Agent 可能决定继续某个假设还是转向。错误方向在当下往往并不荒谬，代价要经过测试、扩展实现或多轮实验才暴露。只看最终任务是否通过，会告诉我们“整条轨迹成败”，却不能判断中途哪次选择真正拖累了结果，也不能区分好判断被差执行浪费、坏判断被后续补救掩盖的情形。</p>
+        <p>论文的概念转移是：过去把整条任务轨迹当作评测单位，本文把“分叉时刻”当作评测单位。给模型原任务、分叉前轨迹和两个候选方向，但隐藏分叉后的工作；由真实后续结果决定哪个候选受到支持。这样，问题从“你能否完成整个任务”变成“在同样历史下，你会押注哪条未来”。</p>
+        <div class="thesis">核心命题：长程判断力可以通过“隐藏未来、利用事后证据标注过去”来测量。<span>真正的新对象不是某个 Agent 模块，而是结果出现前的方向选择；Benchmark、过滤器与蒸馏方法都服务于这一对象。</span></div>
+        <p class="block-intro bridge">理解这篇论文，最重要的是把研究对象、指标和长期愿景分开。下表显示它与相邻评测的区别：不是简单增加更长任务，而是把延迟显现的决策质量变成一个可重复、可训练的二选一判断问题。</p>
+        <div class="table-wrap"><table>
+          <caption>本文与邻近研究的分界</caption>
+          <thead><tr><th>研究线</th><th>被评对象</th><th>标签从哪里来</th><th>本文的新增量</th></tr></thead>
+          <tbody>
+            <tr><td>端到端 Agent Benchmark</td><td>整条任务是否成功</td><td>测试、评分器或环境回报</td><td>不能分离中途判断与执行</td></tr>
+            <tr><td>方案 / 研究想法比较</td><td>脱离执行轨迹的两个提案</td><td>专家偏好或事后性能</td><td>本文保留了当时的任务状态与历史</td></tr>
+            <tr><td>过程监督 / Step Reward</td><td>单步是否正确或有用</td><td>人工标签、rollout 回报</td><td>本文关注影响在较远未来才显现的方向判断</td></tr>
+            <tr class="focus-row"><td>Taste-Bench</td><td>真实轨迹里的决策分叉</td><td>平行分支或绕路恢复的后续结果</td><td>隐藏未来后评测，并可把事后判断蒸馏回模型</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Introduction、Measuring Taste via Long-Horizon Judgment 与 Related Work。比较轴是解释性归纳。</p>
+        <figure class="paper-figure figure-compact"><div class="figure-head"><span>论文原图 · Figure 1</span><span>A decision fork from a machine-learning trajectory</span></div><a href="assets/paper-figures/43-tasteful-agent/decision_fork_example.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/decision_fork_example.png" alt="机器学习训练轨迹中的决策分叉：训练超时后可选择缩小模型继续更多步数，或维持模型规模只训练较少步数；很多步之后最终损失显示前者更优"></a><figcaption><strong>分叉时两条路都合理，优劣要很多步以后才显现</strong><p>示例中，模型训练超时后需要在“缩小模型、训练更久”和“保留规模、减少步数”之间选择。评测模型只能看到分叉前信息，不能看到后续损失 6.56 与 7.66。</p><p class="figure-reading"><b>阅读要点：</b>图说明了任务单位，但不自动证明后续差异完全由这次选择导致；后续执行仍可能改变结果，这正是 Benchmark 构造必须严筛的原因。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>从成败轨迹中挖出可回答的分叉，比生成更多题目更难</h2>
+        <p class="lead">Taste-Bench 的基础设施贡献在于把非结构化长轨迹压缩成可验证问题：同一前缀、两个真实可行方向、一个由后续结果支持的标签。作者用平行轨迹和绕路轨迹覆盖两类错误，再用“可从措辞猜中”和“事后仍无法定论”两道过滤器控制标签质量。</p>
+        <p>平行轨迹构造把同一任务的多次独立尝试对齐：它们在相近历史处转向不同方案，随后一个成功、一个失败。分叉前等价部分成为前缀，两条实际行动被中性改写为候选。它能捕捉 Agent 从未意识到的坏方向，但仍面临后续执行差异这一混杂因素。</p>
+        <p>绕路轨迹构造则在单次运行中寻找“先走错—观察失败—换路—完成任务”的序列，把被放弃方向和恢复方向放到更早的分叉处比较。它拥有轨迹内部的纠错证据，但容易把只有看到失败后才知道的答案倒灌到候选描述，因此生成器必须引用承诺、失败、转向与成功的原始步骤，并检查前缀没有泄漏未来。</p>
+        <div class="formula"><div class="eq">y = arg maxᵢ U(Eᵢ)　　x = (q, hₜ, c₁, c₂)</div><p>q 是任务，hₜ 是分叉前历史，c₁/c₂ 是候选方向，Eᵢ 是分支后续证据，U 把证据映射为结果。模型只接收 x；标签 y 由隐藏的后续证据产生。</p></div>
+        <p class="block-intro bridge">构造流水线不是“让模型随便编两个选项”。它先从真实运行里找分叉，再依次排除两类无效题：只看候选措辞就能猜中的题不测长程判断；即使看完整记录也无法确定标签的题则缺乏可判定性。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>Construction and filtering of Taste-Bench</span></div><a href="assets/paper-figures/43-tasteful-agent/tastebench_construction.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/tastebench_construction.png" alt="Taste-Bench 构造流程：从平行轨迹和绕路轨迹挖掘分叉，生成任务、前缀和候选，再过滤可仅凭候选猜出的简单题与完整记录仍无法判定的题"></a><figcaption><strong>数据量被主动牺牲，以换取“必须读历史且事后可判”的问题</strong><p>生成器提出候选分叉，四个独立 Judge 先只看候选过滤“太容易”，再看完整轨迹过滤“不可判”。最终只保留同时通过两道门的项目。</p><p class="figure-reading"><b>阅读要点：</b>这种严格筛选增强内部有效性，但也改变了题目分布：保留下来的不是自然分叉的无偏样本，而是特意挑出的“至少让一个 Judge 犯错、且所有 Judge 事后同意标签”的难例。</p><div class="figure-source"><span>来源：论文 Figure 2 与 Appendix A.4</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p>原始池包含 2,677 条 SWE-bench Pro 工程 rollout（517 个任务）和 1,132 条 AI 研发运行（47 个 RE-Bench / HCAST 任务）。生成器共挖出 4,657 个候选分叉，1,809 个通过生成规则，729 个通过“非平凡”过滤，最后 502 个进入发布集，保留率 10.8%。其中工程 390 题、研究 112 题；平行构造 172 题、绕路构造 330 题。</p>
+        <p>为减轻二选一位置偏差，每题按一个固定顺序和完全反转顺序各问一次，只有两次都选对才记为正确。因此论文主指标下随机猜测的期望是 25%，总偏好第一个或第二个位置的模型得 0%。这是一种严格的“一致判断”指标，并不等同于普通二选一单次准确率；论文同时报告两次展示的平均准确率以补充解释。</p>
+        <p class="block-intro bridge">标签有效性由自动过滤与小规模人审共同支撑，但两者回答的是不同问题：自动过滤确保机器 Judge 在完整记录下意见一致，人审则检查结果公开后人类是否认可所标方向。</p>
+        <div class="table-wrap"><table>
+          <caption>Benchmark 证据账本</caption>
+          <thead><tr><th>环节</th><th>规模 / 结果</th><th>支持的主张</th><th>仍未排除</th></tr></thead>
+          <tbody>
+            <tr><td>候选 → 发布</td><td>4,657 → 502（10.8%）</td><td>流水线有较强质量门槛</td><td>筛选选择偏差与 Judge 共识偏差</td></tr>
+            <tr><td>人类事后复核</td><td>170 / 172 明确判断支持标签（98.8%）</td><td>对有明确偏好的复核，标签与人类高度一致</td><td>仅 100 个抽样题；先看到了后续结果</td></tr>
+            <tr><td>两位复核者一致性</td><td>73 / 74；κ = 0.973</td><td>结果公开后的方向判断稳定</td><td>不能证明分叉当时应具有同等可预测性</td></tr>
+            <tr><td>四象限覆盖</td><td>工程 / 研究 × 平行 / 绕路</td><td>不依赖单一构造和单一任务类型</td><td>仍集中于软件与 AI 研发</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Section 3、Appendix A 与 Appendix E。人审 100 题包含 70 个发布题及 30 个被过滤题；172 是两位复核者保留的明确 A/B 判断总数。</p>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>模型不是不知道题难：它们在最难处想得更久，却仍看不见尚未发生的证据</h2>
+        <p class="lead">14 个模型的结果支持 Taste-Bench 测到一种尚未饱和、又不完全等同于端到端编码能力的信号。最强结果为 59.7%，而当关键证据必须等到更多后续工作才出现时，模型平均准确率降到 21.0%，接近严格指标下的 25% 随机水平。</p>
+        <p>GPT-5.6 Sol 以 59.7% 的“两个顺序都答对”平均准确率居首，GPT-5.5 为 59.5%，Claude Opus 5 为 55.5%。结果并非只反映是否会写代码：Taste-Bench 与共享 Harness 下 SWE-bench Verified 得分的相关系数为 0.63，只解释约 39% 的模型间方差；在最接近的软件工程子集上相关更低，仅 0.37。样本只有 11 个可比模型且置信区间较宽，因此更稳妥的结论是“部分重叠”，而非已经识别出完全独立能力。</p>
+        <p>最有解释力的分解是“决定性证据离分叉有多远”。作者把分叉分为前缀内已有明确证据、可由前缀推断、下一步观察即可确定、需要更完整后续工作四档。14 模型均值依次为 62.3%、42.9%、31.5%、21.0%。这说明 Benchmark 的难点不是候选文本本身，而是需要模拟尚未展开的后续执行。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 4</span><span>Time horizon and reasoning budget</span></div><a href="assets/paper-figures/43-tasteful-agent/horizon_effort.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/horizon_effort.png" alt="左图显示 14 个模型的决策准确率随决定性证据时距从前缀内到需要更多工作而下降，右图显示 GPT-5.6 Sol 和 Luna 在三种推理预算下曲线大幅重叠"></a><figcaption><strong>时距效应明显，单纯增加推理预算没有填平差距</strong><p>左图深色线是 14 模型均值；右图比较 GPT-5.6 Sol 与 Luna 的三档推理强度。Sol 从最低到最高预算变化 −0.2 个百分点，Luna 为 +2.2 个百分点，Bootstrap 区间均跨 0。</p><p class="figure-reading"><b>谨慎解读：</b>“增加预算无效”只在这两个模型、固定提示、固定 Token 上限和推理强度设置中成立。它更像是在排除“没想够久”这一简单解释，不能推出所有形式的测试时搜索、执行探针或多样化 rollout 都无效。</p><div class="figure-source"><span>来源：论文 Figure 4、Appendix D.2–D.3</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="block-intro bridge">把主结果放在同一张表里，可以看出不同数字支撑不同层次的论断：排名证明当前模型未饱和，时距分解支持“延迟证据”解释，预算消融只排除一种计算不足，相关分析则说明该指标不是端到端能力的简单复刻。</p>
+        <div class="table-wrap"><table>
+          <caption>关键实验与其证明边界</caption>
+          <thead><tr><th>结果</th><th>数值</th><th>能支持什么</th><th>不能单独证明什么</th></tr></thead>
+          <tbody>
+            <tr><td>最佳模型</td><td>GPT-5.6 Sol：59.7%</td><td>Benchmark 对前沿模型仍有区分度</td><td>低分全部来自“品味”而非格式、上下文与领域知识</td></tr>
+            <tr><td>分叉类型</td><td>两域中 Detour 都比 Parallel 难</td><td>预见自己将来纠错的方向更难判断</td><td>两构造难度完全可比</td></tr>
+            <tr><td>时距</td><td>62.3 → 21.0%</td><td>关键证据越晚出现，模型越难</td><td>时距是唯一因果因素</td></tr>
+            <tr><td>推理预算</td><td>Sol −0.2pt；Luna +2.2pt</td><td>同一接口下更多内部推理未显著提升</td><td>执行候选、外部工具搜索或多样化采样也无效</td></tr>
+            <tr><td>与 SWE-bench Verified</td><td>r = 0.63；工程子集 r = 0.37</td><td>测量与端到端能力只有部分重叠</td><td>已建立稳定的心理测量学独立构念</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Section 4、Figure 3–5、Appendix D。论文报告平均相关的 95% 区间为 [+0.04,+0.89]，工程子集为 [−0.30,+0.79]。</p>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>训练“品味”的关键，不是拟合二元标签，而是把看过结果的推理蒸馏给没看过结果的学生</h2>
+        <p class="lead">每个分叉只有一个二元标签，直接监督很容易记答案。论文让同一个 Qwen3.6-27B 在两种上下文中扮演教师和学生：教师额外看到受支持候选的示范，学生只看到正常问题；再用教师的完整推理序列做前向 KL 蒸馏，并用任务不重叠的折验证迁移。</p>
+        <p>训练只使用 390 个工程问题，按源任务拆成两个互不重叠的 195 题折。教师上下文明确告诉模型这次分叉中哪条路成功、哪条失败，然后生成推理；学生上下文看不到这段示范。训练用 LoRA 更新约 79.7M 参数，对教师生成的推理 Token 和最终选择计算前向 KL，随后再用学生自己的自由推理轨迹校准答案位置。</p>
+        <p>这个设计把优化边界从“当前上下文里利用事后提示”移到“模型权重里内化跨任务判断模式”。但它仍依赖高质量事后标签，并且教师与学生是同一基础模型，实验更接近特权信息的上下文蒸馏，而非把一个更强模型的知识传给小模型。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 6</span><span>Distillation and advice injection</span></div><a href="assets/paper-figures/43-tasteful-agent/distillation_advisor.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/distillation_advisor.png" alt="左侧显示看过受支持候选的教师把推理蒸馏给只看问题的学生，右侧显示学生在每个分叉生成判断并以建议形式注入固定执行器上下文"></a><figcaption><strong>训练学生做分叉判断，部署时由另一个固定执行器落实建议</strong><p>学生不直接完成 SWE-bench Pro，而是在已挖出的分叉上选择方向；其判断被写成“已知陷阱 / 建议路线”注入执行器。这样可以把判断改进与执行能力尽量分离。</p><p class="figure-reading"><b>阅读要点：</b>执行器接收的是同一具体任务先前运行中挖出的分叉笔记，因此这是“同任务多次尝试后的经验复用”，不是从零面对一个从未运行过的新任务。</p><div class="figure-source"><span>来源：论文 Figure 6 与 Appendix F–G</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p>在任务不重叠的工程分叉上，学生严格一致准确率从基础模型的 30.0% 升到 47.9%，增加 17.9 个百分点；两顺序平均准确率从 42.7% 升到 62.4%。训练折单顺序准确率则从 48.6% 跳到 92.9%，显示记忆空间确实很大，也说明任务隔离评测不可省略。</p>
+        <p>端到端实验选择 41 个留出 SWE-bench Pro 任务，共 98 个此前已挖出的分叉。固定 Qwen3.6-27B 执行器在无建议时成功率 14.6%，输入学生建议后为 33.7%；若每个分叉都给正确建议，上界为 39.0%。学生在 98 个分叉中选对 77 个，因此它兑现了正确建议上界的大部分。</p>
+        <figure class="paper-figure figure-compact"><div class="figure-head"><span>论文原图 · Figure 7</span><span>Transfer and end-to-end results</span></div><a href="assets/paper-figures/43-tasteful-agent/distillation_results.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/distillation_results.png" alt="左图显示蒸馏学生在留出分叉上的准确率由 30.0 提升至 47.9，右图显示 SWE-bench Pro 成功率由无建议 14.6 提升到学生建议 33.7，正确建议上界为 39.0"></a><figcaption><strong>判断准确率提升能转化为任务成功率，但转化发生在“已有同任务历史”的工作流中</strong><p>左侧验证判断迁移到训练未见任务，右侧验证这些判断作为建议能帮助固定执行器。正确建议条件是一个有用上界，说明分叉质量与方向选择确实对这些任务结果具有实际杠杆。</p><p class="figure-reading"><b>谨慎解读：</b>41 个任务来自能够挖出至少一个分叉的任务集合，且建议总结了这些任务的既往运行。结果证明经验复用与判断训练的组合有效，不等价于学生学会了无需历史轨迹即可泛化的通用品味。</p><div class="figure-source"><span>来源：论文 Figure 7、Section 5.2–5.3</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p class="block-intro bridge">把训练与部署放到完整生命周期里看，成本和适用条件更清楚：先要多次运行任务产生分叉，再做生成、过滤和蒸馏，最后才能在后续运行里复用建议。论文证明的是这种循环的效用，不是零成本、首轮任务上的普遍提升。</p>
+        <div class="flow"><div>历史 Rollout<br>产生分歧与失败</div><div>挖分叉 + 多 Judge 过滤<br>得到事后标签</div><div>特权教师 → 学生<br>蒸馏判断模式</div><div>同任务后续运行<br>把判断写成建议</div></div>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>论文真正打开的是“判断层训练”，最深的未决问题是标签能否代表反事实价值</h2>
+        <p class="lead">最可迁移的贡献，是把长程 Agent 的中途方向选择从不可见的“经验感”变成可收集、可评测、可优化的对象。最需要克制的地方，则是把已实现结果外推为通用“品味”：当前标签仍来自特定轨迹的事后成败，而不是对同一决策进行充分控制后的期望价值。</p>
+        <p class="block-intro bridge">按知识层级看，论文的贡献并不等重。概念层决定未来研究如何提问；Benchmark 与过滤流水线让问题可操作；蒸馏和建议注入说明该信号可以转化为收益；具体数值则只在当前任务、模型和多次尝试工作流内成立。</p>
+        <div class="card-grid">
+          <article class="card"><h3>概念贡献</h3><p>把“结果出现前选对方向”定义为长程判断，并从终局成功率中分离出来。即使未来不用“taste”这个名字，这个评测单位仍有价值。</p></article>
+          <article class="card"><h3>研究基础设施</h3><p>平行 / 绕路两种轨迹挖掘、非平凡与可判定过滤、双顺序评测，共同把事后轨迹转成 502 个可审计问题。</p></article>
+          <article class="card"><h3>机制贡献</h3><p>用特权结果上下文生成推理，再向无结果学生做 KL 蒸馏；部署时让学生提供方向建议、固定执行器负责执行。</p></article>
+          <article class="card"><h3>经验发现</h3><p>前沿模型仍不稳定；证据时距越长越难；单纯增加推理强度未改善；训练后的判断能提升留出任务成功率。</p></article>
+        </div>
+        <h3 class="subhead">三个会改变结论强度的结构性边界</h3>
+        <div class="boundary">
+          <article><h3>1. 事后赢家不必然等于高期望值决策</h3><p><b>证据性质：</b>编辑性推断。两条分支除分叉判断外还包含不同后续执行与随机性；严格过滤提高可判定性，却不能完整建立因果反事实。<br><b>决定性检验：</b>在同一分叉对每个候选做多次受控 continuation，估计结果分布而非单次赢家。</p></article>
+          <article><h3>2. “未见任务迁移”仍依赖该任务的既往运行</h3><p><b>证据性质：</b>论文设置直接可见。学生没在训练中见过 41 个任务，但输入给执行器的建议来自这些任务的先前轨迹。<br><b>决定性检验：</b>只提供别的任务蒸馏出的通用判断策略，在完全没有本任务历史的首轮运行上测试。</p></article>
+          <article><h3>3. 发布集是质量筛选后的困难条件分布</h3><p><b>证据性质：</b>由筛选规则导出。至少一个 Judge 必须在无历史时答错，所有 Judge 又必须在完整记录下同意标签；502 题只占候选 10.8%。<br><b>决定性检验：</b>在自然抽样分叉上分层报告可判定率、准确率与校准，而不是只评发布集。</p></article>
+          <article><h3>4. 生命周期成本尚未进入收益比较</h3><p><b>证据性质：</b>系统边界分析。多次 rollout、生成器、四 Judge、蒸馏 GPU 与任务特定笔记都发生在部署收益之前。<br><b>决定性检验：</b>对齐总 Token、GPU、墙钟时间和尝试次数，与“直接多跑几次并选最好结果”等强反事实比较。</p></article>
+        </div>
+        <p class="callout"><strong>最强反事实：</strong>如果在相同总预算下，简单保存同任务失败模式、增加可执行探针，或让基础 Agent 多做候选 rollout 再选择，就能匹配学生建议的端到端收益，那么蒸馏“品味”的独立价值会变窄；反之，若蒸馏学生在完全新任务、无任务特定笔记时仍提高选择质量，论文的长期愿景会得到显著加强。</p>
+        <p>因此，这篇论文最重要的启发不是“给 Agent 一个玄学的品味分数”，而是把判断放在长期执行闭环里单独建模：提出方向、等待证据、回填信用、再训练未来选择。它把监督信号从即时正确性推进到延迟后果，也把瓶颈从“有没有长轨迹”移动到“能否从轨迹中识别近似因果、可迁移的决策分叉”。</p>
+        <p class="verdict"><strong>一句话判断：</strong>Taste-Bench 是一个强而克制的研究起点：它已经证明事后轨迹可用于测量和训练中途判断，但尚未证明单次轨迹赢家等于一般意义上的最佳决策，也未证明这套判断能脱离同任务历史直接泛化。</p>
+        <p class="source-note">主要来源：arXiv:2609.25804v2（2026-09-23），包括主文、附录构造统计、完整模型结果、时距与推理预算分析、人类复核、蒸馏配置和端到端任务明细。本文未独立复现实验；“最强反事实”、生命周期成本与因果边界为基于论文证据的编辑性判断。</p>
+        <a class="back" href="index.html">← 返回论文目录</a>
+      </section>
+    </main>
+
+    <aside class="rail">
+      <div class="rail-card"><h3>阅读抓手</h3><ul><li>不要把“品味”理解成风格偏好；它是延迟后果下的方向判断。</li><li>59.7% 使用双顺序一致指标，随机基线是 25%。</li><li>端到端增益依赖同一任务的既往分叉记录。</li></ul></div>
+      <div class="rail-card"><h3>三条耐久结论</h3><ul><li>终局成功率不足以诊断中途判断。</li><li>后续证据可以反向产生过程监督。</li><li>长期价值取决于反事实标签质量与全生命周期成本。</li></ul></div>
+    </aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
+    addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
+    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
+  </script>
+</body>
+</html>

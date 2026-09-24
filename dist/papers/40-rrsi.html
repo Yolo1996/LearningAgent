@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="RRSI 中文深度解读：Harness 自进化为何会对固定任务集过拟合；论文如何验证修改能否迁移，以及实验历史、泄漏判断和长期自进化仍有哪些证据缺口。">
+  <title>不是每次分数上涨都值得写进 Harness：RRSI 如何约束自进化｜论文精读</title>
+  <style>
+    :root{
+      --bg:#f3f1ec;--surface:#fffefa;--surface-2:#f5f7fa;--ink:#172232;--muted:#66758a;--line:#ddd9d0;
+      --blue:#2d66b5;--purple:#7653b8;--green:#2f7b5d;--amber:#a5661d;--red:#b24d48;
+      --blue-tint:#edf4fd;--purple-tint:#f3effb;--green-tint:#edf7f2;--amber-tint:#fff5e7;
+      --shadow:0 12px 32px rgba(29,42,58,.065);
+      --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}
+    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
+    body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.9;-webkit-font-smoothing:antialiased}
+    a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+    .progress{position:fixed;inset:0 0 auto;z-index:99;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green))}
+    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 10%,rgba(98,195,151,.22),transparent 30%),radial-gradient(circle at 7% 95%,rgba(124,83,184,.24),transparent 34%),linear-gradient(125deg,#0d2143,#173a67 58%,#4b2769)}
+    .hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c5d4e8;font-size:12px;font-weight:800;letter-spacing:.12em}
+    h1{max-width:1180px;margin:11px 0 0;font-size:clamp(31px,4vw,53px);line-height:1.13;letter-spacing:-.035em}
+    .subtitle{max-width:1160px;margin:14px 0 0;color:#d5deec;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:760}
+    .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:19px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}
+    .metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(5,18,42,.3)}
+    .metric small,.metric span{display:block;color:#b6c3d5;font-size:11px;line-height:1.45}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
+    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}
+    main,.chapter,.table-wrap{min-width:0}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}
+    .toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.42}.toc a.active{border-left-color:var(--blue);color:var(--blue);background:var(--blue-tint);font-weight:760}
+    .rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.68}.rail-card ul{margin:0;padding-left:17px}
+    .chapter{--accent:var(--blue);--tint:var(--blue-tint);margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--surface) 155px);box-shadow:var(--shadow)}
+    .chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--purple-tint)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--green-tint)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--amber-tint)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--blue-tint)}
+    h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}
+    .lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.38));font-size:17px;font-weight:650;line-height:1.78}
+    .chapter>p:not(.lead):not(.block-intro):not(.source-note):not(.callout):not(.verdict),.prose p{max-width:820px;margin:0 0 14px;font-size:16px;line-height:1.92;text-indent:2em;text-align:justify}
+    .block-intro{max-width:820px;margin:20px 0 16px;color:#3e4f65;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:25px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
+    .thesis{margin:18px 0;padding:17px 19px;border:1px solid #d9ccec;border-radius:12px;background:linear-gradient(135deg,var(--purple-tint),var(--blue-tint));font-size:18px;font-weight:780;line-height:1.62;text-align:center}.thesis span{display:block;margin-top:5px;color:var(--muted);font-size:12.5px;font-weight:520}
+    .shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9ee;border-radius:11px;background:var(--blue-tint)}.shift article:nth-child(2){border-color:#d8ccef;background:var(--purple-tint)}.shift article:nth-child(3){border-color:#c7dfd5;background:var(--green-tint)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--surface);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:820;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}
+    .card-grid,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9ee;border-radius:11px;background:var(--blue-tint)}.card:nth-child(4n+2){border-color:#d8ccef;background:var(--purple-tint)}.card:nth-child(4n+3){border-color:#c7dfd5;background:var(--green-tint)}.card:nth-child(4n){border-color:#ead5b4;background:var(--amber-tint)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#47596f;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--amber-tint)}.boundary article:last-child:nth-child(odd){grid-column:1/-1}
+    .flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:86px;padding:11px 8px;place-items:center;border:1px solid #cad9ee;border-radius:10px;background:var(--blue-tint);text-align:center;font-size:12.5px;font-weight:730;line-height:1.48}.flow div:nth-child(2),.flow div:nth-child(4){border-color:#d8ccef;background:var(--purple-tint)}.flow div:nth-child(3),.flow div:nth-child(5){border-color:#c7dfd5;background:var(--green-tint)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}
+    .formula{margin:17px 0;padding:16px 18px;border:1px solid #d8ccef;border-radius:12px;background:var(--purple-tint);overflow-x:auto}.formula .eq{white-space:pre-wrap;text-align:center;font-size:15.5px;font-weight:720;line-height:1.8}.formula p{margin:8px 0 0;color:#584672;font-size:13px;line-height:1.72}
+    .paper-figure{margin:26px 0 12px;border:1px solid var(--line);border-radius:15px;background:#fbfaf7;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ec;font-size:11px;font-weight:800}.paper-figure>a{display:flex;align-items:center;justify-content:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;margin:auto;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--blue-tint))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--blue);background:var(--blue-tint)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11px}
+    .table-wrap{width:100%;max-width:100%;min-width:0;margin:17px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px}.table-wrap table{width:100%;min-width:720px;border-collapse:collapse;background:var(--surface);font-size:13.5px;line-height:1.62}caption{padding:12px 13px;color:var(--ink);background:#fafbfd;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--blue-tint);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:#eef6ff!important;font-weight:700}.positive{color:var(--green);font-weight:780}.negative{color:var(--red);font-weight:750}.source-note{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.72}
+    .callout,.verdict{margin:16px 0;padding:14px 16px;border-left:4px solid var(--amber);border-radius:0 10px 10px 0;color:#694c21;background:var(--amber-tint);font-size:14px;line-height:1.78}.verdict{border-left-color:var(--purple);color:#514168;background:var(--purple-tint)}.back{display:inline-block;margin-top:18px;font-size:13px;font-weight:760}
+    body.dark{--bg:#0d1420;--surface:#151e2c;--surface-2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--blue-tint:#1a2d47;--purple-tint:#292442;--green-tint:#19362f;--amber-tint:#382b1c;--shadow:none}
+    body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--surface) 155px)}body.dark .card p,body.dark .boundary p,body.dark .shift p,body.dark .paper-figure figcaption p,body.dark .block-intro{color:#bfcbda}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head,body.dark caption{color:#d7e2ef;background:#1b2635}body.dark .paper-figure figcaption{background:linear-gradient(var(--surface),var(--blue-tint))}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--surface)}
+    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.chapter{padding:22px 19px 26px}.card-grid,.boundary,.shift,.flow{grid-template-columns:1fr}.boundary article:last-child:nth-child(odd){grid-column:auto}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.block-intro):not(.source-note):not(.callout):not(.verdict),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}.table-wrap table{min-width:690px}}
+    @media print{body{color:#111;background:#fff;font-size:11pt}.progress,.toc,.rail,.actions,.back{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}.paper-figure figcaption,.card,.boundary article,.shift article,.formula,th,.focus-row td{color:#111;background:#fff!important}}
+  </style>
+</head>
+<body id="top">
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <header class="hero"><div class="hero-in">
+    <div class="eyebrow">PAPER REVIEW · arXiv:2609.24972v1</div>
+    <h1>不是每次分数上涨都值得写进 Harness：RRSI 如何约束自进化</h1>
+    <p class="subtitle"><span class="paper-name">RRSI: Regularized Recursive Self-Improvement of Agent Harnesses</span>Peng Xia、Rujun Han、Zifeng Wang 等 14 位作者 · Google Cloud AI Research / UNC-Chapel Hill / Stanford / Washington University in St. Louis · 2026-09-21</p>
+    <div class="actions"><a class="action" href="https://arxiv.org/abs/2609.24972v1" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/40-rrsi/paper.pdf" target="_blank">本地 PDF ↗</a><a class="action" href="https://github.com/google-research/rrsi" target="_blank" rel="noreferrer">官方代码 ↗</a><a class="action" href="https://regularized-rsi.com/" target="_blank" rel="noreferrer">项目页 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
+    <div class="metrics">
+      <div class="metric"><small>真正研究对象</small><b>Search Trajectory</b><span>正则化搜索路径，而非封闭编辑空间</span></div>
+      <div class="metric"><small>失效链</small><b>Fit · Noise · Growth</b><span>任务拟合、追逐噪声、复杂度累积</span></div>
+      <div class="metric"><small>评测范围</small><b>8 Benchmarks</b><span>编码、工作空间、工程设计三域</span></div>
+      <div class="metric"><small>迁移证据</small><b>6 Held-out Splits</b><span>1 个域内留出 + 5 个 OOD</span></div>
+      <div class="metric"><small>最高 OOD 增益</small><b>+4.7 pts</b><span>JobBench：36.0 → 40.7</span></div>
+      <div class="metric"><small>成本边界</small><b>2.42M Tokens</b><span>比无正则进化少 36.3%，但高于 H₀</span></div>
+    </div>
+  </div></header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
+      <li><a href="#s1">01 解决的问题：自适应过拟合</a></li>
+      <li><a href="#s2">02 最大优点：改进须经检验</a></li>
+      <li><a href="#s3">03 机制：提案与选择双正则</a></li>
+      <li><a href="#s4">04 证据：迁移、消融与成本</a></li>
+      <li><a href="#s5">05 核心缺点与下一步</a></li>
+    </ol></nav>
+
+    <main>
+      <section class="chapter" id="s1">
+        <h2><span class="num">01</span>论文解决的问题：自进化反复使用同一批任务，容易把过拟合当成进步</h2>
+        <p class="lead">Harness Evolution 会根据固定 evolve set 上的执行轨迹提出修改，再用同一批任务测分并决定是否继承。经过多轮自适应选择，集合内分数上涨不再足以证明 Agent 获得了可复用能力。RRSI 要减少的正是这种自适应过拟合，以及伴随它出现的噪声追逐和复杂度膨胀。</p>
+        <p>对一个冻结策略 π，Harness H 包含系统提示、控制流、工具接口、记忆、技能、子智能体与上下文管理。标准 Harness Evolution 把 H 当作优化变量：在第 t 轮运行当前 Harness，读取轨迹与失败，再由 LLM proposer 生成多个修改，最后把 evolve-set 实测分数最高者写成下一轮的永久状态。这里的关键不是一次普通评估，而是候选本身依赖此前对同一数据的观察；搜索因而成为一个高表达力、强自适应的经验优化过程。</p>
+        <p>论文把失效拆成三条相互耦合的链：候选可以编码 benchmark 特有模式；在有限次随机 rollout 中，偶然胜出的候选会被永久保留；而 score-only 选择没有动力删除上下文、工具或控制逻辑，只要复杂度带来一点局部收益就会持续累积。于是 evolve-set 曲线很好看，迁移到新任务、工具面或 verifier 时，增益却缩小甚至反转。</p>
+        <p>更精确地说，evolve set 的任务没有必然进入最终 Harness；“泄漏”发生在搜索过程：第十轮的提案取决于前九轮在同一批任务上的观察和取舍。模型开发中的验证集若被如此反复用于调参，也会逐渐承担训练信号的角色。RRSI 因而需要同时控制单轮搜索容量、跨轮证据使用和最终结构的资源足迹。</p>
+        <div class="thesis">核心问题：一次分数上涨，是否足以让修改成为 Agent 的永久能力？<span>RRSI 的回答是先筛查任务特异性、噪声与成本，再观察修改能否离开 evolve set 仍然有效。</span></div>
+        <p class="block-intro">与最邻近的四种基线相比，分界不在编辑对象：Meta-Harness、AHE、TTHE、HarnessX 与 RRSI 都能改动 Harness。分界发生在反馈如何进入下一状态，以及成本、稳定性和任务特异性是否拥有不可互相补偿的否决权。</p>
+        <div class="table-wrap"><table>
+          <caption>最邻近方案：差别在搜索规则，而不只是组件集合</caption>
+          <thead><tr><th>方案</th><th>什么保持固定</th><th>什么被优化</th><th>进入永久状态的依据</th><th>主要风险 / 新能力</th></tr></thead>
+          <tbody>
+            <tr><td>H₀（不进化）</td><td>策略与 Harness</td><td>无</td><td>无外层搜索</td><td>无自适应过拟合，但也无法从轨迹改进</td></tr>
+            <tr><td>Meta-Harness / AHE / TTHE / HarnessX</td><td>冻结策略</td><td>开放或模块化 Harness</td><td>以 evolve-set 分数为主</td><td>能自动进化；可能拟合集合、噪声与额外算力</td></tr>
+            <tr class="focus-row"><td>RRSI</td><td>冻结策略与开放编辑空间</td><td>候选修改 + 搜索转移规则</td><td>分数门槛、泄漏筛查、成本约束、历史信用与剪枝</td><td>把“可迁移且值得成本”的修改优先写入 Harness</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Sections 1–3、Related Work 与 Appendix “Baseline Methods”。四种基线在实验中从同一 H₀ 出发，共享冻结策略、evolve set 与 candidate budget。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 1</span><span>Evolve gain vs. held-out transfer</span></div><a href="assets/paper-figures/40-rrsi/figure1-overfit-transfer.png" target="_blank"><img src="assets/paper-figures/40-rrsi/figure1-overfit-transfer.png" alt="RRSI 与四种 Harness 进化基线在 evolve split 增益和 OOD 留出增益上的比较，并展示编码、工作空间和工程设计三域的留出结果"></a><figcaption><strong>最高的 evolve-set 增益，不等于最好的迁移</strong><p>左图中 Meta-Harness 与无正则进化在 evolve split 上提高更多，但落在理想 1:1 迁移线下；AHE、TTHE 与 HarnessX 的 OOD 收益接近零或为负。RRSI 牺牲部分集合内增益，换取更高的 OOD 留出提升。</p><p class="figure-reading"><b>谨慎解读：</b>这张图支持“正则化后的完整系统更会迁移”，但不能单独证明每个具体正则器都通过作者提出的因果路径起作用；机制判断还需要消融与逐轮轨迹。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/abs/2609.24972v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s2">
+        <h2><span class="num">02</span>最大优点：把“改进是否可信”写进自进化的选择规则</h2>
+        <p class="lead">这篇论文最有价值的转向，是让修改承担证据责任：一个候选必须说明自己的假设与代码差分，经任务特异性筛查，在噪声和成本约束下竞争永久位置。这样，系统优化的不只是某次 benchmark 分数，也包括修改在后续任务上复用的可能性。</p>
+        <p>去品牌后的本质可以写成一句话：在冻结 backbone、有限且可重复评测的环境中，把适应边界从“只改 Harness 内容”推进到“连 Harness 的搜索转移规则也受约束”；利用 evolve-set 分数、policy-token 成本、历史差分和泄漏 critic 产生一个可执行 Harness，并用较低的局部拟合自由度换取跨任务迁移。</p>
+        <div class="shift">
+          <article><small>PREVIOUS LOOP</small><h3>分数驱动继承</h3><p>候选只要在当前 evolve set 上更高，就可能进入下一轮。</p></article>
+          <article><small>RRSI MOVE</small><h3>可接受集合</h3><p>先由多个不可补偿条件形成 admissible set，再从中选最高分。</p></article>
+          <article><small>OUTPUT</small><h3>更轻的可迁移 Harness</h3><p>不是最会“买”集合内分数，而是让修改持续证明其价值。</p></article>
+        </div>
+        <p>这也解释了为何论文不把 OOD benchmark 直接放进优化目标。RRSI 试图在不偷看 held-out / OOD 的前提下，仅靠搜索过程的结构偏置获得泛化：更少的同时改动、更清晰的历史信用、停滞时探索未触及组件、对显式任务特异逻辑做事前筛查、用噪声门槛和成本约束拒绝“看似提高”的候选。</p>
+        <p>其中最有延展性的思想是“实验历史”。账本保存的不只是 Agent 做过什么，还包括修改前提出了什么假设、源代码如何变化、分数和成本如何变化、最终是否被接受。失败候选也能成为后续提案的负证据，降低反复尝试同一思路的概率。但这种账本目前仍按候选级结果记账，不能把“有记录”误读为“已识别单个编辑的因果贡献”。</p>
+        <p class="block-intro">论文借用经典正则化术语来组织这些约束，但多次强调它们只是功能类比，而不是对同一连续参数向量直接优化范数。准确理解需要把“每轮更新的稀疏性”“整体资源规模”和“保留结构的稀疏性”分开。</p>
+        <div class="card-grid">
+          <article class="card"><h3>L₀-style：更新基数</h3><p>退火预算限制一个候选能捆绑的独立编辑数。早期允许组合探索，后期趋向单一、可归因修改。</p></article>
+          <article class="card"><h3>L₂-style：整体复杂度</h3><p>额外 policy-token 成本必须由可测得的分数增益支付；它抑制总资源足迹增长，但不要求删除特定组件。</p></article>
+          <article class="card"><h3>L₁-style：结构剪枝</h3><p>近期没有产生严格正收益的组件成为删除目标，使最终 Harness 在离散结构上变稀疏。</p></article>
+          <article class="card"><h3>不是数学等价</h3><p>编辑池会跨轮变化，组件异质，规则也不是范数惩罚目标；术语表达的是复杂度控制角色。</p></article>
+        </div>
+        <p class="callout"><b>源文一致性提示：</b>正文与附录一致地把“更新预算”称为 L₀-style、“成本感知接受”称为 Ridge/L₂-style、“结构剪枝”称为 Lasso/L₁-style；但 Figure 2 的右栏文字把成本接受标成 L₁-style、结构剪枝标成 L₀-style。本文按正文、公式与附录算法解释，这更像图中标签错误，而不是两套不同定义。</p>
+      </section>
+
+      <section class="chapter" id="s3">
+        <h2><span class="num">03</span>双侧正则：一侧控制“搜索容量花在哪里”，另一侧控制“哪些收益能成为永久状态”</h2>
+        <p class="lead">Proposal-side regularization 控制候选如何产生；selection-side regularization 决定哪些候选可以进入下一轮。二者共同减少固定任务反馈被写成永久 Harness 状态的机会。分数仍用于排序，但只比较已通过筛查和接受规则的候选。</p>
+        <p>提案侧首先用余弦退火把每轮独立编辑预算从 b<sub>max</sub> 降到 b<sub>min</sub>。论文三个实例最终都降到 1，初始预算为 3 或 4。其次，每个被评测编辑都记录组件、假设、源代码 diff、分数与成本变化、是否被接受；提案器因而能看到整段进化历史，而不是只模仿上一轮赢家。若最近 w=3 轮的进展不超过经验噪声 δ，就预留一个候选槽探索此前未触及的组件类型。</p>
+        <div class="formula"><div class="eq">bₜ = ⌈bmin + (bmax − bmin) · ½(1 + cos(πt/T))⌉
+
+从“早期组合发现”逐步退火到“后期单改动归因”</div><p>这条规则控制的是候选更新的基数，不限制最终 Harness 能包含多少种组件。一个现实弱点是：早期捆绑编辑仍共享同一个候选级 ΔS 与 ΔC，逐编辑信用并未被真正识别。</p></div>
+        <p>选择侧先由 critic 读取 diff，在完整评测前拒绝任务名、实体名、答案、特定数值等显式 benchmark 逻辑。对进入评测的候选，系统要求它不得低于历史最好分数 S* 超过经验噪声带 δ；若提升明显超过噪声，额外成本必须落在随收益增长的预算线内。若提升仍在噪声区间，则用分数变化、成本变化和此前未进入赢家路径的结构类型做整形判断。</p>
+        <p>筛查安排在测分之前，避免一个显式记住任务答案的候选先得到很高分，再影响后续提案。结构剪枝则处于另一位置：近期未观察到正收益的组件会被标成下一轮的删除目标，由 proposer 提议移除；它不是与噪声底线并列的一道自动拒绝门。这个区别关系到方法的真实控制力度。</p>
+        <div class="formula"><div class="eq">稳定性门槛：Ŝ(H′) ≥ S* − δ
+显著增益时：ΔC ≤ β₀ + β₁ΔS
+噪声区间内：wₛΔS − w꜀ΔC + wₙν(H′) &gt; 0</div><p>这些条件是不可补偿的：成本更低不能拯救跌破稳定性底线的候选；分数更高也不能绕过泄漏筛查。工程设计实例还额外守住 valid-output 和 no-submission 基础可靠性。</p></div>
+        <p class="block-intro">把整轮执行展开，可以看到 RRSI 并没有改变 policy weights，也没有把 held-out 数据塞进搜索。它改变的是候选从想法到永久 Harness 的“制度”：先缩小单次假设束，再积累历史证据，最后通过多重接受门。</p>
+        <div class="flow"><div>运行 Hₜ<br>汇总失败轨迹</div><div>按预算与历史<br>生成候选 edits</div><div>critic 事前筛查<br>泄漏与惰性结构</div><div>在 evolve set<br>测分数与 tokens</div><div>从 admissible set<br>选 Hₜ₊₁ 或保留 Hₜ</div></div>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>Proposal-side + selection-side regularization</span></div><a href="assets/paper-figures/40-rrsi/figure2-pipeline.png" target="_blank"><img src="assets/paper-figures/40-rrsi/figure2-pipeline.png" alt="RRSI 框架图：左侧为退火更新稀疏性、历史信用和结构化探索，右侧为泄漏筛查、噪声门槛、成本感知接受和结构剪枝"></a><figcaption><strong>RRSI 正则化的是 transition rule，而不是允许修改的组件清单</strong><p>左侧回答搜索容量如何使用，右侧回答哪些候选可以成为永久状态；中间的 Harness 编辑空间仍保持开放。每轮若没有候选同时满足门槛，系统保留当前 Hₜ。</p><p class="figure-reading"><b>阅读要点：</b>图中的 A–G 应按流程理解，而不要把 L₀/L₁ 标签当作严格数学目标。成本约束的 proxy 是 policy tokens；它覆盖部署推理成本，却不覆盖 proposer、analyst、critic 与所有失败候选的外层搜索开销。</p><div class="figure-source"><span>来源：论文 Figure 2；标签一致性说明见本页第二章</span><a href="https://arxiv.org/abs/2609.24972v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s4">
+        <h2><span class="num">04</span>证据最强之处不是最高分，而是“集合内少赢一点、集合外多留下来一点”</h2>
+        <p class="lead">论文在编码、Agentic Workspace、工程设计三域的 8 个 benchmark 上运行；每一域只在一个 suite 上进化，再把最终 Harness 原样搬到留出 benchmark。RRSI 在 6 个未参与搜索的 split 上全部提高，且工程域由冻结 simulator/testbench 打分，削弱了“只是迎合 LLM judge”的替代解释。</p>
+        <p>主实验在 Claude Opus 4.8 冻结策略上运行，proposer、跨轮失败分析器与 leakage critic 也使用 Claude Opus 4.8。编码域在 89 个 Terminal-Bench 2.1 任务上进化并迁移到 SWE-bench Verified；工作空间域在 Harvey LAB 的 120 个任务上进化，另有 40 个域内留出任务和 JobBench、GDPval、APEX-Agents 三个 OOD benchmark；工程域在 61 个 EngDesign 任务上进化，再迁移到 Frontier-Eng。</p>
+        <div class="table-wrap"><table>
+          <caption>完整主结果：H₀ 与 RRSI（分数越高越好，均为绝对点数）</caption>
+          <thead><tr><th>领域</th><th>Benchmark / split</th><th>角色</th><th>H₀</th><th>RRSI</th><th>Δ</th></tr></thead>
+          <tbody>
+            <tr><td>编码</td><td>Terminal-Bench 2.1</td><td>Evolve</td><td>74.2</td><td>80.2</td><td class="positive">+6.0</td></tr>
+            <tr><td>编码</td><td>SWE-bench Verified</td><td>OOD</td><td>82.0</td><td>83.8</td><td class="positive">+1.8</td></tr>
+            <tr><td>工作空间</td><td>Harvey LAB</td><td>Evolve</td><td>89.4</td><td>90.5</td><td class="positive">+1.1</td></tr>
+            <tr><td>工作空间</td><td>Harvey LAB</td><td>ID held-out</td><td>86.9</td><td>89.2</td><td class="positive">+2.3</td></tr>
+            <tr><td>工作空间</td><td>JobBench</td><td>OOD</td><td>36.0</td><td>40.7</td><td class="positive">+4.7</td></tr>
+            <tr><td>工作空间</td><td>GDPval</td><td>OOD</td><td>48.8</td><td>52.3</td><td class="positive">+3.5</td></tr>
+            <tr><td>工作空间</td><td>APEX-Agents</td><td>OOD</td><td>34.2</td><td>37.9</td><td class="positive">+3.7</td></tr>
+            <tr><td>工程设计</td><td>EngDesign</td><td>Evolve</td><td>50.0</td><td>54.9</td><td class="positive">+4.9</td></tr>
+            <tr><td>工程设计</td><td>Frontier-Eng</td><td>OOD</td><td>17.7</td><td>22.0</td><td class="positive">+4.3</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Figure 3 与 Section 4.2。Harvey LAB 同一 benchmark 同时包含 evolve 和固定 ID held-out split，因此“8 个 benchmark”对应 9 行 split 结果。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 3</span><span>Main results across three domains</span></div><a href="assets/paper-figures/40-rrsi/figure3-main-results.png" target="_blank"><img src="assets/paper-figures/40-rrsi/figure3-main-results.png" alt="RRSI 在 Terminal-Bench、SWE-bench Verified、Harvey LAB、JobBench、GDPval、APEX-Agents、EngDesign 和 Frontier-Eng 上相对未进化 Harness 的结果"></a><figcaption><strong>留出提升跨三种任务形态，但幅度不是均匀的</strong><p>编码 OOD 只提高 1.8 点，工作空间 OOD 提高 3.5–4.7 点，Frontier-Eng 提高 4.3 Medal points。论文报告所有 held-out split 均未回退，这是比“最高 +14.1”更贴近中心主张的证据。</p><p class="figure-reading"><b>谨慎解读：</b>主表未报告多次独立进化 run 的方差或显著性检验；因此 1.8–2.3 点的小幅差异是否跨搜索随机性稳定，仍需复现确认。每个 H₀ 与 RRSI 在同一时间窗评测，只控制了评测基础设施漂移。</p><div class="figure-source"><span>来源：论文 Figure 3</span><a href="https://arxiv.org/abs/2609.24972v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+        <p>最能说明论文问题的对照出现在工作空间域。无正则进化使 Harvey evolve 分数从 89.4 升至 92.8，增加 3.4 点；其 OOD 平均只从 39.7 升至 40.3，增加 0.6 点。RRSI 的 evolve 分数只增加 1.1 点，OOD 平均却增加 3.9 点，达到 43.6。这个方向相反的结果，比单独展示最高分更直接地支持作者关于自适应过拟合的判断。</p>
+        <div class="table-wrap"><table>
+          <caption>工作空间消融：正则化把收益从 evolve split 推向 OOD</caption>
+          <thead><tr><th>设置</th><th>Harvey Evolve ↑</th><th>ID Held-out ↑</th><th>OOD Avg. ↑</th><th>Tokens / trial ↓</th></tr></thead>
+          <tbody>
+            <tr><td>H₀</td><td>89.4</td><td>86.9</td><td>39.7</td><td>1.56M</td></tr>
+            <tr><td>无正则进化</td><td class="positive">92.8</td><td>88.9</td><td>40.3</td><td class="negative">3.80M</td></tr>
+            <tr><td>去掉 proposal regularizers</td><td>90.7</td><td>88.8</td><td>41.9</td><td>2.69M</td></tr>
+            <tr><td>去掉 acceptance regularizers</td><td>91.5</td><td>88.7</td><td>41.0</td><td>3.59M</td></tr>
+            <tr class="focus-row"><td>RRSI</td><td>90.5</td><td class="positive">89.2</td><td class="positive">43.6</td><td>2.42M</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文 Table 2。OOD Avg. 为 JobBench、GDPval、APEX-Agents 均值。2.42M 相比无正则 3.80M 少 36.3%；摘要的“30% fewer”是保守概述。</p>
+        <p>分组消融中，去掉 proposal 侧约束，OOD 平均从 43.6 降到 41.9；去掉 acceptance 侧约束则降到 41.0，policy tokens 由 2.42M 升至 3.59M。这个实例表明 selection 侧对结果影响更大，但论文只按两大组移除规则，不能据此断言其中某一个门槛单独主导了迁移。</p>
+        <p class="block-intro">论文附录还给出逐轮决策案例，使“什么修改值得留下”变得具体。下面几行展示的是候选、实测变化与选择理由；它们说明规则如何执行，是机制行为的例证，不能替代跨任务的因果验证。</p>
+        <div class="table-wrap"><table>
+          <caption>附录案例：分数、成本和稳定性如何共同决定候选命运</caption>
+          <thead><tr><th>候选</th><th>修改</th><th>Evolve-set 结果</th><th>决定</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>编码 R0-A</td><td>完工前核验；长作业采用非阻塞轮询</td><td>+3.93 点</td><td>接受</td><td>把通用执行习惯写入 Harness</td></tr>
+            <tr><td>编码 R0-B</td><td>相似的核验提醒和长作业指导</td><td>+1.69 点；tokens +26.1%</td><td>成本规则拒绝</td><td>小幅实测提升不足以支付额外推理</td></tr>
+            <tr><td>编码 R8-B</td><td>完工前再次固定原始任务指令</td><td>−2.81 点；tokens −13.6%</td><td>稳定性底线拒绝</td><td>降成本不能抵消明显的性能退化</td></tr>
+            <tr><td>工程 R2</td><td>对不存在工作目录的工具错误加入有限恢复提示</td><td>122/244 → 128/244；tokens +1.6%</td><td>接受</td><td>小而通用的可靠性修复</td></tr>
+          </tbody>
+        </table></div>
+        <p class="source-note">来源：论文附录 Table “Representative harness-evolution decisions”。案例展示选择规则的行为；其中“通用”是依据修改内容作出的解释，不是额外的独立迁移测量。</p>
+        <p>跨策略证据进一步缩小了“只适配一个 backbone”的解释。编码域独立使用 Claude Opus 4.8 与 Gemini 3.5 Flash 进化：前者在 Terminal-Bench / SWE-bench 上分别 +6.0 / +1.8，后者 +14.1 / +2.2。把 Gemini 3.5 Flash 搜出的 Harness 原样放到更弱、未参与搜索的 Gemini 3.1 Flash Lite，Terminal-Bench 仍从 11.2 提到 14.6（+3.4 点）。这支持机制可跨能力等级复用，但只覆盖一次同家族的 unseen-model transfer。</p>
+        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 4</span><span>Deployment cost vs. OOD transfer</span></div><a href="assets/paper-figures/40-rrsi/figure4-efficiency.png" target="_blank"><img src="assets/paper-figures/40-rrsi/figure4-efficiency.png" alt="RRSI 和四种基线在工作空间 OOD 平均分、每次 trial 的 policy token 数和轨迹步数上的比较"></a><figcaption><strong>RRSI 是最轻的 evolved Harness，却不是最便宜的 Harness</strong><p>相对四种进化基线，RRSI 同时拥有更高 OOD 平均与更低 policy-token / trajectory-step 成本；但 H₀ 仍只用 1.56M tokens 和 21.2 步，低于 RRSI 的 2.42M 与 26.3 步。</p><p class="figure-reading"><b>阅读要点：</b>这是一条部署期 Pareto 证据，不是完整生命周期经济性。论文没有报告 20/40 轮搜索中 proposer、analyst、critic、重复评测和失败候选的总 token、墙钟时间或摊销点。</p><div class="figure-source"><span>来源：论文 Figure 4 与 Section 4.3</span><a href="https://arxiv.org/abs/2609.24972v1" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
+      </section>
+
+      <section class="chapter" id="s5">
+        <h2><span class="num">05</span>最大缺点：能筛出更会迁移的 Harness，却还不能解释改进从何而来</h2>
+        <p class="lead">RRSI 的最深边界是证据本身仍由固定 evolve set 提供。规则减少了显式任务拟合和无效成本，留出测试也显示完整系统更会迁移；但历史分数、LLM critic 与组级消融还无法独立识别某个修改为何有效、何时会失效。论文建立了更谨慎的选择制度，尚未形成受控实验驱动的自进化。</p>
+        <p>贡献层级需要分开看。概念贡献是把 Harness RSI 的核心风险表述为自适应过拟合，并把搜索轨迹纳入约束；系统贡献是记录假设和失败的实验账本，以及提案、筛查、评测、接受的闭环；具体机制是退火预算、停滞探索、噪声底线、成本线与删除目标；经验贡献是三域留出提升、分组消融和有限跨模型迁移。最持久的价值是“如何判断改进是否可信”这个研究问题，而不依赖 L₀/L₁/L₂ 的名称。</p>
+        <p class="block-intro">以下五项按对中心主张的影响排序。前两项直接关系到“可迁移机制”能否被识别；后几项界定判别器、长期搜索与成本结论的适用范围。每项都附上能够改变判断的实验，而不是把未测试直接当成失败。</p>
+        <div class="boundary">
+          <article><h3>① 固定反馈集仍主导能力发现</h3><p><b>关乎：</b>能否从“减少已有 benchmark 的过拟合”走向主动发现未知能力缺口。<br><b>现有证据：</b>三域各在一个固定 suite 上进化；作者也承认依赖有限 evolve set 与所选超参数。<br><b>后果：</b>系统仍从既有任务失败中被动提出修改，任务分布之外的能力空白不会自动变成新实验。<br><b>决定性检查：</b>让 Agent 提出新测试、冻结验证器，并测新实验是否比固定任务反馈带来额外迁移。</p></article>
+          <article><h3>② “历史信用”仍是候选级相关性</h3><p><b>关乎：</b>被保留的编辑是否真是改进原因。<br><b>现有证据：</b>早期一个候选可含 3–4 个编辑，附录账本把同一候选的 ΔS、ΔC 赋给每个编辑；消融只移除 proposal / acceptance 两组。<br><b>后果：</b>账本有利于搜索记忆，却不能区分协同、混淆和单个机制的边际效应，更不是长程动作到最终奖励的因果信用。<br><b>决定性检查：</b>对同一候选逐编辑开关、做交互消融，并在新任务上重复。</p></article>
+          <article><h3>③ 泄漏 critic 的判断边界未验证</h3><p><b>关乎：</b>筛查是否真的优先留下可复用机制。<br><b>现有证据：</b>Claude Opus 4.8 在评测前阅读 diff 并拒绝显式任务特异逻辑；论文没有系统报告误判、漏判或与人工标注的一致性。<br><b>后果：</b>隐蔽的 benchmark 拟合可能通过，真正有用的领域规则也可能被错杀。<br><b>决定性检查：</b>构造任务特异、领域通用、跨域通用的盲测编辑集，测 critic 混淆矩阵和后续迁移结果。</p></article>
+          <article><h3>④ 20–40 轮尚不能代表持续 RSI</h3><p><b>关乎：</b>长期自改进是否稳定。<br><b>现有证据：</b>编码与工作空间各 20 轮，工程设计 40 轮，权重冻结，规则本身不演化。<br><b>后果：</b>尚不清楚旧负证据何时应重测、任务漂移后历史如何失效，以及搜索账本与错误判断会否持续积累。<br><b>决定性检查：</b>跨多阶段任务分布持续运行，测性能、误判、账本规模和恢复能力的长期曲线。</p></article>
+          <article><h3>⑤ 推理省 tokens，不等于完整搜索更省</h3><p><b>关乎：</b>部署收益何时抵消发现成本。<br><b>现有证据：</b>最终 Harness 用 2.42M policy tokens/trial，低于无正则进化的 3.80M，但高于 H₀ 的 1.56M。<br><b>缺口：</b>proposer、analyst、critic、失败候选、重复评测的总 token 与墙钟成本未闭合；主表也未量化独立搜索 run 的方差。<br><b>决定性检查：</b>在相同总预算下做多次完整搜索，报告生命周期成本和部署调用数的摊销曲线。</p></article>
+        </div>
+        <p class="callout"><b>最强可信反事实：</b>如果在相同候选、评测次数与总 token 预算下，一个简化的“重复评测 + 置信下界 + 成本约束 + 提前停止”选择器达到同样 OOD 分数，那么论文关于“搜索需控制过拟合”的核心问题仍成立，但完整规则组合的独特贡献会缩小。现有四个邻近基线与两组消融尚未完成这项对照。</p>
+        <p>因此，论文打开的下一步可以表述为“假设 → 受控实验 → 可归因证据 → 可迁移策略”。这是一种基于现有缺口的研究方向，不是论文已经实现的能力。它要求 Agent 能主动设计检验、追踪哪些编辑在新分布下仍起作用，并在环境变化时重新审视旧证据。</p>
+        <p class="verdict"><b>综合判断：</b>RRSI 的最大优点是把“这次修改是否真实、可复用、值得成本”纳入 Harness 自进化的选择规则，实验中出现了 evolve 增益较小、OOD 增益反而更大的关键证据。最大缺点是判别仍依赖固定任务的经验分数和未经充分验证的筛查器，无法对具体修改给出受控、可迁移的因果解释。</p>
+        <p class="source-note">主要来源：arXiv:2609.24972v1（提交于 2026-09-21）的正文、附录、Figure 1–4、主要结果与消融表、附录案例表及算法描述。本文未独立复现实验；“最大优点 / 最大缺点”的排序、最强反事实和“实验驱动自进化”的方向均为基于论文证据的编辑性判断。</p>
+        <a class="back" href="#top">↑ 返回顶部</a>
+      </section>
+    </main>
+
+    <aside class="rail">
+      <div class="rail-card"><h3>最后记住五句话</h3><ul><li>固定任务反复使用会让搜索过拟合</li><li>最高 evolve 分不保证迁移</li><li>实验历史应记录假设、diff 与失败</li><li>候选须同时接受噪声、泄漏和成本检查</li><li>可迁移机制仍需受控归因</li></ul></div>
+      <div class="rail-card"><h3>证据强度</h3><p><b>较强：</b>完整系统的跨域迁移、组级消融与部署成本。<br><b>中等：</b>跨策略和一次未见模型的迁移。<br><b>有限：</b>单编辑因果、critic 准确率、长期 RSI 与生命周期回报。</p></div>
+      <div class="rail-card"><h3>检索关键词</h3><p>adaptive overfitting<br>experiment history<br>harness evolution<br>OOD transfer<br>causal edit attribution</p></div>
+    </aside>
+  </div>
+  <script>
+    const bar=document.getElementById('progress'),theme=document.getElementById('theme'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')];
+    function update(){const h=document.documentElement.scrollHeight-innerHeight;bar.style.width=(h?scrollY/h*100:0)+'%';let id=sections[0]?.id;for(const s of sections){if(s.getBoundingClientRect().top<innerHeight*.36)id=s.id}links.forEach(a=>a.classList.toggle('active',a.hash==='#'+id))}
+    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
+    theme.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('paper-theme',document.body.classList.contains('dark')?'dark':'light')});
+    if(localStorage.getItem('paper-theme')==='dark')document.body.classList.add('dark');
+  </script>
+</body>
+</html>
