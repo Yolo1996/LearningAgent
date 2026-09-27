@@ -24,9 +24,9 @@
           <div class="hero-topics" aria-label="核心研究方向"><span>Post-training</span><span>Agentic RL</span><span>Harness</span><span>Skill · Memory · Context</span><span>Self-Evolution</span><span>Benchmark</span><span>Business</span></div>
         </div>
         <div class="stats" aria-label="索引概览">
-          <div class="stat"><small>全部资料</small><b>71</b><span>结构化 HTML 笔记</span></div>
+          <div class="stat"><small>全部资料</small><b>73</b><span>结构化 HTML 笔记</span></div>
           <div class="stat"><small>文档资料</small><b>11</b><span>技术文章与实践复盘</span></div>
-          <div class="stat"><small>视频资料</small><b>17</b><span>演讲、访谈与技术分享</span></div>
+          <div class="stat"><small>视频资料</small><b>19</b><span>演讲、访谈与技术分享</span></div>
           <div class="stat"><small>论文资料</small><b>43</b><span>Agent 系统、演化与评测精读</span></div>
         </div>
       </div>
@@ -36,7 +36,7 @@
   <main class="shell" id="library">
     <div class="section-head library-heading">
       <div><span class="section-index">LIB</span><h2>技术资料库</h2><p>资料按技术方向分组展示；可继续按方向、资料类型或关键词筛选。</p></div>
-      <div class="count" id="count">71 篇</div>
+      <div class="count" id="count">73 篇</div>
     </div>
 
     <div class="library-controls" aria-label="资料筛选">
@@ -68,6 +68,8 @@
 
   <script>
     const items = [
+      {topic:'evolution',material:'video',href:'./BV1PZhs6bEsy-summary/summary.html',image:'./BV1PZhs6bEsy-summary/frames/frame_0010_00-09-07.jpg',alt:'SPIRAL、SPICE 与 SPADE 三阶段自博弈路线',series:'QINGKE TALK 156',tags:['Self-Play','RSI','环境生成'],title:'从 SPIRAL、SPICE 到 SPADE：自博弈如何走向递归自我改进',desc:'从固定语言游戏、语料驱动出题到可执行自适应环境，拆解模型如何逐步接管训练经验与自动课程。',meta:'61:52 · 含完整讲稿',search:'SPIRAL SPICE SPADE self-play 自博弈 recursive self improvement RSI 后训练 环境生成 自动课程 regret 刘博'},
+      {topic:'agentic',material:'video',href:'./BV1creh6LEu6-summary/summary.html',image:'./BV1creh6LEu6-summary/frames/frame_0030_00-32-24.jpg',alt:'SkyRL 从环境准备到泛化评测的六步 RL 路线',series:'QINGKE TALK 155',tags:['SkyRL','Agentic RL','397B 实战'],title:'SkyRL：模块化 RL 后训练与 397B Office Work Agent 实战',desc:'从环境、Harness 与 token 保真开始，经系统调优、小模型消融和 Hero Run，形成一条可验证的 Agentic RL 扩模路线。',meta:'88:17 · 含完整讲稿',search:'SkyRL Agentic RL 模块化 后训练 397B Office Work Agent APEX Agents Harbor TITO DPPO Qwen 阮世麟'},
       {topic:'posttraining',material:'video',href:'./BV1WbeS6KEFf-summary/summary.html',image:'./BV1WbeS6KEFf-summary/frames/frame_0010_00-13-38.jpg',alt:'OPD token 支持集消融图',series:'ON-POLICY DISTILLATION',tags:['OPD','状态覆盖','稠密监督'],title:'重新理解 On‑Policy Distillation：现象、机制、配方与数据覆盖',desc:'解释强教师为何未必带来强学生，并从 token 重叠、状态覆盖与吸收率重新理解 OPD。',meta:'84:50 · 机制与实验',search:'On-Policy Distillation OPD teacher student token overlap state coverage 蒸馏'},
       {topic:'posttraining',material:'video',href:'./BV1Gz1MBZEGk-summary/summary.html',image:'./BV1Gz1MBZEGk-summary/frames/frame_0013_00-18-11.jpg',alt:'UPGE 统一策略梯度估计器',series:'SFT + RL · HPT',tags:['SFT','策略梯度','混合训练'],title:'统一 SFT 与 RL：从策略梯度到动态混合后训练',desc:'用统一策略梯度分解 SFT、PPO、GRPO 与 off-policy 方法，并按实时表现动态选择训练信号。',meta:'97:02 · 统一理论与方法',search:'SFT RL PPO GRPO UPGE HPT hybrid post-training 策略梯度'},
       {topic:'posttraining',material:'video',href:'./BV1RHe26VE4M-summary/summary.html',image:'./BV1RHe26VE4M-summary/frames/frame_0007_00-03-07.jpg',alt:'MiMo 强化学习异步流水线画面',series:'RL POST-TRAINING',tags:['后训练','Agentic RL','系统工程'],title:'MiMo‑V2.6：强化学习后训练的系统方法',desc:'从超大规模 Rollout、动态采样和组内信用分配，深入到异步流水线、沙箱基础设施与训练稳定性。',meta:'高密度技术解析 · 含拓展调研',search:'MiMo V2.6 RL GRPO PPO rollout SFT 沙箱'},

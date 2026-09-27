@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SkyRL 模块化 Agentic RL 后训练框架与 397B Office Work Agent 实战：从环境、Harness、TITO、系统调优到消融、扩模和泛化评估。">
+  <title>SkyRL：模块化 RL 后训练框架与 397B Office Work Agent 实战</title>
+  <style>
+    :root{
+      --bg:#f2f5f9;--surface:#fff;--surface-2:#f7f9fc;--ink:#18202d;--muted:#637083;--line:#dce3ec;
+      --navy:#0b1930;--navy-2:#17285a;--blue:#5b4fb5;--cyan:#0f8fa6;--green:#10845d;--orange:#c46a13;
+      --red:#bf3447;--purple:#7855c7;--lime:#b9f45b;--shadow:0 14px 38px rgba(20,34,58,.08);
+      --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+      --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.76 var(--sans)}
+    a{color:var(--purple)}button{font:inherit}.progress{position:fixed;z-index:50;inset:0 auto auto 0;width:0;height:3px;background:linear-gradient(90deg,var(--lime),#49d8e8)}
+    .hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 84% 12%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 11% 92%,rgba(120,85,199,.36),transparent 34%),linear-gradient(125deg,var(--navy),var(--navy-2) 57%,#431668)}
+    .hero:after{content:"";position:absolute;inset:0;opacity:.09;background-image:linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.18) 1px,transparent 1px);background-size:44px 44px}
+    .hero-in{position:relative;z-index:1;max-width:1340px;margin:auto;padding:58px 32px 48px}.eyebrow{color:#bac8dd;font-size:12px;font-weight:800;letter-spacing:.14em}
+    .hero h1{max-width:1110px;margin:12px 0 16px;font-size:clamp(36px,5.15vw,66px);line-height:1.06;letter-spacing:-.045em}.hero h1 em{color:var(--lime);font-style:normal}
+    .dek{max-width:960px;margin:0;color:#ccd7e8;font-size:18px;line-height:1.72}.source{display:inline-flex;align-items:center;gap:8px;margin-top:22px;color:#e1ffad;text-decoration:none;font-weight:780}.source:hover{text-decoration:underline}
+    .facts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;max-width:1220px;margin-top:32px}.fact{padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:11px;background:rgba(3,17,37,.35);backdrop-filter:blur(4px)}
+    .fact b{display:block;color:#fff;font:780 19px/1.25 var(--mono);letter-spacing:-.03em}.fact span{display:block;margin-top:4px;color:#aebbd2;font-size:11px;line-height:1.4}
+    .theme{position:absolute;z-index:3;top:27px;right:29px;padding:7px 11px;border:1px solid rgba(255,255,255,.22);border-radius:8px;color:#fff;background:rgba(255,255,255,.08);cursor:pointer}
+    .layout{display:grid;grid-template-columns:238px minmax(0,940px) 210px;gap:22px;max-width:1450px;margin:auto;padding:30px 24px 78px}.toc,.rail{position:sticky;top:22px;align-self:start}.toc{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+    .toc strong,.rail strong{font-size:12px;letter-spacing:.09em}.toc a{display:block;margin-top:9px;padding-left:10px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:12px;line-height:1.55}.toc a:hover,.toc a.active{border-left-color:var(--purple);color:var(--purple);font-weight:720}
+    .rail{display:grid;gap:10px}.rail .box{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}.rail p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.58}.rail .mini{display:grid;gap:7px;margin-top:8px}.rail .mini span{display:flex;justify-content:space-between;gap:8px;padding-top:7px;border-top:1px solid var(--line);font-size:11px}.rail .mini b{font-family:var(--mono);color:var(--ink)}
+    main{min-width:0}.chapter{margin-bottom:20px;padding:30px 32px;border:1px solid var(--line);border-radius:15px;background:var(--surface);box-shadow:var(--shadow)}.chapter h2{margin:0 0 16px;font-size:27px;line-height:1.25;letter-spacing:-.025em}.chapter h3{margin:24px 0 8px;font-size:18px;line-height:1.4}.chapter h4{margin:18px 0 6px;font-size:14px}.chapter p{margin:10px 0;text-indent:2em}.chapter p.noindent,.chapter .lead,.chapter .callout p,.chapter .metric p,.chapter .card p,.chapter .step p{ text-indent:0 }
+    .kicker{display:inline-block;margin-bottom:8px;color:var(--purple);font:800 11px/1 var(--mono);letter-spacing:.11em}.lead{margin:0 0 18px!important;padding:16px 18px;border-left:4px solid var(--purple);border-radius:0 9px 9px 0;background:#f1edfb;font-weight:680}.ts{color:var(--cyan);font:730 11px/1.4 var(--mono)}
+    .insight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.card{padding:14px 15px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}.card h3,.card h4{margin:0 0 5px;font-size:15px}.card p{margin:0;color:var(--muted);font-size:12px;line-height:1.62}.card b{color:var(--ink)}
+    .pipeline{display:flex;align-items:stretch;gap:7px;margin:18px 0}.pipeline div{position:relative;flex:1;padding:12px 9px;border-radius:8px;color:#fff;background:linear-gradient(145deg,#273d68,var(--purple));font-size:12px;text-align:center}.pipeline div:not(:last-child):after{content:"→";position:absolute;right:-10px;z-index:2;color:var(--orange);font-weight:900}
+    .fact-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0}.metric{padding:12px 13px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2)}.metric b{display:block;color:var(--purple);font:790 18px/1.2 var(--mono)}.metric span{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.4}
+    .steps{display:grid;gap:7px;margin:16px 0}.step{display:grid;grid-template-columns:78px minmax(0,1fr);gap:13px;padding:11px 13px;border-top:1px solid var(--line)}.step:first-child{border-top:0}.step .label{color:var(--purple);font:790 12px/1.5 var(--mono)}.step p{margin:0;font-size:13px;line-height:1.62}
+    .callout{margin:17px 0;padding:15px 17px;border:1px solid #efcda7;border-radius:10px;background:#fff7ed;color:#714218}.callout.info{border-color:#b9dbe4;background:#eff9fb;color:#245866}.callout.ok{border-color:#b7decf;background:#effaf5;color:#235f4b}.callout strong{color:inherit}
+    .risk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:16px 0}.risk{padding:13px 14px;border-top:3px solid var(--red);border-radius:8px;background:var(--surface-2)}.risk b{display:block;font-size:13px}.risk span{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.55}
+    figure{margin:19px 0}figure.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}figure.pair figure{margin:0}img{display:block;width:100%;max-width:1280px;height:auto;border:1px solid var(--line);border-radius:10px;background:#101723}figcaption{margin-top:7px;color:var(--muted);font-size:11px;line-height:1.55}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px;line-height:1.55}th,td{padding:10px 11px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:var(--surface-2);font-size:11px;letter-spacing:.03em}.up{color:var(--green);font-weight:780}.down{color:var(--red);font-weight:780}.neutral{color:var(--orange);font-weight:720}
+    code,.formula{font-family:var(--mono)}.formula{margin:15px 0;padding:14px 16px;border:1px solid var(--line);border-radius:9px;background:#0f1d32;color:#dce8f6;font-size:12px;overflow-x:auto;white-space:nowrap}.formula b{color:var(--lime)}
+    .checklist{columns:2;column-gap:26px;margin:15px 0;padding:0;list-style:none}.checklist li{break-inside:avoid;position:relative;margin:0 0 9px;padding:0 0 0 22px;font-size:13px}.checklist li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}
+    .footnote{color:var(--muted);font-size:11px;line-height:1.6}.top{position:fixed;z-index:40;right:20px;bottom:20px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;color:var(--ink);background:var(--surface);box-shadow:var(--shadow);cursor:pointer;opacity:0;pointer-events:none;transition:.2s}.top.show{opacity:1;pointer-events:auto}
+    body.dark{--bg:#0e1420;--surface:#151e2c;--surface-2:#1a2535;--ink:#e8eef6;--muted:#a0aec0;--line:#2a394d;--shadow:0 14px 36px rgba(0,0,0,.25)}body.dark .lead{background:#2c2845}body.dark .callout{background:#3a2b1d;border-color:#6b4b2b;color:#f2d0a7}body.dark .callout.info{background:#17313a;border-color:#285766;color:#a9dce7}body.dark .callout.ok{background:#17332a;border-color:#285f4c;color:#b7e2d3}
+    @media(max-width:1220px){.layout{grid-template-columns:215px minmax(0,1fr)}.rail{display:none}.facts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:820px){.hero-in{padding:46px 18px 36px}.theme{top:14px;right:14px}.layout{display:block;padding:16px 12px 54px}.toc{position:static;margin-bottom:14px}.chapter{padding:23px 19px}.chapter h2{font-size:23px}.insight-grid,.risk-grid{grid-template-columns:1fr}.fact-strip{grid-template-columns:repeat(2,1fr)}.pipeline{display:grid}.pipeline div:not(:last-child):after{content:"↓";right:auto;left:50%;bottom:-14px}.step{grid-template-columns:66px minmax(0,1fr)}figure.pair{grid-template-columns:1fr}.checklist{columns:1}table{display:block;overflow-x:auto}}
+    @media(max-width:480px){.hero h1{font-size:34px}.dek{font-size:16px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.fact b{font-size:16px}.chapter{padding:21px 16px}.fact-strip{grid-template-columns:1fr 1fr}}
+    @media print{.progress,.theme,.toc,.rail,.top{display:none}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.eyebrow,.dek{color:#333}.source{color:#111}.facts{grid-template-columns:repeat(3,1fr)}.fact{border-color:#bbb;background:#fff}.fact b,.fact span{color:#111}.layout{display:block;max-width:none;padding:14px 0}.chapter{box-shadow:none;break-inside:auto}.chapter h2,figure,.callout,.card,.step{break-inside:avoid}a{color:#111}}
+  </style>
+<style id="reading-refinement">
+
+/* Reading refinement: preserve the existing navy / purple / lime palette. */
+body, body.academic-report {font-size:16px;line-height:1.82}
+.hero-in,.hero-inner {max-width:1190px!important;padding-top:46px!important;padding-bottom:39px!important}
+.hero h1 {max-width:990px!important;font-size:clamp(34px,4.35vw,56px)!important;line-height:1.14!important;letter-spacing:-.035em!important;text-wrap:balance}
+.hero .dek,.hero .subtitle {max-width:790px!important;font-size:16px!important;line-height:1.8!important;text-wrap:pretty}
+.hero .facts,.hero .metrics {margin-top:25px!important}
+.hero .metrics {grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:960px}
+.layout {max-width:1260px!important;grid-template-columns:205px minmax(0,820px) 175px!important;gap:22px!important}
+.chapter {padding:31px 36px 35px!important;margin-bottom:22px!important}
+.chapter h2 {font-size:clamp(25px,2.2vw,31px)!important;line-height:1.28!important;margin-bottom:20px!important;text-wrap:pretty}
+.chapter h3 {font-size:19px!important;line-height:1.4!important;margin-top:30px!important;margin-bottom:12px!important;text-wrap:pretty}
+.chapter > p:not(.lead),.chapter .prose p {max-width:760px;font-size:16px;line-height:1.86;margin-top:12px;margin-bottom:16px}
+.chapter .lead {max-width:760px;font-size:16.5px!important;line-height:1.8!important;margin-bottom:23px!important}
+.chapter figure {margin-top:24px;margin-bottom:27px}
+.chapter figure img {display:block;width:auto!important;max-width:100%!important;height:auto;margin-inline:auto}
+.chapter figcaption {max-width:760px;margin-inline:auto;padding-top:10px;font-size:12px!important;line-height:1.6!important}
+.chapter table {line-height:1.58}
+.chapter th,.chapter td {padding:11px 13px}
+.manuscript-cta {display:inline-flex;align-items:center;justify-content:center;min-height:43px;margin:18px 0 0 10px;padding:8px 14px;border:1px solid var(--lime,#b9f45b);border-radius:9px;color:#17243a!important;background:var(--lime,#b9f45b);font-weight:800;text-decoration:none!important;white-space:nowrap;box-shadow:0 7px 18px rgba(12,23,43,.12)}
+.manuscript-cta:hover {background:#cefc82;text-decoration:none!important;transform:translateY(-1px)}
+.actions .manuscript-cta,.hero-actions .manuscript-cta {margin:0}
+a:focus-visible,button:focus-visible {outline:3px solid var(--lime,#b9f45b);outline-offset:3px}
+@media(max-width:1220px){.layout{grid-template-columns:195px minmax(0,820px)!important}.rail{display:none!important}}
+@media(max-width:820px){.layout{display:block!important;padding:17px 13px 60px!important}.chapter{padding:24px 22px 29px!important}.hero-in,.hero-inner{padding:39px 20px 31px!important}.hero h1{font-size:clamp(31px,7vw,45px)!important}.hero .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:480px){body,body.academic-report{font-size:15.5px}.hero h1{font-size:34px!important}.hero .dek,.hero .subtitle{font-size:15px!important}.chapter{padding:22px 17px 27px!important}.chapter h2{font-size:24px!important}.chapter h3{font-size:18px!important}.chapter > p:not(.lead),.chapter .prose p{font-size:15.5px;line-height:1.86}.manuscript-cta{display:flex;width:100%;margin:12px 0 0;white-space:normal}.actions .manuscript-cta,.hero-actions .manuscript-cta{margin:0}.hero .facts,.hero .metrics{gap:8px!important}}
+@media print{.manuscript-cta{color:#111!important;background:#fff;border-color:#777;box-shadow:none}}
+
+</style></head>
+<body><script src="../library-nav.js" data-material-type="video"></script>
+  <div class="progress" id="progress"></div>
+  <header class="hero">
+    <button class="theme" id="theme" type="button" aria-label="切换明暗主题">◐ 主题</button>
+    <div class="hero-in">
+      <div class="eyebrow">AGENTIC RL · MODULAR POST-TRAINING · OFFICE WORK AGENT</div>
+      <h1>SkyRL：模块化 RL 后训练，如何扩到 <em>397B</em></h1>
+      <p class="dek">真正昂贵的不是某个 RL 公式，而是让环境、Harness、token、推理和训练在大规模并发下保持一致。视频用一个 Office Work Agent 项目给出了一条严格按风险排序的六步路线。</p>
+      <a class="source" href="https://www.bilibili.com/video/BV1creh6LEu6/">观看原视频 ↗</a><a class="manuscript-cta" href="manuscript.html">阅读完整讲稿 →</a>
+      <div class="facts">
+        <div class="fact"><b>88:17</b><span>视频时长</span></div>
+        <div class="fact"><b>1,928</b><span>专家训练任务</span></div>
+        <div class="fact"><b>480</b><span>Held-out 评测任务</span></div>
+        <div class="fact"><b>13.96→23.75%</b><span>35B Pass@1</span></div>
+        <div class="fact"><b>16.11→27.29%</b><span>397B Pass@1</span></div>
+        <div class="fact"><b>20×8 H200</b><span>397B Hero Run</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="章节导航">
+      <strong>阅读导航</strong>
+      <a href="#c1">01 SkyRL 在解决什么</a>
+      <a href="#c2">02 任务、证据与核心结果</a>
+      <a href="#c3">03 先修管道，再做 RL</a>
+      <a href="#c4">04 从小规模验证到 397B</a>
+      <a href="#c5">05 泛化、边界与复用清单</a>
+    </nav>
+
+    <main>
+      <section class="chapter" id="c1">
+        <span class="kicker">FRAMEWORK</span>
+        <h2>01｜SkyRL 在解决什么：把异步 Agentic RL 做成可组合系统</h2>
+        <p class="lead">SkyRL 的重点不是再发明一个 RL 算法，而是把训练器、推理引擎、环境与 Harness 分开，让大型模型、长上下文和复杂工具调用能够在同一条后训练流水线上稳定协作。</p>
+
+        <h3>四个设计支点</h3>
+        <div class="insight-grid">
+          <div class="card"><h4>异步优先</h4><p>异步训练不是事后添加的优化项，而是长轨迹、时延不齐的 Agent rollout 的默认组织方式。</p></div>
+          <div class="card"><h4>训练与推理都可扩展</h4><p>训练侧接 Megatron 或 FSDP；推理侧以 vLLM 为主，并处理 pause/resume、权重同步与高并发请求。</p></div>
+          <div class="card"><h4>环境与 Harness 可替换</h4><p>框架只规定接口，用户可接自己的任务环境、工具循环与 sandbox 生命周期管理；视频案例使用 Harbor。</p></div>
+          <div class="card"><h4>Tinker API 兼容</h4><p>把 forward/backward、optimizer step、sample 与 save state 暴露成训练服务接口，为本地与托管后端提供同一脚本入口。</p></div>
+        </div>
+
+        <p><span class="ts">07:13–10:26</span> 讲者把 2026 年后训练需求概括为两股同时发生的变化：一边是模型从几十 B 扩到数百 B 甚至更大、上下文更长、异步 RL 成为常态；另一边是任务更定制、API 更标准化、Agent Harness 从简单 ReAct loop 发展为复杂的代码与办公自动化系统。</p>
+
+        <div class="pipeline" aria-label="SkyRL 训练闭环">
+          <div>SFT / 成功轨迹蒸馏</div><div>Generator 产生 Rollout</div><div>Environment 返回观察与奖励</div><div>Trainer 更新策略</div><div>Weight Sync 回推理侧</div>
+        </div>
+
+        <figure>
+          <img src="frames/frame_0010_00-10-03.jpg" width="1280" height="720" alt="SkyRL Controller、Trainer、推理引擎和环境组成的架构图">
+          <figcaption><span class="ts">00:10:03</span> Controller 编排训练与生成；轨迹和奖励进入 Trainer，更新后的策略权重再同步给 vLLM。环境既可用 SkyRL-Gym，也可接入 Harbor 等外部 Harness。</figcaption>
+        </figure>
+
+        <h3>规模化不只等于“加卡”</h3>
+        <table>
+          <thead><tr><th>环节</th><th>视频给出的关键工程选择</th><th>要解决的问题</th></tr></thead>
+          <tbody>
+            <tr><td>SFT / RFT</td><td>与 RL 共享 Megatron/FSDP、数据格式和模型定义；支持 sequence packing、streaming data、混合数据集</td><td>先用更静态、可控的学习信号建立初始能力</td></tr>
+            <tr><td>推理</td><td>HTTP 化 control plane / data plane；新 trajectory 先分配到低负载 engine，后续 turn 保持粘性</td><td>兼顾负载均衡与 prefix cache；案例页报告最高约 1.4× generation throughput</td></tr>
+            <tr><td>权重同步</td><td>vLLM 原生 weight sync、两阶段 pause/resume</td><td>避免 DP/EP 组合下更新协调导致死锁</td></tr>
+            <tr><td>数值与策略一致性</td><td>FP8 训练与推理、同步量化 scale；MoE Router Replay（R3）与 Top‑P Replay</td><td>减少 rollout 与 training 的策略偏差，防止熵过快坍缩</td></tr>
+            <tr><td>服务化</td><td>Tinker Engine + Multi‑LoRA；训练侧时间复用、推理侧批量服务多个 LoRA</td><td>在共享 base model 上承载持续学习与多租户实验</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><p><strong>理解重点：</strong>SkyRL 的抽象边界是“训练/生成/环境如何协作”，而不是把所有 Agent 逻辑重写进训练框架。这为后面的 Office Work 项目保留了真实工具链与 sandbox。</p></div>
+      </section>
+
+      <section class="chapter" id="c2">
+        <span class="kicker">TASK & EVIDENCE</span>
+        <h2>02｜任务、证据与核心结果：APEX‑Agents 上的真实办公工作</h2>
+        <p class="lead">实验对象不是短答案数学题，而是带文件、邮件、聊天、办公软件与代码执行的长程任务；因此奖励质量和环境可靠性，与模型能力同等重要。</p>
+
+        <h3>一个 world，就是一个可运行的工作场景</h3>
+        <p><span class="ts">26:49–30:40</span> APEX‑Agents 的 held-out 集包含 480 个任务、33 个 world，覆盖管理咨询、投行与公司法。每个 world 可包含 PDF、XLSX、PPTX、邮件、聊天记录和约 9 个 MCP 工具服务器；Agent 既通过工具操作办公系统，也可执行代码。专家为每个任务编写 rubric，LLM judge 按标准逐项判定，文件类任务还用 file diff 验证产物。</p>
+
+        <figure>
+          <img src="frames/frame_0027_00-29-03.jpg" width="1280" height="720" alt="APEX-Agents 办公任务、world、工具和 rubric 评测说明">
+          <figcaption><span class="ts">00:29:03</span> 幻灯片给出任务形态、评测指标与工具环境。MeanReward 是满足标准的平均比例；Pass@1 要求全部标准都满足。</figcaption>
+        </figure>
+
+        <div class="fact-strip">
+          <div class="metric"><b>112</b><span>训练 world 数量</span></div>
+          <div class="metric"><b>1,928</b><span>专家制作的 OTS 训练任务</span></div>
+          <div class="metric"><b>33</b><span>Held-out world 数量</span></div>
+          <div class="metric"><b>3</b><span>咨询 / 投行 / 公司法领域</span></div>
+        </div>
+
+        <h3>结果：两个尺度都获得约 70% 的相对 Pass@1 提升</h3>
+        <figure>
+          <img src="frames/frame_0029_00-31-17.jpg" width="1280" height="720" alt="Qwen 35B 和 397B 模型在 APEX-Agents 上强化学习后的 Pass@1 曲线">
+          <figcaption><span class="ts">00:31:17</span> 视频中的 headline：Qwen3.6‑35B‑A3B 从 13.96% 升至 23.75%，Qwen3.5‑397B‑A17B 从 16.11% 升至 27.29%。这些数字是讲者展示的实验结果，不是本页独立复现。</figcaption>
+        </figure>
+
+        <table>
+          <thead><tr><th>模型</th><th>Base Pass@1</th><th>RL 后 Pass@1</th><th>绝对提升</th><th>讲者强调</th></tr></thead>
+          <tbody>
+            <tr><td>Qwen3.6‑35B‑A3B</td><td>13.96%</td><td>23.75%</td><td class="up">+9.79 pts</td><td>小模型结果超过视频中的若干对照模型</td></tr>
+            <tr><td>Qwen3.5‑397B‑A17B</td><td>16.11%</td><td>27.29%</td><td class="up">+11.18 pts</td><td>沿用小模型 recipe，参数规模约 11×</td></tr>
+          </tbody>
+        </table>
+
+        <h3>关键不是“直接开训”，而是严格降风险</h3>
+        <figure>
+          <img src="frames/frame_0030_00-32-24.jpg" width="1280" height="720" alt="从环境准备到泛化评估的六步 RL 项目路线">
+          <figcaption><span class="ts">00:32:24</span> 六步路线按失败成本排序；约三分之一项目时间投入第 1 步，真正开始大范围算法实验已经是第 4 步。</figcaption>
+        </figure>
+
+        <div class="steps">
+          <div class="step"><div class="label">STEP 1</div><p><b>环境、Harness、TITO 就绪。</b> 先证明每条轨迹、奖励和 token 都可信，此时还不做 RL。</p></div>
+          <div class="step"><div class="label">STEP 2</div><p><b>RL 系统调优。</b> 让训练侧和生成侧吞吐匹配，并确认 train–inference mismatch 健康。</p></div>
+          <div class="step"><div class="label">STEP 3</div><p><b>过拟合少量任务。</b> 若 32 个任务都学不会，就没有理由在 1,928 个任务上烧更多 GPU。</p></div>
+          <div class="step"><div class="label">STEP 4</div><p><b>小模型消融。</b> 用低成本找出真正影响结果的算法与 Harness 旋钮。</p></div>
+          <div class="step"><div class="label">STEP 5</div><p><b>大模型 Hero Run。</b> 沿用已验证 recipe，只重新做系统层配置。</p></div>
+          <div class="step"><div class="label">STEP 6</div><p><b>泛化评测。</b> 更换 Harness，并检查通用推理能力是否退化。</p></div>
+        </div>
+      </section>
+
+      <section class="chapter" id="c3">
+        <span class="kicker">STEP 1</span>
+        <h2>03｜先修管道，再做 RL：环境、Harness 与 TITO</h2>
+        <p class="lead">这一步最“没有算法含量”，却占了项目约三分之一时间。原因很直接：环境错误、Harness 缺陷或 token 漂移都可能让 reward 上升，但模型学到的是绕过系统漏洞，而非真正完成工作。</p>
+
+        <h3>先画清楚：每个组件到底跑在哪里</h3>
+        <figure>
+          <img src="frames/frame_0033_00-35-45.jpg" width="1280" height="720" alt="APEX-Agents 单次 RL trial 的数据、训练、推理、Harbor、sandbox 与 verifier 系统图">
+          <figcaption><span class="ts">00:35:45</span> 左侧是 HF task data，中间为 Ray 管理的训练/推理节点与用户 Generator，右侧每个 trial 独立启动 Modal sandbox、MCP 服务、文件系统和 verifier，外部 Gemini judge 给 rubric 打分。</figcaption>
+        </figure>
+
+        <div class="risk-grid">
+          <div class="risk"><b>非模型错误</b><span>下载、MCP、容器 teardown、SSL、judge 限流、文件解析等失败，会浪费 rollout 并污染奖励。</span></div>
+          <div class="risk"><b>Harness 缺陷</b><span>工具返回码错误、缺包、PDF 表格被压平、工具输出不截断，都可能成为模型被迫适应的“假任务”。</span></div>
+          <div class="risk"><b>Token 漂移</b><span>decode 后重新 tokenize 可能改变 token IDs；多轮对话会让偏差在后续输入中继续累积。</span></div>
+        </div>
+
+        <h3>1A｜环境稳健性：先按训练并发跑完整数据集</h3>
+        <p><span class="ts">37:41–40:26</span> 经验规则是：在训练前，用预计的 RL 并发度把全训练集纯推理跑一遍。案例中的目标并发约 600；第一次全规模跑 480 个 trial 时，229 个报错、7 个永久挂起，而且没有一个是模型能力问题。之后通过全链路 timeout、每个 agent loop 单独 OS 进程、judge key 轮换与重试，把非模型错误率从约 48% 降到 0.15%。</p>
+        <figure>
+          <img src="frames/frame_0035_00-37-59.jpg" width="1280" height="720" alt="环境错误率从 48% 降到 0.15% 的工程检查项">
+          <figcaption><span class="ts">00:37:59</span> “不要计划在 RL 期间 mask 掉错误”，因为错误 rollout 已经消耗了昂贵的生成与训练资源；应在开训前把非模型错误压到接近零。</figcaption>
+        </figure>
+
+        <h3>1B｜Harness 正确性：失败只能归因于能力不足</h3>
+        <p><span class="ts">40:26–42:48</span> 做一轮 evaluation 后，应逐条分析未满分轨迹，确认失败来自模型能力，而不是工具或 Harness 的别扭设计。案例修复 Harness 后，未训练模型的 reward 就从约 23% 升到 28%，几乎相当于一次 RL 提升——这也说明，训练前的系统修复本身就是重要的“能力释放”。</p>
+        <div class="callout"><p><strong>危险信号：</strong>reward 上升并不自动证明能力上升。模型可能只是学会避开工具 bug、迎合 judge、耗尽上下文前投机结束，甚至利用 rubric 漏洞“散弹式”罗列所有情形。</p></div>
+
+        <h3>1C｜TITO：训练必须针对引擎真正采样的 token</h3>
+        <p><span class="ts">43:00–46:26</span> Token-in / token-out 的核心原则是：不要对引擎输出的字符串重新 tokenize。Chat template 的 decode → re-encode 不是可逆过程；假如 rollout 实际采样 token 序列 <code>[0,1,3]</code>，重新分词后却变成 <code>[2,3]</code>，训练器就会奖励或惩罚“模型没有执行过的动作”，系统悄然变成 off-policy。</p>
+        <figure>
+          <img src="frames/frame_0040_00-43-35.jpg" width="1280" height="720" alt="TITO 原则、token 重分词错误与三种解决路径">
+          <figcaption><span class="ts">00:43:35</span> 三条实现路径：用 raw-token completion API 重写 Harness；使用 <code>return_token_ids</code>；或由 RL 框架提供 tokenization proxy。多轮场景最适合后两端都能完整维护 token 历史的方案。</figcaption>
+        </figure>
+        <div class="formula" aria-label="TITO 正确性条件"><b>TITO parity check</b> = 同一模型 + 同一 480 个任务 + 默认 Harness 与 token-aware Harness 的评测结果应一致</div>
+      </section>
+
+      <section class="chapter" id="c4">
+        <span class="kicker">STEPS 2–5</span>
+        <h2>04｜从小规模验证到 397B：系统调优、过拟合、消融、扩模</h2>
+        <p class="lead">大模型 Hero Run 应该“无聊”：真正的判断已经在前面的低成本实验完成。扩模时只改变系统参数，不再临时发明新算法。</p>
+
+        <h3>Step 2｜让训练与生成彼此不等待</h3>
+        <p><span class="ts">46:39–50:29</span> 训练侧调 Megatron 并行方式、CPU offload 粒度与动态 micro-batching；推理侧根据 KV cache 容量和平均轨迹长度估算并发。最终希望 trainer 刚完成一步，下一批 rollout 已准备好，而不是持续等待 generation buffer。</p>
+        <figure>
+          <img src="frames/frame_0043_00-46-56.jpg" width="1280" height="720" alt="训练侧与推理侧的系统调优参数和训练推理概率差异曲线">
+          <figcaption><span class="ts">00:46:56</span> 并发同时受系统上限与算法上限约束；轨迹会随训练变长，因此并发不是一次性常数。视频经验中 train–inference log-prob difference 约 0.01–0.07 较健康，连续两步高于 0.1 应中止排查。</figcaption>
+        </figure>
+        <div class="formula">
+          <math display="block" aria-label="可用并发约等于 KV 容量除以平均轨迹长度，与算法并发上限两者中的较小值">
+            <mrow><msub><mi>C</mi><mtext>可用并发</mtext></msub><mo>≈</mo><mi mathvariant="normal">min</mi><mo>(</mo>
+            <mfrac><msub><mi>K</mi><mtext>KV 容量</mtext></msub><msub><mi>L</mi><mtext>平均轨迹</mtext></msub></mfrac><mo>,</mo>
+            <mrow><mo>(</mo><mi>s</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>×</mo><mi>B</mi><mo>×</mo><mi>G</mi></mrow><mo>)</mo></mrow>
+          </math>
+          <span><b>其中：</b><code>s</code> 为 staleness，<code>B</code> 为 batch size，<code>G</code> 为每个 prompt 的采样数。</span>
+        </div>
+
+        <h3>Step 3｜先证明 32 个任务能被过拟合</h3>
+        <p><span class="ts">50:29–52:40</span> 协议是 32 tasks、batch size 32、每个 prompt 采样 8 次，并用同步训练让每一步近似一个 epoch。某些文件编辑任务起初 25 个 epoch 只提升约 3%，而其他任务约提升 10%；根因不是 RL 算法，而是本地 file extraction 噪声太大。更换高保真第三方文档解析器后，同一批任务才可稳定过拟合。</p>
+        <figure>
+          <img src="frames/frame_0047_00-51-24.jpg" width="1280" height="720" alt="32 个任务过拟合协议与奖励上升曲线">
+          <figcaption><span class="ts">00:51:24</span> 小集合过拟合既是可学习性测试，也是端到端系统单元测试；如果失败，应回退检查环境、Harness、verifier 与数据。</figcaption>
+        </figure>
+
+        <h3>Step 4｜在 35B 上做真正有区分度的消融</h3>
+        <figure>
+          <img src="frames/frame_0049_00-53-38.jpg" width="1280" height="720" alt="35B 模型五个算法与 Harness 旋钮的消融结果表">
+          <figcaption><span class="ts">00:53:38</span> 五个旋钮、15 次 run、三次评测；真正影响最大的不是复杂 penalty，而是 loss aggregation 与轻量 context nudge。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>旋钮</th><th>比较</th><th>视频结论</th><th>解释</th></tr></thead>
+          <tbody>
+            <tr><td>Loss aggregation</td><td>token mean vs prompt mean</td><td class="up">prompt mean +3.9 pts</td><td>避免长轨迹凭 token 数量主导更新，让每个任务权重更接近相等</td></tr>
+            <tr><td>Policy loss</td><td>rollout IS vs DPPO</td><td class="neutral">一轮后得分接近</td><td>DPPO 产生更多、但更短的 turn；讲者将其视为更充分探索与更高效思考的迹象</td></tr>
+            <tr><td>Context nudge</td><td>on vs off</td><td class="up">+3.0 pts</td><td>剩余上下文约 20% 时提示尽快收尾，减少超长轨迹与被 mask 的样本</td></tr>
+            <tr><td>Overlong filtering</td><td>mask vs reward 0</td><td class="down">中性到负面</td><td>最终保留 reward 0，让超长行为继续受到惩罚</td></tr>
+            <tr><td>Adaptive length penalty</td><td>多组 β</td><td class="down">中性到负面</td><td>未观察到足够收益，不纳入最终 recipe</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Step 5｜同一 recipe，扩到 11× 参数</h3>
+        <p><span class="ts">57:54–59:11</span> Hero Run 沿用 <code>prompt_mean + DPPO + context nudge</code>，不使用 overlong filtering 与 adaptive length penalty；学习率约 <code>1e‑6</code>，batch 16 × 16 samples，staleness ≤ 3，训练上下文 160K，3 epochs。397B 运行在 20 个节点、每节点 8 张 H200。讲者强调，35B 与 397B 之间算法 recipe 不变，主要重新调 Step 2 的系统旋钮。</p>
+        <figure>
+          <img src="frames/frame_0053_00-58-06.jpg" width="1280" height="720" alt="397B Hero Run 的训练配方、奖励与策略熵曲线">
+          <figcaption><span class="ts">00:58:06</span> 训练曲线显示两个模型尺度的奖励与熵保持可用；幻灯片将扩模经验概括为“babysitting experience identical”。</figcaption>
+        </figure>
+      </section>
+
+      <section class="chapter" id="c5">
+        <span class="kicker">STEP 6 & TAKEAWAYS</span>
+        <h2>05｜泛化、边界与复用清单：能力有没有被 Harness 锁死</h2>
+        <p class="lead">Agentic RL 最关键的外部检验，不只是训练 Harness 上分数更高，而是换一个完全没见过的 Harness 后，提升是否仍然存在。</p>
+
+        <h3>Harness swap：35B 迁移得比 397B 更完整</h3>
+        <figure>
+          <img src="frames/frame_0054_00-59-13.jpg" width="1280" height="720" alt="在 Archipelago 训练后迁移到未见过的 OpenCode Harness 的评测表和工具使用曲线">
+          <figcaption><span class="ts">00:59:13</span> OpenCode 不暴露 MCP，只允许 code execution，是一个显著不同的 Harness。两个尺度的收益大体迁移，35B 的迁移更完整。</figcaption>
+        </figure>
+        <table>
+          <thead><tr><th>模型</th><th>Archipelago（训练 Harness）</th><th>OpenCode（未见 Harness）</th><th>观察</th></tr></thead>
+          <tbody>
+            <tr><td>35B base → RL</td><td>28.69 → 38.81 <span class="up">(+10.1)</span></td><td>26.22 → 37.93 <span class="up">(+11.7)</span></td><td>收益几乎完整迁移；训练后期约 80% 工具调用转向 code execution</td></tr>
+            <tr><td>397B base → RL</td><td>31.29 → 43.18 <span class="up">(+11.9)</span></td><td>28.92 → 37.62 <span class="up">(+8.7)</span></td><td>仍明显提升，但迁移弱于 35B，视频将其与模型持续依赖 MCP 联系起来</td></tr>
+          </tbody>
+        </table>
+        <p>视频还报告 Humanity’s Last Exam 与 GPQA 基本持平或略升，用来说明这次约两百多步的办公任务训练没有观察到明显通用推理退化。但这只能视作有限检查：它不能证明所有能力维度都无损。</p>
+
+        <h3>最值得复用的项目清单</h3>
+        <ul class="checklist">
+          <li>按真实 RL 并发跑完整训练集，先把非模型错误压到接近零。</li>
+          <li>对失败轨迹做归因：能力不足、Harness 缺陷、环境失败、judge 漏洞必须分开。</li>
+          <li>确认 token-in / token-out 一致，绝不对引擎输出做有损重分词。</li>
+          <li>用默认 Harness 与 token-aware Harness 做 parity check。</li>
+          <li>调到 trainer 不等待 generator，并随轨迹长度动态重估并发。</li>
+          <li>监控 train–inference log-prob difference，而不只看 reward。</li>
+          <li>先过拟合 32 个任务；过拟合失败就回退排查管道。</li>
+          <li>消融放在小模型完成，再把确定 recipe 原样扩到大模型。</li>
+          <li>至少做一次 Harness swap，检查学到的是任务能力还是接口习惯。</li>
+          <li>对 reward hacking 做专门红队测试，尤其是 LLM judge 的宽容模式。</li>
+        </ul>
+
+        <h3>讲者在问答中补充的边界</h3>
+        <div class="insight-grid">
+          <div class="card"><h4>奖励可以连续，也可以二值化</h4><p>案例直接把 rubric 满足比例作为浮点 reward；Pass@1 式二值 reward 也可行，但这是可消融选择。</p></div>
+          <div class="card"><h4>训练数据没有复杂 curriculum</h4><p>三个领域约 1,900 个任务被随机混合训练；讲者承认领域配比、难度采样仍有探索空间。</p></div>
+          <div class="card"><h4>企业应训练部署时真正使用的 Harness</h4><p>排行榜项目选择 Archipelago 是因为榜单环境如此；企业场景更应贴近实际部署，必要时混合多个 Harness。</p></div>
+          <div class="card"><h4>Office Work 数据的质量验证仍困难</h4><p>专家造数成本高；合成任务可用强弱模型的预期排序做粗检，但最终仍需要环境质量与训练收益验证。</p></div>
+        </div>
+
+        <div class="callout ok"><p><strong>一句话结论：</strong>这场分享的真正方法论是“把大模型 RL 变成可证伪的工程流程”：先证明每一层都可信，再增加模型规模；任何一步不能通过，就停止扩大成本。</p></div>
+        <p class="footnote noindent"><strong>证据边界：</strong>本文依据原视频讲解与画面整理，数字、对比和因果解释均属于讲者及其幻灯片所呈现的项目结果；未对训练代码、私有训练数据或实验进行独立复现。训练集因许可限制未公开，自动识别中易混淆的专名已结合幻灯片校正。</p>
+      </section>
+    </main>
+
+    <aside class="rail">
+      <div class="box"><strong>核心判断</strong><p>项目的主要风险不是“算法没选对”，而是 reward、token、环境或 Harness 不可信。</p></div>
+      <div class="box"><strong>六步成本顺序</strong><div class="mini"><span>管道可信 <b>先</b></span><span>系统平衡 <b>再</b></span><span>小规模可学 <b>后</b></span><span>大模型扩模 <b>末</b></span></div></div>
+      <div class="box"><strong>阅读建议</strong><p>框架用户先看第 01 章；要落地 Agentic RL，重点看第 03–05 章。</p></div>
+    </aside>
+  </div>
+
+  <button class="top" id="top" type="button" aria-label="返回顶部">↑</button>
+  <script>
+    const progress=document.getElementById('progress'),topBtn=document.getElementById('top');
+    const tocLinks=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')];
+    addEventListener('scroll',()=>{
+      const d=document.documentElement,max=d.scrollHeight-d.clientHeight;
+      progress.style.width=(max?100*d.scrollTop/max:0)+'%';topBtn.classList.toggle('show',d.scrollTop>620);
+      let active=sections[0]?.id;for(const s of sections){if(s.getBoundingClientRect().top<150)active=s.id}
+      tocLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+active));
+    },{passive:true});
+    topBtn.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+    const theme=document.getElementById('theme'),themeKey='skyrl-summary-theme';
+    if(localStorage.getItem(themeKey)==='dark')document.body.classList.add('dark');
+    theme.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem(themeKey,document.body.classList.contains('dark')?'dark':'light')};
+  </script>
+</body>
+</html>
