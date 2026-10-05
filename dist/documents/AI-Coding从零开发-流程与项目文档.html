@@ -1,0 +1,2622 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#0b1930"><meta name="description" content="面向有开发经验的算法工程师，完整展开 AI Coding 从零开发的五阶段流程、项目文档、任务维护、测试与验收，以及上下文管理、过度设计控制和根因排查。"><title>AI Coding 从零开发：完整流程、项目文档与任务维护</title><style>
+:root{--bg:#f2f5f9;--surface:#fff;--surface2:#f7f9fc;--ink:#18202d;--muted:#637083;--line:#dce3ec;--line2:#c8d2df;--navy:#0b1930;--blue:#1769e0;--blueSoft:#e8f1ff;--cyan:#0f8fa6;--green:#10845d;--greenSoft:#e7f7f0;--lime:#b9f45b;--orange:#c46a13;--orangeSoft:#fff3e5;--red:#bf3447;--redSoft:#fff0f2;--purple:#7855c7;--purpleSoft:#f2edff;--shadow:0 12px 32px rgba(20,38,64,.08);--sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:22px}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.68 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}strong{font-weight:750}code{padding:.12em .36em;border:1px solid var(--line);border-radius:5px;background:var(--surface2);font-family:var(--mono);font-size:.9em}.progress{position:fixed;inset:0 0 auto;z-index:100;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--lime))}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 84% 12%,rgba(185,244,91,.18),transparent 25%),radial-gradient(circle at 9% 92%,rgba(120,85,199,.28),transparent 31%),linear-gradient(125deg,var(--navy),#142557 58%,#4b176d)}.hero:after{content:"";position:absolute;inset:0;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}.hero-in{position:relative;z-index:1;max-width:1450px;margin:auto;padding:42px 28px 32px}.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:#c4cce0;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.eyebrow:before{content:"";width:32px;height:2px;background:var(--lime)}h1{max-width:1100px;margin:0;font-size:clamp(30px,4.1vw,53px);line-height:1.12;letter-spacing:-.035em}.subtitle{max-width:990px;margin:18px 0 0;color:#cbd5e7;font-size:16px;line-height:1.7}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.action,.theme{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;color:#edf4ff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.action:hover,.theme:hover{background:rgba(255,255,255,.14);text-decoration:none}.metrics{display:grid;grid-template-columns:repeat(6,minmax(125px,1fr));gap:10px;margin-top:30px}.metric{min-height:86px;padding:13px 14px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:rgba(4,18,39,.34);backdrop-filter:blur(5px)}.metric small{color:#adb9d2;font-size:11px;letter-spacing:.06em}.metric b{display:block;margin-top:4px;color:#fff;font-size:21px;line-height:1.15;font-variant-numeric:tabular-nums}.metric span{display:block;margin-top:4px;color:#adb9d2;font-size:11px;line-height:1.35}
+.layout{display:grid;grid-template-columns:238px minmax(0,940px) 210px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 80px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;scrollbar-width:thin}.side-title{margin:0 0 10px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.toc ol{margin:0;padding:0;list-style:none}.toc li{margin:2px 0}.toc a{display:block;padding:7px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.35}.toc a:hover{color:var(--ink);background:var(--surface);text-decoration:none}.toc a.active{color:var(--blue);border-left-color:var(--blue);background:var(--blueSoft);font-weight:750}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);box-shadow:0 5px 18px rgba(20,38,64,.04)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 8px!important;padding:0!important;border:0!important;color:var(--ink)!important;font-size:13px!important}.rail-card h3:before{display:none!important}.rail-card p,.rail-card li{color:var(--muted);font-size:12px;line-height:1.55}.rail-card ul{margin:0;padding-left:17px}.legend{display:grid;gap:7px}.legend div{display:grid;grid-template-columns:10px 1fr;gap:8px;color:var(--muted);font-size:12px}.dot{width:9px;height:9px;margin-top:5px;border-radius:50%}
+main{min-width:0}.chapter{margin-bottom:20px;padding:24px 28px 26px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:25px;line-height:1.25;letter-spacing:-.02em}h2:after{content:"";flex:1;height:1px;margin-left:16px;background:linear-gradient(90deg,var(--line2),transparent)}.num{display:inline-flex;align-items:center;justify-content:center;min-width:31px;height:24px;margin-right:8px;padding:0 8px;border-radius:7px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:12px;font-weight:850}h3{display:flex;align-items:center;gap:9px;margin:27px 0 11px;color:#102748;font-size:18px;line-height:1.35}h3:before{content:"";flex:0 0 auto;width:5px;height:18px;border-radius:5px;background:linear-gradient(180deg,var(--blue),var(--purple))}h4{margin:20px 0 7px;color:#102748;font-size:15px}p{margin:8px 0 12px}ul,ol{margin:8px 0 14px;padding-left:22px}li{margin:4px 0}.lead{margin:0;padding:16px 18px;border-left:4px solid var(--lime);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--blueSoft),var(--surface2));font-size:17px;font-weight:650;line-height:1.68}.prose-card{padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,var(--surface2),var(--surface))}.subhead+ul,.subhead+ol{margin-top:10px}
+.insight-list,.qa-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 16px;padding:0;list-style:none;counter-reset:item}.insight-list li,.qa-list li{position:relative;margin:0;padding:13px 14px 12px 42px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);font-size:13px;counter-increment:item}.insight-list li:before,.qa-list li:before{content:counter(item,decimal-leading-zero) / "";position:absolute;left:12px;top:13px;color:var(--purple);font:850 11px var(--mono)}.dense-list{margin:10px 0 16px;padding:0;list-style:none}.dense-list li{position:relative;margin:5px 0;padding:9px 11px 9px 29px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);font-size:13px}.dense-list li:before{content:"•" / "";position:absolute;left:12px;color:var(--purple);font-weight:900}.steps{display:grid;gap:9px;margin:12px 0 16px;padding:0;list-style:none;counter-reset:step}.steps li{position:relative;margin:0;padding:13px 14px 13px 51px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);counter-increment:step}.steps li:before{content:counter(step,decimal-leading-zero) / "";position:absolute;left:13px;top:13px;display:grid;place-items:center;width:27px;height:27px;border-radius:7px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font:850 10px var(--mono)}
+.table-wrap{margin:12px 0 16px;overflow-x:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;background:var(--surface);font-size:13px;line-height:1.48}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#415168;background:var(--surface2);font-size:12px;font-weight:850;white-space:nowrap}tr:last-child td{border-bottom:0}tbody tr:hover{background:rgba(23,105,224,.035)}figure{margin:16px 0 20px;padding:7px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}figure img{display:block;width:100%;height:auto;border-radius:8px}figcaption{padding:7px 5px 2px;color:var(--muted);font-size:12px}blockquote{margin:14px 0;padding:14px 16px;border-left:4px solid var(--purple);border-radius:0 10px 10px 0;color:#102748;background:var(--purpleSoft);font-weight:650}.code{overflow:auto;margin:12px 0;padding:14px 16px;border-radius:10px;color:#eaf2ff;background:#101d31;font:12.5px/1.58 var(--mono);white-space:pre}.uncertainty{border-left:4px solid var(--orange)}.footer-note{color:var(--muted);font-size:13px}.back{position:fixed;right:18px;bottom:18px;z-index:20;width:40px;height:40px;border:1px solid var(--line2);border-radius:10px;color:var(--ink);background:var(--surface);box-shadow:var(--shadow);cursor:pointer;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.back.show{opacity:1;transform:none;pointer-events:auto}
+body.dark{--bg:#0e1420;--surface:#151e2c;--surface2:#1a2535;--ink:#e8eef6;--muted:#9bacbf;--line:#29374a;--line2:#3a4a60;--blue:#68a7ff;--blueSoft:#182d4b;--greenSoft:#15382e;--orangeSoft:#3c2b1c;--redSoft:#3f2028;--purpleSoft:#2b2344;--shadow:0 12px 34px rgba(0,0,0,.22)}body.dark h3,body.dark h4,body.dark blockquote{color:#e8eef6}body.dark tbody tr:hover{background:rgba(104,167,255,.07)}
+@media(max-width:1220px){.layout{grid-template-columns:220px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){.hero-in{padding:34px 18px 26px}.layout{display:block;padding:16px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.toc ol{display:grid;grid-template-columns:repeat(2,1fr);gap:3px 8px}.toc a{border-left:0;border-radius:7px}.chapter{padding:20px 18px 22px}.metrics{grid-template-columns:repeat(2,1fr)}.insight-list,.qa-list{grid-template-columns:1fr}}@media(max-width:480px){body{font-size:14px}h1{font-size:29px}h2{align-items:flex-start;font-size:21px}.metrics{grid-template-columns:1fr 1fr}.metric{min-height:78px;padding:11px}.metric b{font-size:18px}.toc ol{grid-template-columns:1fr}.chapter{padding:18px 14px 20px}}@media print{body{color:#111;background:#fff;font-size:11pt}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.hero:after,.toc,.rail,.back,.theme,.progress{display:none!important}.subtitle,.metric small,.metric span{color:#333}.metric{color:#111;border-color:#aaa;background:#fff}.metric b{color:#111}.layout{display:block;max-width:none;padding:16px 0}.chapter{break-inside:avoid;box-shadow:none;border-color:#bbb}a{color:#111;text-decoration:underline}}
+
+.academic-report{
+  --reading:"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --display:Inter,"SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-family:var(--reading);
+  font-size:16px;
+  line-height:1.82;
+  letter-spacing:.012em;
+  font-variant-numeric:tabular-nums;
+}
+.hero-in{padding-top:50px;padding-bottom:38px}
+.hero h1{max-width:1180px;font-family:var(--display);font-weight:820;line-height:1.14;letter-spacing:-.035em;text-wrap:balance}
+.hero .subtitle{max-width:980px;margin-top:20px;font-size:17px;line-height:1.78;letter-spacing:.015em;text-wrap:pretty}
+.eyebrow{font-family:var(--display);letter-spacing:.15em}
+.metrics{gap:12px;margin-top:34px}
+.metric{min-height:92px;padding:15px 16px;border-radius:13px}
+.metric b{font-family:var(--display);font-size:22px;letter-spacing:-.02em}
+.metric span{margin-top:6px;font-size:12px}
+.layout{grid-template-columns:246px minmax(0,960px) 214px;gap:24px;padding-top:30px}
+.toc a{padding:8px 11px;border-radius:0 8px 8px 0;line-height:1.45}
+.toc a.active{box-shadow:inset 3px 0 0 var(--blue)}
+.chapter{margin-bottom:24px;padding:30px 34px 32px;border-radius:18px;box-shadow:0 14px 38px rgba(20,38,64,.075)}
+.chapter h2{margin-bottom:24px;padding-bottom:17px;font-family:var(--display);font-size:27px;font-weight:800;letter-spacing:-.025em}
+.chapter h3{margin:34px 0 14px;padding:9px 12px;border-radius:9px;color:#123052;background:linear-gradient(90deg,var(--blueSoft),transparent 88%);font-family:var(--display);font-size:18px;font-weight:780}
+.chapter h3:before{height:20px}
+.chapter h4{font-family:var(--display);font-weight:760}
+.chapter p{max-width:none;margin:0 0 1.08em;color:var(--ink);font-size:16px;line-height:1.9;text-align:justify;text-justify:inter-ideograph;letter-spacing:.018em;overflow-wrap:anywhere}
+.chapter>p:not(.lead):not(.prose-card):not(.keyline):not(.footer-note),
+.chapter>h3+p,
+.chapter>p+p{ text-indent:2em }
+.chapter .lead{
+  margin:2px 0 6px;
+  padding:18px 20px;
+  border-left-width:5px;
+  font-size:18px;
+  line-height:1.82;
+  letter-spacing:.018em;
+  text-align:left;
+  text-indent:0;
+}
+.chapter .prose-card,.chapter .keyline{padding:15px 18px;line-height:1.8;text-align:left;text-indent:0}
+.chapter blockquote{margin:18px 0 22px;padding:16px 19px;font-size:16px;line-height:1.78;text-align:justify}
+.chapter blockquote p{margin:0;text-indent:0}
+.chapter ul:not(.dense-list):not(.insight-list):not(.qa-list),
+.chapter ol:not(.steps){margin:10px 0 20px;padding-left:1.55em}
+.chapter ul:not(.dense-list):not(.insight-list):not(.qa-list) li,
+.chapter ol:not(.steps) li{margin:8px 0;padding-left:.15em;line-height:1.76}
+.dense-list{margin:12px 0 22px}
+.dense-list li{margin:0;padding:10px 8px 10px 26px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;font-size:14px;line-height:1.72}
+.dense-list li:last-child{border-bottom:0}
+.dense-list li:before{left:8px}
+.steps{gap:10px;margin:14px 0 22px}
+.steps li{padding:15px 16px 15px 54px;line-height:1.72}
+.insight-list,.qa-list{gap:11px;margin:15px 0 22px}
+.insight-list li,.qa-list li{padding-top:15px;padding-bottom:14px;line-height:1.68}
+.table-wrap{margin:17px 0 23px;border-radius:12px;box-shadow:0 5px 16px rgba(20,38,64,.035)}
+table{font-size:13.5px;line-height:1.62}
+th,td{padding:11px 13px}
+th{font-family:var(--display);font-size:12.5px;letter-spacing:.015em}
+tbody tr:nth-child(even){background:rgba(99,112,131,.035)}
+.flow{display:flex;align-items:stretch;gap:8px;margin:16px 0 20px;overflow-x:auto}
+.flow-node{min-width:142px;flex:1;padding:14px 15px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,var(--surface2),var(--surface));font-size:13px;line-height:1.58;box-shadow:0 5px 14px rgba(20,38,64,.035)}
+.flow-node strong{display:block;margin-bottom:6px;color:#102748;font-family:var(--display);font-size:13.5px}
+.flow-arrow{display:grid;place-items:center;color:var(--purple);font-weight:900}
+.compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:17px 0 22px}
+.compare>div{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,var(--surface2),var(--surface))}
+.compare h4{margin:0 0 7px}
+.compare p{margin:0;font-size:14px;line-height:1.76;text-indent:0;text-align:justify}
+.formula{margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:#101d31;color:#eaf2ff;font:13px/1.65 var(--mono);overflow:auto}
+.formula{margin-top:18px;margin-bottom:22px;padding:17px 19px;border-radius:12px;font-size:13.5px;line-height:1.78}
+.keyline{margin:18px 0 4px;padding:15px 18px;border-left:4px solid var(--blue);background:var(--blueSoft);border-radius:0 10px 10px 0}
+.footer-note{line-height:1.7!important;text-indent:0!important}
+.rail-card{border-radius:13px}
+body.dark .chapter h3{color:var(--ink);background:linear-gradient(90deg,var(--blueSoft),transparent 88%)}
+body.dark tbody tr:nth-child(even){background:rgba(255,255,255,.025)}
+@media(max-width:820px){
+  .academic-report{font-size:15px}
+  .chapter{padding:23px 21px 26px;border-radius:14px}
+  .chapter h2{font-size:23px}
+  .chapter p{font-size:15.5px;line-height:1.86}
+  .hero .subtitle{font-size:15.5px}
+}
+@media(max-width:700px){.flow{display:grid}.flow-arrow{transform:rotate(90deg)}.compare{grid-template-columns:1fr}}
+@media(max-width:480px){
+  .chapter{padding:20px 16px 23px}
+  .chapter>p:not(.lead):not(.prose-card):not(.keyline):not(.footer-note),.chapter>h3+p,.chapter>p+p{text-indent:2em}
+  .chapter .lead{font-size:16.5px;padding:15px 16px}
+}
+body.dark .flow-node strong{color:var(--ink)}
+
+
+body.academic-report{
+ --academic-bg:var(--bg);--academic-paper:var(--surface);--academic-paper-soft:var(--surface2);
+ --academic-ink:var(--ink);--academic-ink-soft:var(--ink);--academic-muted:var(--muted);
+ --academic-line:var(--line);--academic-line-strong:var(--line2);
+ --academic-blue:var(--blue);--academic-blue-soft:var(--blueSoft);--academic-sans:var(--sans);
+}
+
+
+body.academic-report .metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+body.academic-report .toc a.active{box-shadow:none}
+body.academic-report .toc .minor{font-size:12px;padding-block:6px}
+body.academic-report .toc .toc-divider{margin:14px 10px 6px 0;border-top:1px solid var(--academic-line)}
+body.academic-report .chapter h3{scroll-margin-top:28px;align-items:flex-start}
+body.academic-report .chapter h3::before{margin-top:5px}
+body.academic-report .source-ref{font-size:11px;white-space:nowrap}
+body.academic-report .source-list>div{padding:13px 0;border-bottom:1px solid var(--academic-line);scroll-margin-top:28px}
+body.academic-report .source-list p{margin:5px 0 0;color:var(--academic-muted);font-size:13px;line-height:1.75;text-indent:0}
+body.academic-report .source-list b{font-size:13px}
+body.academic-report .chapter .note{color:var(--academic-muted);font-size:13px;line-height:1.75;text-indent:0}
+body.academic-report .keyline{border-left:3px solid var(--academic-blue);border-radius:0 5px 5px 0;background:var(--academic-blue-soft);text-indent:0!important}
+body.academic-report .keyline,.academic-report .keyline strong{color:var(--academic-ink)}
+body.academic-report .flow-node{border-radius:6px;background:var(--academic-paper-soft);box-shadow:none}
+body.academic-report .flow-node strong{color:var(--academic-ink)}
+body.academic-report .flow-arrow{color:var(--academic-blue)}
+body.academic-report .table-wrap table{min-width:510px}
+body.academic-report .page-footer{max-width:1540px;margin:0 auto 35px;padding:0 22px;color:var(--academic-muted);font-size:12px}
+.anchor-alias{display:block;position:relative;top:-28px;visibility:hidden}
+.library-back-link,.library-material-badge{position:fixed;z-index:99;border:1px solid rgba(119,137,160,.28);background:rgba(255,255,255,.92);box-shadow:0 8px 24px rgba(21,39,67,.14);backdrop-filter:blur(10px);font:700 12px/1.25 var(--academic-sans)}
+.library-back-link{left:18px;bottom:18px;padding:9px 13px;border-radius:9px;color:#1f4f8f!important;text-decoration:none!important}
+.library-material-badge{right:18px;top:18px;padding:7px 11px;border-radius:999px;letter-spacing:.08em;color:#2f5d49;background:rgba(236,248,242,.94);border-color:rgba(53,125,91,.28)}
+body.dark .library-back-link,body.dark .library-material-badge{color:#e8edf7!important;background:rgba(17,28,45,.9);border-color:rgba(255,255,255,.18)}
+@media(max-width:1220px){body.academic-report .layout{grid-template-columns:220px minmax(0,1fr)}body.academic-report .rail{display:none}}
+@media(max-width:820px){body.academic-report .layout{display:block}body.academic-report .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}body.academic-report .hero-in{padding-top:54px}body.academic-report .toc{border-right:1px solid var(--academic-line)}}
+@media(max-width:640px){.library-back-link{left:10px;bottom:10px;padding:8px 10px;font-size:11px}.library-material-badge{right:10px;top:10px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+@media print{
+ body.academic-report,body.academic-report.dark{--bg:#fff;--surface:#fff;--surface2:#f5f5f5;--ink:#111;--muted:#444;--line:#ccc;--line2:#aaa;--blue:#333;--blueSoft:#f4f4f4;--purpleSoft:#f4f4f4;--shadow:none;--academic-bg:#fff;--academic-paper:#fff;--academic-paper-soft:#f5f5f5;--academic-ink:#111;--academic-ink-soft:#222;--academic-muted:#444;--academic-line:#ccc;--academic-line-strong:#aaa;--academic-blue:#333;--academic-blue-soft:#f4f4f4;color:#111!important;background:#fff!important}
+ .library-back-link,.library-material-badge,.actions,.page-footer,.anchor-alias{display:none!important}
+ body.academic-report .hero,body.academic-report .hero h1{color:#111;background:#fff}
+ body.academic-report .eyebrow,body.academic-report .subtitle,body.academic-report .metric b,body.academic-report .metric small,body.academic-report .metric span{color:#333}
+ body.academic-report .metrics{background:#fff;border-color:#aaa}
+ body.academic-report .metric{background:#fff}
+ body.academic-report .layout{display:block;padding:16px 0;max-width:none}
+ body.academic-report .chapter{break-inside:auto}
+ body.academic-report .chapter h2,body.academic-report .chapter h3{break-after:avoid}
+ body.academic-report.dark .chapter h2,body.academic-report.dark .chapter h3,body.academic-report.dark strong,body.academic-report.dark b{color:#111!important}
+ body.academic-report .table-wrap{overflow:visible}body.academic-report .table-wrap table{min-width:0}
+ body.academic-report .flow{display:block}body.academic-report .flow-arrow{display:none}body.academic-report .flow-node{margin-bottom:7px;break-inside:avoid}
+}
+
+/* Keep code foregrounds and backgrounds paired in every display mode. */
+body.academic-report{
+  --code-bg:#f4f7fb;
+  --code-ink:#203047;
+  --code-line:#dce3ec;
+}
+body.academic-report.dark{
+  --code-bg:#101d31;
+  --code-ink:#eaf2ff;
+  --code-line:#3a4a60;
+}
+body.academic-report code{
+  color:var(--ink);
+  background:var(--surface2);
+}
+body.academic-report pre,
+body.academic-report .formula{
+  margin:16px 0 22px;
+  padding:16px 18px;
+  border:1px solid var(--code-line);
+  border-radius:10px;
+  color:var(--code-ink);
+  background:var(--code-bg);
+  font:13px/1.72 var(--mono);
+  letter-spacing:0;
+  text-align:left;
+  text-indent:0;
+  white-space:pre;
+  overflow:auto;
+  tab-size:4;
+}
+body.academic-report pre code,
+body.academic-report .formula code{
+  display:block;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  color:var(--code-ink);
+  background:transparent;
+  font:inherit;
+  letter-spacing:inherit;
+  text-align:inherit;
+  text-indent:0;
+  white-space:inherit;
+}
+body.academic-report pre code *,
+body.academic-report .formula code *{
+  color:inherit;
+  background:transparent;
+}
+body.academic-report.dark .chapter th{color:var(--ink)}
+@media print{
+  body.academic-report,
+  body.academic-report.dark{
+    --code-bg:#fff;
+    --code-ink:#111;
+    --code-line:#aaa;
+  }
+  body.academic-report pre,
+  body.academic-report .formula{
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    overflow:visible;
+  }
+}
+
+
+/* Same visual vocabulary as the reference; additions serve this document. */
+.hero h1{max-width:1180px;font-size:clamp(32px,4vw,52px);line-height:1.18}
+.title-detail{display:block;margin-top:11px;font-size:.61em;font-weight:720;letter-spacing:-.018em;line-height:1.35}
+.hero .subtitle{max-width:1030px;font-size:16px;margin-top:17px}
+.hero-in{padding-top:39px;padding-bottom:31px}
+.metrics{margin-top:25px}.metric{min-height:85px;padding:13px 16px}
+.metric b{font-size:21px}.metric small{font-size:12px}
+.chapter-label{font-size:11px;color:var(--muted);font-weight:760;letter-spacing:.1em;margin-bottom:9px}
+.chapter h2{display:block;font-size:26px;line-height:1.42;letter-spacing:-.02em;margin-bottom:23px}
+.chapter h2:after{display:none}.chapter h2 .num{vertical-align:4px}
+.chapter h3{line-height:1.5}.chapter h4{margin:26px 0 10px;font-size:16px;line-height:1.5}
+.chapter h3,.chapter h4,.course-source{scroll-margin-top:25px}
+.chapter p{overflow-wrap:break-word;line-height:1.88}
+.chapter p.conclusion{font-weight:650;text-align:left;text-indent:0!important;margin:15px 0 20px}
+.chapter li p{margin:5px 0;text-indent:0!important;text-align:left;font-size:inherit}
+.chapter p code,.chapter li code,.chapter td code{overflow-wrap:anywhere}
+.reading-intro{margin-bottom:30px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.reading-intro>p:first-child{font-size:13px;color:var(--muted);text-indent:0;line-height:1.7}
+.reading-intro p:not(.conclusion){text-indent:0}
+.reading-intro .conclusion{font-size:15px;line-height:1.8;font-weight:650}
+.reading-intro .conclusion:first-of-type{border-left:4px solid var(--lime);padding:13px 16px;background:var(--blueSoft);border-radius:0 8px 8px 0}
+.table-wrap table{min-width:510px}table{font-size:14px;line-height:1.65}
+th{font-size:13px;color:#415168}td,th{padding:11px 13px}
+th:first-child,td:first-child{min-width:120px}
+.table-wrap:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.code-shell{margin:18px 0 25px;border:1px solid var(--code-line);border-radius:11px;background:var(--code-bg);overflow:hidden}
+.code-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 14px;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--code-line);font-size:11px;line-height:1.5}
+.copy-code{flex:0 0 auto;padding:4px 8px;background:var(--surface);color:var(--ink);border:1px solid var(--line2);border-radius:5px;font:12px var(--sans);cursor:pointer}
+.copy-code:hover{border-color:var(--blue);color:var(--blue)}
+body.academic-report .code-shell pre{margin:0;border:0;border-radius:0;padding:17px 18px;font-size:13px;line-height:1.8;color:var(--code-ink);background:var(--code-bg);max-width:100%;}
+body.academic-report .code-shell pre code{color:var(--code-ink);background:transparent;white-space:pre}
+body.academic-report .code-shell pre code *{color:inherit;background:transparent}
+.nav-number{display:inline-block;min-width:25px;font-size:11px;font-variant-numeric:tabular-nums;color:inherit}
+.toc summary{list-style:none;cursor:default}.toc summary::-webkit-details-marker{display:none}
+.toc .side-title{margin-bottom:10px}.toc details>summary:after{content:none}
+.toc .minor{padding-left:11px}.toc .quick-title{font-size:11px;color:var(--muted);margin:13px 11px 3px;font-weight:700}
+.rail-card p{margin:0 0 8px;text-align:left}.rail-card p:last-child{margin-bottom:0}
+.rail-card ul{padding-left:17px}.rail-card li{margin:6px 0}.rail-card a{font-size:12px}
+.rail-card .rail-status{display:inline-flex;margin-bottom:8px;padding:3px 7px;background:var(--blueSoft);border-radius:5px;color:var(--blue);font-size:11px;font-weight:700}
+.course-source .source-file{overflow-wrap:anywhere;font-family:var(--mono);font-size:12px}
+.local-source-open{display:none;font-size:12px;margin:6px 16px 0 0}
+body.local-reading .local-source-open{display:inline-block}
+.source-return{display:inline-block;font-size:12px;margin-top:6px}
+.course-source:target{outline:2px solid var(--blue);outline-offset:8px;border-radius:5px}
+.skip-link{position:fixed;top:-90px;left:15px;z-index:150;background:var(--surface);color:var(--ink);padding:10px 16px;border-radius:7px}
+.skip-link:focus{top:10px}button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+.chapter a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+body.dark .chapter th{color:var(--ink)}
+.page-footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;line-height:1.7}
+.chapter .note{font-size:13px!important;color:var(--muted)!important;text-indent:0!important;line-height:1.75}
+/* Publishing edition: concise paragraphs, neutral weight, in-place examples. */
+body{color-scheme:light}body.dark{color-scheme:dark}
+body.academic-report .chapter p{font-weight:400;text-indent:0!important;text-align:left;line-height:1.82;margin-bottom:14px}
+body.academic-report .chapter blockquote{font-weight:400;border-left-width:3px;font-size:15px}
+body.academic-report .chapter blockquote p{font-weight:400;line-height:1.8}
+.chapter li{line-height:1.75}.chapter ul,.chapter ol{margin-top:8px;margin-bottom:18px}
+.reading-intro{padding-bottom:15px;margin-bottom:25px}
+.reading-intro>p:first-child{font-size:13px!important;color:var(--muted)!important;line-height:1.75!important;margin-bottom:20px!important}
+.workflow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0 23px}
+.workflow a{display:flex;flex-direction:column;gap:5px;padding:12px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--ink);text-decoration:none!important;min-width:0}
+.workflow a:hover{border-color:var(--blue);background:var(--blueSoft)}
+.workflow span{color:var(--purple);font:750 11px var(--mono)}
+.workflow b{font-size:13px;font-weight:650}.workflow small{color:var(--muted);font-size:11px;line-height:1.55}
+body.academic-report .chapter .stage-check{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;margin:20px 0;background:var(--surface2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px;line-height:1.75;font-weight:400}
+.stage-check span{flex:0 0 auto;color:var(--blue);font-size:12px;font-weight:650;line-height:2.1}
+.file-example{margin:16px 0 22px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);overflow:hidden;scroll-margin-top:25px}
+.file-example>summary{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:5px 11px;list-style:none;padding:14px 37px 14px 15px;cursor:pointer;background:var(--surface2);color:var(--ink);line-height:1.6}
+.file-example>summary::-webkit-details-marker{display:none}
+.file-example>summary:after{content:'＋';position:absolute;right:14px;top:14px;color:var(--blue);font-size:18px;line-height:1.2}
+.file-example[open]>summary:after{content:'−'}
+.example-title{font-size:14px;font-weight:600}.example-kind{font-size:11px;color:var(--muted)}
+.file-example[open]>summary{border-bottom:1px solid var(--line)}
+.file-example .code-shell{margin:0;border:0;border-radius:0}
+.file-example>summary:hover{background:var(--blueSoft)}
+@media(max-width:700px){
+ .workflow{grid-template-columns:1fr;gap:6px}
+ .workflow a{display:grid;grid-template-columns:24px 110px minmax(0,1fr);align-items:center;gap:8px;padding:10px 12px}
+ .workflow small{font-size:11px}.workflow b{font-size:13px}
+ body.academic-report .chapter .stage-check{display:block;padding:11px 13px;font-size:13px}
+ .stage-check span{display:block;margin-bottom:3px;font-size:12px}
+ .example-title{font-size:13px}.example-kind{font-size:10px}.file-example>summary{padding:12px 33px 12px 12px}
+}
+@media print{
+ .file-example{overflow:visible;border-color:#bbb}.file-example>summary{background:#f5f5f5}.file-example>summary:after{display:none}
+ .file-example::details-content{content-visibility:visible;display:block}
+ .workflow{grid-template-columns:repeat(5,minmax(0,1fr))}.workflow a{display:flex}
+}
+@media(min-width:821px){.toc details>div{display:block!important}.toc details:not([open])>div{display:block!important}}
+@media(max-width:820px){
+ .hero-in{padding:32px 20px 26px}.hero h1{font-size:36px}.title-detail{font-size:23px}.hero .subtitle{font-size:15px}
+ .layout{padding-top:16px}.toc{padding:0}.toc summary{cursor:pointer;padding:13px 15px;margin:0!important;color:var(--ink)}
+ .toc details>summary:after{content:'展开目录';float:right;color:var(--muted);font-size:11px;font-weight:500;letter-spacing:0}
+ .toc details[open]>summary:after{content:'收起目录'}
+ .toc details>div{padding:0 9px 12px}.toc ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+ .toc .quick-links{display:block}.chapter{padding:23px 21px 26px}.chapter h2{font-size:23px}
+ .chapter h3{font-size:17px}.chapter p{font-size:15.5px}.metrics{gap:9px;margin-top:23px}.metric b{font-size:19px}
+}
+@media(max-width:480px){
+ .hero-in{padding:29px 18px 23px}.hero h1{font-size:31px}.title-detail{font-size:21px;max-width:340px;line-height:1.48}
+ .hero .subtitle{font-size:14.5px}.metric{padding:11px 12px;min-height:85px}.metric b{font-size:18px}.metric span{font-size:11px}
+ .toc ol{grid-template-columns:1fr}.chapter{padding:20px 16px 23px}.chapter h2{font-size:22px}.chapter h2 .num{vertical-align:2px}
+ .chapter h3{padding:8px 10px;gap:8px}.chapter p{font-size:15px;line-height:1.86}
+ .reading-intro .conclusion{font-size:14px}.code-head{padding:8px 11px;font-size:10px}
+ body.academic-report .code-shell pre{padding:14px;font-size:12.5px}
+ .page-footer{padding-inline:16px!important}.actions{gap:8px}.theme,.action{font-size:12px}
+}
+@media print{
+ .code-head,.skip-link,.local-source-open,.source-return{display:none!important}
+ .chapter-label{color:#444}.chapter h3,.chapter h4{break-after:avoid}.chapter h2{font-size:21px}
+ .chapter p,.chapter li{orphans:3;widows:3}.code-shell{border-color:#aaa;overflow:visible}
+ body.academic-report .code-shell pre,body.academic-report .code-shell pre code{color:#111;background:#fff;white-space:pre-wrap;overflow-wrap:anywhere;overflow:visible}
+ .table-wrap{overflow:visible}.table-wrap table{min-width:0!important}thead{display:table-header-group}tr{break-inside:avoid}
+ .source-file{color:#333!important}.hero-in{padding:15px 0!important}.hero h1{font-size:28px}.title-detail{font-size:21px}
+}
+/* One continuous reading surface, with no chapter-sized page cards. */
+body.academic-report main{padding:30px 34px 34px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+body.academic-report .chapter{margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;break-before:auto!important;break-after:auto!important;break-inside:auto!important;page-break-before:auto!important;page-break-after:auto!important;page-break-inside:auto!important}
+body.academic-report .chapter+.chapter{margin-top:36px;padding-top:28px;border-top:1px solid var(--line)}
+body.academic-report .chapter h2{margin-top:0}
+@media(max-width:820px){body.academic-report main{padding:23px 21px 26px;border-radius:11px}body.academic-report .chapter+.chapter{margin-top:30px;padding-top:25px}}
+@media(max-width:480px){body.academic-report main{padding:21px 16px 24px}body.academic-report .chapter+.chapter{margin-top:26px;padding-top:23px}}
+@media print{
+ body.academic-report main{padding:0;border:0;border-radius:0;box-shadow:none;background:#fff;break-inside:auto}
+ body.academic-report .chapter+.chapter{margin-top:22px;padding-top:16px;border-top:1px solid #bbb}
+}
+/* Compact reading rhythm; source cases use a distinct purple outline. */
+body.academic-report .chapter p{line-height:1.66;margin:0 0 10px;font-size:15.5px}
+body.academic-report .chapter li{line-height:1.62;margin:3px 0}
+body.academic-report .chapter ul,body.academic-report .chapter ol{margin:8px 0 15px;padding-left:23px}
+body.academic-report .chapter h2{margin-bottom:19px}
+body.academic-report .chapter h3{margin:25px 0 12px;line-height:1.4}
+body.academic-report .chapter h4{margin:19px 0 9px}
+body.academic-report .chapter blockquote p{line-height:1.65;margin:0}
+body.academic-report .chapter+.chapter{margin-top:30px;padding-top:25px}
+body.academic-report .table-wrap{margin:13px 0 18px}
+body.academic-report table{line-height:1.55}body.academic-report td,body.academic-report th{padding:9px 11px}
+body.academic-report .code-shell pre{max-height:390px;overflow:auto;line-height:1.55;scrollbar-width:thin;scrollbar-color:#8698b8 var(--code-bg)}
+body.academic-report .real-case{--case-accent:#6853b2;--case-border:#c3b6e5;--case-tint:#f8f6fd;--case-ink:#4f3b91;margin:19px 0 23px;border:1px solid var(--case-border);border-left:4px solid var(--case-accent);border-radius:8px;background:var(--surface);padding:15px 17px 0;overflow:hidden;scroll-margin-top:24px}
+body.dark.academic-report .real-case{--case-accent:#b49cec;--case-border:#6d5b91;--case-tint:#202236;--case-ink:#d2bef8}
+.case-head{display:flex;align-items:center;gap:9px;line-height:1.45;margin-bottom:7px}
+.case-badge{color:var(--case-ink);font-size:11px;font-weight:650;background:var(--case-tint);border:1px solid var(--case-border);border-radius:4px;padding:2px 6px}
+.case-kind{color:var(--muted);font-size:11px}
+body.academic-report .real-case .case-title{font-size:16px;line-height:1.45;margin:0 0 7px;padding:0;color:var(--ink)}
+body.academic-report .real-case .case-provenance{font-size:11.5px;line-height:1.5;color:var(--muted);margin-bottom:9px;overflow-wrap:anywhere}
+.case-filename{font-family:var(--mono);font-size:11px}
+body.academic-report .real-case .case-note{font-size:13.5px;line-height:1.6;margin:0 0 13px;color:var(--ink)}
+.case-fold{margin:0 -17px;border-top:1px solid var(--case-border)}
+.case-fold>summary{position:relative;list-style:none;cursor:pointer;padding:10px 37px 10px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--case-tint);color:var(--case-ink);font-size:13px;font-weight:600;line-height:1.5}
+.case-fold>summary::-webkit-details-marker{display:none}
+.case-fold>summary:after{content:'＋';position:absolute;right:14px;font-size:16px}
+.case-fold[open]>summary:after{content:'−'}
+.case-fold>summary small{font-size:10.5px;font-weight:400;color:var(--muted)}
+.case-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:7px 17px;border-top:1px solid var(--case-border);border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);background:var(--surface)}
+.copy-case{padding:5px 8px;font:11px var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:4px;cursor:pointer}
+.copy-case:hover{border-color:var(--case-accent);color:var(--case-ink)}
+.case-reader{max-height:460px;overflow:auto;padding:14px 17px 17px;background:var(--surface);scrollbar-width:thin;scrollbar-color:var(--case-border) var(--surface);scroll-padding-top:12px;line-height:1.6}
+.case-reader:focus-visible{outline:2px solid var(--case-accent);outline-offset:-3px}
+body.academic-report .case-reader p,body.academic-report .case-reader li{font-size:13.5px;line-height:1.6;margin-bottom:8px}
+body.academic-report .case-reader .source-heading{display:block;color:var(--ink);background:transparent;border:0;border-radius:0;padding:0;margin:17px 0 9px;line-height:1.4;scroll-margin-top:15px;font-weight:650;font-size:14px}
+body.academic-report .case-reader .source-level-1{font-size:16px;margin-top:0}
+body.academic-report .case-reader .source-level-2{font-size:15px;border-bottom:1px solid var(--line);padding-bottom:6px}
+body.academic-report .case-reader .source-heading:before,body.academic-report .case-reader .source-heading:after{display:none}
+body.academic-report .case-reader pre{margin:11px 0 15px;padding:12px 13px;font-size:12px;line-height:1.55;border:1px solid var(--code-line);border-radius:5px;color:var(--code-ink);background:var(--code-bg);overflow:auto}
+body.academic-report .case-reader pre code{color:inherit;background:transparent;white-space:pre;line-height:inherit;padding:0;border:0}
+body.academic-report .case-reader .source-code{margin:0;border:0;border-radius:0;background:transparent;padding:0;color:var(--ink)}
+body.academic-report .case-reader .table-wrap{margin:10px 0 16px}
+body.academic-report .case-reader table{font-size:12px;line-height:1.55;min-width:520px}
+body.academic-report .case-reader td,body.academic-report .case-reader th{padding:7px 8px}
+.case-reader input[type=checkbox]{accent-color:var(--case-accent)}
+.anchor-alias{display:block;height:0;scroll-margin-top:24px}
+@media(max-width:480px){
+ body.academic-report .chapter p{font-size:15px;line-height:1.66}
+ body.academic-report .real-case{padding:13px 12px 0;margin:16px 0 20px}
+ .case-fold{margin:0 -12px}.case-fold>summary{padding:10px 33px 10px 12px;display:block}.case-fold>summary small{display:block;margin-top:2px}
+ .case-toolbar{padding:7px 12px}.case-reader{padding:13px 12px;max-height:420px}
+ body.academic-report .real-case .case-title{font-size:15px}
+ body.academic-report .case-reader p,body.academic-report .case-reader li{font-size:13px}
+}
+@media print{
+ body.academic-report .real-case{border-color:#aaa;border-left-color:#777;background:#fff;overflow:visible;break-inside:auto}
+ .case-fold,.case-reader{overflow:visible;max-height:none!important}.case-toolbar{display:none!important}
+ .case-fold>summary:after{display:none}.case-fold::details-content{content-visibility:visible;display:block}
+ .case-fold>summary{background:#f5f5f5;color:#222}.case-badge{background:#fff;color:#333;border-color:#999}
+ body.academic-report .case-reader pre,body.academic-report .case-reader pre code,body.academic-report .code-shell pre{max-height:none;overflow:visible;color:#111;background:#fff;white-space:pre-wrap;overflow-wrap:anywhere}
+ body.academic-report .case-reader table{min-width:0!important}
+}
+
+/* Connected reading paragraphs and restrained subsection headings. */
+.case-fold>summary:after{top:50%;transform:translateY(-50%);line-height:1}
+body.academic-report .chapter p.body-prose{
+ text-indent:2em!important;text-align:justify;text-justify:inter-ideograph;
+ font-size:16px;line-height:1.68;letter-spacing:0;margin:0 0 12px
+}
+body.academic-report .reading-intro>p:first-child{text-indent:2em!important;text-align:justify;font-size:16px!important;color:var(--ink)!important;line-height:1.68!important;margin-bottom:12px!important}
+body.academic-report .reading-intro{margin-bottom:20px;padding-bottom:8px}
+body.academic-report .chapter>h3{margin:26px 0 11px;padding:0;background:transparent;border-radius:0;color:var(--ink);font-size:18px;line-height:1.4;font-weight:700;gap:9px}
+body.academic-report .chapter>h3:before{width:3px;height:17px;border-radius:2px;margin-top:4px}
+body.academic-report .case-reader p.source-prose{text-indent:2em!important;text-align:justify}
+body.academic-report .case-reader li p,body.academic-report .case-note,body.academic-report .case-provenance{ text-indent:0!important;text-align:left }
+.hero-in{padding-top:30px;padding-bottom:24px}.hero h1{font-size:clamp(31px,3.45vw,46px)}
+.hero .subtitle{margin-top:13px}.metrics{margin-top:20px}.metric{min-height:72px;padding-top:11px;padding-bottom:11px}
+.toc a[data-section]{display:flex;align-items:flex-start;gap:4px;padding-top:10px;padding-bottom:10px}
+.toc .nav-text{display:block;line-height:1.5}.toc .nav-text small{display:block;font-size:10px;line-height:1.5;font-weight:400;opacity:.78;margin-top:3px}
+.toc .nav-number{flex:0 0 21px;min-width:21px;padding-top:2px}
+.toc .quick-links>summary{cursor:pointer;margin:14px 10px 5px;font-size:11px;font-weight:600;color:var(--muted)}
+.toc details.quick-links>summary:after{content:' ＋';position:static;font-size:12px}
+.toc details.quick-links[open]>summary:after{content:' －'}
+@media(max-width:820px){body.academic-report .chapter p.body-prose{font-size:15.5px;line-height:1.68}}
+@media(max-width:480px){
+ body.academic-report .chapter p.body-prose{font-size:15px;line-height:1.68;margin-bottom:11px}
+ body.academic-report .reading-intro>p:first-child{font-size:15px!important}
+ body.academic-report .chapter>h3{font-size:17px;margin-top:24px}
+ .hero-in{padding:26px 18px 21px}.hero h1{font-size:31px}
+}
+@media print{body.academic-report .chapter p.body-prose{font-size:11pt;line-height:1.55;text-indent:2em!important}}
+
+</style></head>
+<body class="academic-report"><a class="skip-link" href="#main-content">跳到正文</a><div class="progress" aria-hidden="true"><span id="progress"></span></div>
+<header class="hero" id="top"><div class="hero-in"><div class="eyebrow">AI CODING · PROJECT DEVELOPMENT</div><h1>AI Coding 从零开发<span class="title-detail">完整流程、项目文档与任务维护</span></h1><p class="subtitle">需求、设计、任务执行与交付中的关键决策，附项目文件示例、测试设计与审阅方法。</p><div class="actions"><a class="action" href="#开发流程总览">开始阅读 ↓</a><button class="theme" id="theme" type="button" aria-pressed="false">◐ 切换深色</button><button class="theme" id="print" type="button">打印 / 保存 PDF</button></div><div class="metrics"><div class="metric"><small>开发主线</small><b>5 个阶段</b><span>需求 → 设计 → 初始化 → 实现 → 交付</span></div><div class="metric"><small>文档结构</small><b>5 个章节</b><span>流程总览 → 阶段展开 → 专项问题</span></div><div class="metric"><small>实践内容</small><b>7 份课程案例</b><span>需求、架构、规则、交接与测试</span></div><div class="metric"><small>整理日期</small><b>2026-10-05</b><span>文件全文 · 测试设计 · 文件模板</span></div></div></div></header>
+<div class="layout"><nav class="toc" aria-label="文档目录"><details open><summary class="side-title">文档目录</summary><div><ol><li><a href="#开发流程总览" data-section="开发流程总览"><span class="nav-number">01</span><span class="nav-text">开发流程总览<small>总览 · 五阶段及其关系</small></span></a></li><li><a href="#需求确认与项目设计" data-section="需求确认与项目设计"><span class="nav-number">02</span><span class="nav-text">需求确认与项目设计<small>设计 · PRD、技术方案与项目 Plan</small></span></a></li><li><a href="#工程初始化与任务开发" data-section="工程初始化与任务开发"><span class="nav-number">03</span><span class="nav-text">工程初始化与任务开发<small>开发 · 环境、任务、测试与文档</small></span></a></li><li><a href="#整体验收与交付" data-section="整体验收与交付"><span class="nav-number">04</span><span class="nav-text">整体验收与交付<small>交付 · 集成、效果与验收结果</small></span></a></li><li><a href="#开发过程中的专项问题" data-section="开发过程中的专项问题"><span class="nav-number">05</span><span class="nav-text">开发过程中的专项问题<small>补充 · 上下文、过度设计与排错</small></span></a></li></ol><details class="quick-links"><summary>文件与案例快捷入口</summary><ol><li><a class="minor" href="#case-rag-prd">PRD.md · 文件全文</a></li><li><a class="minor" href="#case-board-agents">AGENTS.md · 文件全文</a></li><li><a class="minor" href="#case-board-architecture">ARCHITECTURE.md · 文件全文</a></li><li><a class="minor" href="#任务文件示例查询超时控制">任务文件 · T014 示例</a></li><li><a class="minor" href="#会话上下文的压缩与重启">上下文 · 压缩与重启</a></li><li><a class="minor" href="#人的介入与plan审阅">Plan · 人的审阅</a></li></ol></details></div></details></nav>
+<main id="main-content"><section class="chapter" id="开发流程总览" aria-labelledby="chapter-title-1"><h2 id="chapter-title-1"><span aria-hidden="true" class="num">01</span>开发流程总览</h2>
+<p class="body-prose">AI Coding 中容易遗漏的工作，往往发生在代码之外：需求中的歧义没有消除，模块各自实现却无法联调，测试通过但预期来自错误假设。下面按项目开发的五个阶段，讨论这些问题对应的设计、文件和检查方法。</p>
+<span class="anchor-alias" id="从零开发的完整流程"></span>
+<div aria-label="从零开发的五个阶段" class="workflow">
+<a href="#1-需求确认形成-prd"><span>01</span><b>需求确认</b><small>明确产品行为</small></a>
+<a href="#2-技术设计与任务规划"><span>02</span><b>设计与规划</b><small>确定结构和任务</small></a>
+<a href="#3-工程初始化"><span>03</span><b>工程初始化</b><small>建立运行环境</small></a>
+<a href="#4-逐项实现与验收"><span>04</span><b>逐项实现</b><small>实施并检查任务</small></a>
+<a href="#5-整体验收与交付"><span>05</span><b>整体验收</b><small>验证并交付系统</small></a>
+</div>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>这一阶段需要确定的内容</th>
+<th>进入下一阶段的依据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需求确认</td>
+<td>本期范围、主流程、业务规则和验收场景</td>
+<td>PRD 中的关键行为已确认，阻塞项与待定项已区分</td>
+</tr>
+<tr>
+<td>设计与规划</td>
+<td>模块职责、数据与接口约定、任务依赖和验证安排</td>
+<td>项目技术方案能够约束实现，任务有可检查的结果</td>
+</tr>
+<tr>
+<td>工程初始化</td>
+<td>依赖、配置、运行入口、测试工具和开发规则</td>
+<td>工程可启动，适用的检查可执行，命令与说明一致</td>
+</tr>
+<tr>
+<td>逐项实现</td>
+<td>本轮修改范围、必要的局部方案、实现与相关测试</td>
+<td>任务行为与受影响功能已检查，设计和结果已保存</td>
+</tr>
+<tr>
+<td>整体验收</td>
+<td>跨模块主流程、真实依赖、算法效果和目标环境</td>
+<td>交付版本有对应的验收证据，未验证项和限制已说明</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">文件按职责分开维护，任务结束时只更新实际发生变化的部分：</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PRD.md</code></td>
+<td>产品需求、本期范围、业务规则与验收场景</td>
+</tr>
+<tr>
+<td><code>ARCHITECTURE.md</code></td>
+<td>项目技术方案与共同设计约定，可附项目级任务规划</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>安装、配置、运行、检查与交付说明</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Coding Agent 的开发、检查和文档维护规则</td>
+</tr>
+<tr>
+<td><code>docs/tasks/T014-query-timeout.md</code></td>
+<td>单次任务的局部方案、Plan 与验收结果；T014 为示例任务</td>
+</tr>
+<tr>
+<td><code>ACCEPTANCE.md</code></td>
+<td>对应版本的实际验收证据与限制</td>
+</tr>
+<tr>
+<td><code>session-handoff.md</code></td>
+<td>当前工作状态、遗留问题与会话续接信息</td>
+</tr>
+</tbody></table></div>
+</section><section class="chapter" id="需求确认与项目设计" aria-labelledby="chapter-title-2"><h2 id="chapter-title-2"><span aria-hidden="true" class="num">02</span>需求确认与项目设计</h2>
+<span class="anchor-alias" id="项目文件的内容与代表性写法"></span>
+<span class="anchor-alias" id="文件分工"></span>
+<h3 id="需求确认prdmd-与验收场景">需求确认：PRD.md 与验收场景</h3>
+<span class="anchor-alias" id="1-需求确认形成-prd"></span>
+<span class="anchor-alias" id="prd规定行为与范围"></span>
+<p class="body-prose">PRD 确认产品行为和本期开发范围。仅列出“上传、检索、问答”等功能名称，仍不足以指导实现：上传成功之后发生什么，索引失败时能否提问，用户切换数据源后旧请求如何处理，都会改变代码和测试。需求阶段应明确这些规则，不必预先规定每个函数的写法。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>PRD 的内容</th>
+<th>应明确到什么程度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户与范围</td>
+<td>谁在什么场景使用；本期必须完成、可延期与明确排除的功能</td>
+</tr>
+<tr>
+<td>主流程</td>
+<td>输入、操作、系统反馈和最终结果，包括失败、中断与重复操作</td>
+</tr>
+<tr>
+<td>业务规则</td>
+<td>合法状态转换、数据归属、修改权限、冲突与异常处理</td>
+</tr>
+<tr>
+<td>非功能要求</td>
+<td>对效果、时延、成本、数据保护和运行环境有实际影响的约束</td>
+</tr>
+<tr>
+<td>验收场景</td>
+<td>给定什么条件、执行什么动作、应出现什么结果；待定规则单独标记</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">文档问答需求可以沿“上传 → 创建索引 → 查询状态 → 问答”逐步展开：每一步写明使用的标识、允许的状态、失败后的反馈和下一步操作。下面的 PRD 用 file_id 关联上传结果，用 index_id 跟踪索引，并规定终态停止轮询、切换索引清理旧轮询；这些规则可以直接转成接口与交互测试。</p>
+<section aria-labelledby="case-rag-prd-title" class="real-case" id="case-rag-prd">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">正文全文</span></div>
+<h4 class="case-title" id="case-rag-prd-title">PRD.md · 多模态 RAG 问答系统</h4>
+<p class="case-provenance">西瓜老师 · 第八章多模态知识库 · GraphRAG-Agent 课件<br/><span class="case-filename">PRD.md</span></p>
+<p class="case-note">多模态问答系统的 PRD 草案。§4 为流程，§6 为交互，§8 为验收；条件性功能尚待确认。</p>
+<details class="case-fold" id="case-rag-prd-fold"><summary><span>展开全文</span><small>370 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 PRD.md" class="copy-case" data-case="rag-prd" type="button">复制全文</button></div>
+<div aria-label="PRD.md · 多模态 RAG 问答系统；可上下滚动" class="case-reader" role="region" tabindex="0"><h4 class="source-heading source-level-1" id="case-rag-prd-多模态-rag-问答系统--产品需求文档prdv10">多模态 RAG 问答系统 — 产品需求文档（PRD）v1.0</h4>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>文档属性</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>文档版本</strong></td>
+<td>1.0</td>
+</tr>
+<tr>
+<td><strong>状态</strong></td>
+<td>草案（可评审）</td>
+</tr>
+<tr>
+<td><strong>制定日期</strong></td>
+<td>2026-04-08</td>
+</tr>
+<tr>
+<td><strong>产品名称（工作名）</strong></td>
+<td>多模态 RAG 问答系统（GraphRAG-Agent Web 端）</td>
+</tr>
+<tr>
+<td><strong>后端规范依据</strong></td>
+<td><code>docs/multimodal-rag-backend-api-specification-v1.0.md</code></td>
+</tr>
+<tr>
+<td><strong>问答格式依据</strong></td>
+<td><code>docs/agentic-rag-kg-specification-v1.0.md</code> §6.2</td>
+</tr>
+<tr>
+<td><strong>关联设计</strong></td>
+<td><code>docs/frontend-product-specification-v1.0.md</code></td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-文档修订记录">文档修订记录</h5>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>版本</th>
+<th>日期</th>
+<th>修订说明</th>
+<th>作者</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.0</td>
+<td>2026-04-08</td>
+<td>首版：目标与场景、端到端流程、页面与模块、交互、UI 与响应式</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-目录">目录</h5>
+<ol>
+<li><a href="#case-rag-prd-1-概述">概述</a></li>
+<li><a href="#case-rag-prd-2-核心目标场景痛点与用户">核心目标、场景、痛点与用户</a></li>
+<li><a href="#case-rag-prd-3-产品范围与非目标">产品范围与非目标</a></li>
+<li><a href="#case-rag-prd-4-端到端产品流程">端到端产品流程</a></li>
+<li><a href="#case-rag-prd-5-关键页面与模块清单及设计说明">关键页面与模块清单及设计说明</a></li>
+<li><a href="#case-rag-prd-6-关键节点与核心功能交互逻辑">关键节点与核心功能交互逻辑</a></li>
+<li><a href="#case-rag-prd-7-ui-布局配色响应式与组件样式">UI 布局、配色、响应式与组件样式</a></li>
+<li><a href="#case-rag-prd-8-与后端-api-的验收对齐">与后端 API 的验收对齐</a></li>
+<li><a href="#case-rag-prd-9-附录">附录</a></li>
+</ol>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-1-概述">1. 概述</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-11-背景">1.1 背景</h6>
+<p class="source-prose">企业或教研场景中，大量 <strong>PDF / DOCX / PPTX</strong> 等文档需要被 <strong>解析、结构化抽取并构建知识图谱</strong>，进而支持 <strong>基于图谱的 Agentic 问答</strong>。传统方式依赖命令行与多工具串联，门槛高、可观测性差。本 PRD 描述 <strong>浏览器端 Web 产品</strong>：在 <strong>REST API v1</strong>（<code>/api/v1</code>）之上，完成 上传 → 异步建索引 → 图谱与抽取只读浏览 → 知识图谱问答 的闭环体验。</p>
+<h6 class="source-heading source-level-3" id="case-rag-prd-12-术语">1.2 术语</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Indexing</strong></td>
+<td>自上传文件起的完整管线：MinerU → Adapter → LangExtract → KG Builder（见后端规范 §4）</td>
+</tr>
+<tr>
+<td><strong><code>file_id</code></strong></td>
+<td><code>POST /files</code> 返回的已落盘文件标识</td>
+</tr>
+<tr>
+<td><strong><code>index_id</code></strong></td>
+<td>一次 Indexing 任务实例，与产物目录绑定</td>
+</tr>
+<tr>
+<td><strong><code>conversation_id</code></strong></td>
+<td>多轮问答会话标识（可选）</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-13-文档读者">1.3 文档读者</h6>
+<p>产品经理、UX/UI、前端与后端研发、测试；用于需求评审、迭代排期与验收。</p>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-2-核心目标场景痛点与用户">2. 核心目标、场景、痛点与用户</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-21-核心目标">2.1 核心目标</h6>
+<ol>
+<li><strong>降低使用门槛</strong>：非工程用户可在 Web 内完成文档入库与问答，无需本地安装链路与命令行。  </li>
+<li><strong>过程可观测</strong>：Indexing 为 <strong>异步任务</strong>，界面须展示 状态、阶段（stage）、进度（progress），避免「长时间无反馈」。  </li>
+<li><strong>结果可核验</strong>：成功后可查看 <strong>图谱统计、产物列表、抽取摘要</strong>；问答结果可附带 <strong><code>graph_stats</code></strong> 增强可信度（与后端 §7.7 对齐）。  </li>
+<li><strong>与架构一致</strong>：所有主流程与 《多模态 RAG 后端 API 规范 v1.0》 中的资源模型、HTTP 语义、错误码一致，便于联调与自动化测试。</li>
+</ol>
+<h6 class="source-heading source-level-3" id="case-rag-prd-22-核心业务场景">2.2 核心业务场景</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>编号</th>
+<th>场景名称</th>
+<th>描述</th>
+<th>成功标准</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>文档入库与建索引</td>
+<td>用户上传合规文档，创建 Indexing 任务并等待至 <code>succeeded</code></td>
+<td>用户获得可用 <code>index_id</code>，并看到摘要统计（如 <code>node_count</code> / <code>edge_count</code>）</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>索引进度跟踪</td>
+<td>用户离开详情页后返回，或保持页面打开</td>
+<td>状态与后端 <code>GET /indexes/{id}</code> 一致；轮询不造成明显卡顿</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>知识图谱问答</td>
+<td>用户基于已成功索引提问，可多轮（若后端支持 <code>conversation_id</code>）</td>
+<td>展示 <code>answer</code>；可选展示 <code>graph_stats</code>、<code>meta.duration_ms</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>图谱与产物查阅</td>
+<td>用户查看图谱 JSON 或可视化、下载/预览产物</td>
+<td>调用 <code>GET .../graph</code>、<code>.../artifacts</code>、<code>.../extractions</code>；大内容采用摘要/分页策略（与规范一致）</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>失败与限流处理</td>
+<td>索引失败、文件过大、索引未就绪就问答等</td>
+<td>展示统一错误体中的 <code>error_code</code> / <code>error_message</code>；提供可理解的下一步操作</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-23-业务痛点与产品对策">2.3 业务痛点与产品对策</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>痛点</th>
+<th>说明</th>
+<th>产品对策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>管线耗时长、易误以为卡死</td>
+<td>MinerU/LangExtract 等阶段耗时不定</td>
+<td>异步 + <strong>轮询</strong> <code>GET /indexes/{id}</code>；步骤条 + <code>message</code>；页面隐藏时降低轮询频率</td>
+</tr>
+<tr>
+<td>上传与建索引耦合过紧</td>
+<td>大文件需先传再决策是否建索引</td>
+<td>严格遵循 先 <code>POST /files</code> 再 <code>POST /indexes</code>（规范 §7.1–7.2）</td>
+</tr>
+<tr>
+<td>问答依赖索引就绪</td>
+<td><code>INDEX_NOT_READY</code> 等冲突</td>
+<td>对话入口校验索引状态；错误码映射为中文引导</td>
+</tr>
+<tr>
+<td>证据难追溯</td>
+<td>用户不信任纯文本回答</td>
+<td>展示 <code>graph_stats</code>；提供图谱页与产物入口</td>
+</tr>
+<tr>
+<td>密钥与敏感数据</td>
+<td>规范要求密钥不入响应、产物可能含 PII</td>
+<td>前端不存储 API Key；下载与调试功能预留鉴权后的行为（见 §8）</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-24-面向用户群体">2.4 面向用户群体</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>用户类型</th>
+<th>特征</th>
+<th>核心诉求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>业务分析 / 研究员</strong></td>
+<td>熟悉业务文档，弱技术</td>
+<td>简单上传、看懂进度、直接提问</td>
+</tr>
+<tr>
+<td><strong>实施顾问 / 售前</strong></td>
+<td>需要演示与可核验结果</td>
+<td>索引摘要、图谱可视化、稳定演示路径</td>
+</tr>
+<tr>
+<td><strong>工程与运维</strong></td>
+<td>关注健康与排错</td>
+<td><code>GET /health</code>、错误码、日志入口（若产品提供链接）</td>
+</tr>
+</tbody></table></div>
+<p class="source-prose"><strong>v1.0 假设</strong>：单租户或内网部署为主；多租户账号体系为后续版本，本 PRD 仅 <strong>预留</strong> <code>Authorization: Bearer</code> 的 UI 与请求头扩展点。</p>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-3-产品范围与非目标">3. 产品范围与非目标</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-31-v10-范围内">3.1 v1.0 范围内</h6>
+<ul>
+<li>基于 <code>/api/v1</code> 的 文件上传、创建索引、轮询状态、产物列表、图谱 GET、抽取 GET、聊天 completions、健康检查。  </li>
+<li><strong>Indexing 状态机</strong>：<code>queued</code> / <code>running</code> / <code>succeeded</code> / <code>failed</code>（及可选 <code>cancelled</code>）的展示与终态处理。  </li>
+<li><strong>对话</strong>：请求体与响应体字段与后端 §7.7、<code>agentic-rag-kg-specification</code> §6.2 对齐。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-32-v10-非目标可列-backlog">3.2 v1.0 非目标（可列 backlog）</h6>
+<ul>
+<li>服务端 <strong>SSE/WebSocket</strong> 推送索引进度（规范推荐轮询；推送为增强项）。  </li>
+<li>完整 <strong>向量检索模式</strong>切换（规范边界以 KG 为主）。  </li>
+<li>独立多模态资产库（图片/音频单独索引）的完整 UI。  </li>
+<li>细粒度 <strong>RBAC</strong> 与审计日志前端（仅预留入口）。</li>
+</ul>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-4-端到端产品流程">4. 端到端产品流程</h5>
+<p class="source-prose">以下流程与 <strong>后端规范 §6 API 总览</strong> 一致，按用户从入口到「完成问答」的最短路径描述；<strong>分支</strong>单独列出。</p>
+<h6 class="source-heading source-level-3" id="case-rag-prd-41-主流程从进入到完成首次问答">4.1 主流程：从进入到完成首次问答</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户动作</th>
+<th>系统行为</th>
+<th>数据/API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>打开 Web 应用</td>
+<td>可选调用 <code>GET /api/v1/health</code> 展示服务可用/版本</td>
+<td><code>GET /health</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>进入「上传/新建索引」</td>
+<td>展示上传区：格式说明（pdf/docx/pptx）、大小上限提示（如 200MB，与后端一致）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>3</td>
+<td>选择或拖拽文件</td>
+<td>前端校验扩展名；可选客户端大小提示</td>
+<td>—</td>
+</tr>
+<tr>
+<td>4</td>
+<td>确认上传</td>
+<td><code>multipart/form-data</code> 上传 <code>file</code></td>
+<td><code>POST /api/v1/files</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>收到上传成功</td>
+<td>展示 <code>file_id</code>、<code>original_filename</code>、<code>size_bytes</code>（建议同时展示人类可读单位，避免小文件显示为 0.00MB）</td>
+<td>响应体 §7.1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>点击「开始建索引」</td>
+<td>请求体携带 <code>file_id</code> 与可选 <code>options</code></td>
+<td><code>POST /api/v1/indexes</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>收到 202</td>
+<td>保存 <code>index_id</code>、<code>poll_url</code>；<strong>跳转或展开「索引详情」</strong></td>
+<td>响应体 §7.2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>停留在索引详情</td>
+<td><strong>定时轮询</strong>（建议 2–5s，终态停止）</td>
+<td><code>GET /api/v1/indexes/{index_id}</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>运行中</td>
+<td>展示 <code>status</code>、<code>stage</code>（如 mineru/adapter/langextract/kg_builder）、<code>progress</code>、<code>message</code></td>
+<td>§7.3</td>
+</tr>
+<tr>
+<td>10</td>
+<td>成功 <code>succeeded</code></td>
+<td>展示 <code>result_summary</code>（如 <code>node_count</code>、<code>edge_count</code>、<code>document_id</code> 等）</td>
+<td>§7.3</td>
+</tr>
+<tr>
+<td>11</td>
+<td>用户进入「对话」</td>
+<td>必须绑定当前 <code>index_id</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>12</td>
+<td>输入问题并发送</td>
+<td>请求体：<code>index_id</code>、<code>messages</code>、可选 <code>conversation_id</code>、<code>options</code></td>
+<td><code>POST /api/v1/chat/completions</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td>收到回答</td>
+<td>展示 <code>answer</code>；可选展示 <code>graph_stats</code>、<code>meta</code>；<code>include_debug</code> 为 true 时展示 <code>debug</code>（内部/高级用户）</td>
+<td>§7.7</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-42-分支流程-a查看产物">4.2 分支流程 A：查看产物</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户动作</th>
+<th>系统行为</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A1</td>
+<td>在成功索引后进入「产物」</td>
+<td>列表展示 <code>artifacts[].type</code> 与获取方式（链接或内联说明）</td>
+<td><code>GET /api/v1/indexes/{id}/artifacts</code> §7.4</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>下载或跳转</td>
+<td>按 <code>uri</code> 拉取；大文件以链接为主，避免阻塞 UI</td>
+<td>规范 §7.4</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-43-分支流程-b查看知识图谱">4.3 分支流程 B：查看知识图谱</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户动作</th>
+<th>系统行为</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>B1</td>
+<td>进入「图谱」</td>
+<td>拉取完整 JSON 或 <code>?summary=1</code> 先展示统计再加载全量</td>
+<td><code>GET /api/v1/indexes/{id}/graph</code> §7.5</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>交互</td>
+<td>可视化（若实现）：节点点击展示属性；与 <code>nodes</code>/<code>edges</code> 结构一致</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-44-分支流程-c查看抽取">4.4 分支流程 C：查看抽取</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>用户动作</th>
+<th>系统行为</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C1</td>
+<td>进入「抽取」</td>
+<td>默认摘要；<code>include_text</code> 按需开启</td>
+<td><code>GET /api/v1/indexes/{id}/extractions</code> §7.6</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-45-异常流程与-8-错误码一致">4.5 异常流程（与 §8 错误码一致）</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>条件</th>
+<th>用户可见反馈</th>
+<th>建议操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>FILE_TOO_LARGE</code> / <code>INVALID_FILE_TYPE</code></td>
+<td>明确文案 + 格式/大小约束重述</td>
+<td>更换文件</td>
+</tr>
+<tr>
+<td><code>INDEX_NOT_FOUND</code> / <code>FILE_NOT_FOUND</code></td>
+<td>资源不存在</td>
+<td>返回列表或重新上传</td>
+</tr>
+<tr>
+<td><code>INDEX_NOT_READY</code>（问答时）</td>
+<td>提示索引仍为 <code>running</code> 等</td>
+<td>跳转索引详情等待</td>
+</tr>
+<tr>
+<td><code>INDEXING_FAILED</code></td>
+<td>展示 <code>error_message</code></td>
+<td>联系管理员或重试新建索引</td>
+</tr>
+<tr>
+<td><code>RATE_LIMITED</code></td>
+<td>限流提示</td>
+<td>稍后重试</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>通用失败 + 重试</td>
+<td>重试或反馈</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-5-关键页面与模块清单及设计说明">5. 关键页面与模块清单及设计说明</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-51-信息架构ia与路由建议">5.1 信息架构（IA）与路由建议</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>路由（示例）</th>
+<th>页面名称</th>
+<th>优先级</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/</code></td>
+<td>首页/控制台</td>
+<td>P0</td>
+<td>入口、最近索引、快捷操作</td>
+</tr>
+<tr>
+<td><code>/upload</code></td>
+<td>上传与创建索引</td>
+<td>P0</td>
+<td>串联 <code>POST /files</code> → <code>POST /indexes</code></td>
+</tr>
+<tr>
+<td><code>/indexes/:indexId</code></td>
+<td>索引任务详情</td>
+<td>P0</td>
+<td>轮询核心页</td>
+</tr>
+<tr>
+<td><code>/indexes/:indexId/artifacts</code></td>
+<td>产物浏览</td>
+<td>P1</td>
+<td>对齐 §7.4</td>
+</tr>
+<tr>
+<td><code>/indexes/:indexId/graph</code></td>
+<td>图谱探索</td>
+<td>P1</td>
+<td>对齐 §7.5</td>
+</tr>
+<tr>
+<td><code>/indexes/:indexId/extractions</code></td>
+<td>抽取浏览</td>
+<td>P1</td>
+<td>对齐 §7.6，注意性能</td>
+</tr>
+<tr>
+<td><code>/chat</code></td>
+<td>对话（选择索引）</td>
+<td>P0</td>
+<td>未选索引时阻断或引导</td>
+</tr>
+<tr>
+<td><code>/chat/:indexId</code></td>
+<td>指定索引对话</td>
+<td>P0</td>
+<td>深链、分享</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>404</td>
+<td>P1</td>
+<td>返回首页或索引列表</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-52-页面级设计说明">5.2 页面级设计说明</h6>
+<h6 class="source-heading source-level-4" id="case-rag-prd-521-首页控制台">5.2.1 首页/控制台</h6>
+<ul>
+<li><strong>目的</strong>：降低冷启动成本，展示「新建索引」主 CTA 与 <strong>最近成功的 <code>index_id</code></strong>（可来自 localStorage 或后端列表接口若存在）。  </li>
+<li><strong>模块</strong>：顶部栏、快捷卡片、环境/健康状态（可选，<code>GET /health</code>）。  </li>
+<li><strong>空态</strong>：无历史时强调「上传第一个文档」。</li>
+</ul>
+<h6 class="source-heading source-level-4" id="case-rag-prd-522-上传与创建索引">5.2.2 上传与创建索引</h6>
+<ul>
+<li><strong>目的</strong>：完成 §4 步骤 2–7。  </li>
+<li><strong>模块</strong>：拖拽上传区、文件信息回显、<code>开始建索引</code> 按钮（仅在 <code>file_id</code> 就绪后可用）、可选高级选项折叠（<code>options</code> 与后端 §7.2 字段对应）。  </li>
+<li><strong>约束展示</strong>：扩展名 pdf/docx/pptx；单文件上限 200MB（与后端 §7.1 一致）。</li>
+</ul>
+<h6 class="source-heading source-level-4" id="case-rag-prd-523-索引任务详情">5.2.3 索引任务详情</h6>
+<ul>
+<li><strong>目的</strong>：满足 <strong>S2</strong>，核心为轮询展示。  </li>
+<li><strong>模块</strong>：状态徽章、<code>stage</code> 步骤指示、<code>progress</code> 进度条、<code>message</code> 文案、时间戳 <code>updated_at</code>、失败时 <code>error</code> 区块、成功时 <code>result_summary</code> 卡片与「去对话」「看图谱」按钮。</li>
+</ul>
+<h6 class="source-heading source-level-4" id="case-rag-prd-524-对话页">5.2.4 对话页</h6>
+<ul>
+<li><strong>目的</strong>：满足 <strong>S3</strong>。  </li>
+<li><strong>模块</strong>：<code>index_id</code> 选择器、消息列表（用户/助手）、输入框、发送按钮、可选侧栏展示 <code>graph_stats</code> 与 <code>meta.duration_ms</code>。  </li>
+<li><strong>开发者选项</strong>：<code>include_debug</code> 开关（默认关闭），展开 <code>debug.tools_used</code> 等。</li>
+</ul>
+<h6 class="source-heading source-level-4" id="case-rag-prd-525-图谱页">5.2.5 图谱页</h6>
+<ul>
+<li><strong>目的</strong>：满足 <strong>S4-B</strong>。  </li>
+<li><strong>模块</strong>：摘要模式与全量加载、图可视化区域、节点详情侧栏（数据源于 <code>nodes[]</code>）。</li>
+</ul>
+<h6 class="source-heading source-level-4" id="case-rag-prd-526-产物页">5.2.6 产物页</h6>
+<ul>
+<li><strong>目的</strong>：满足 <strong>S4-A</strong>。  </li>
+<li><strong>模块</strong>：表格或卡片列表 <code>artifacts[]</code>，类型可读名映射（如 <code>knowledge_graph_json</code> →「知识图谱 JSON」）。</li>
+</ul>
+<h6 class="source-heading source-level-4" id="case-rag-prd-527-抽取页">5.2.7 抽取页</h6>
+<ul>
+<li><strong>目的</strong>：满足 <strong>S4-C</strong>。  </li>
+<li><strong>模块</strong>：<code>extraction_count</code>、<code>text_preview</code>、折叠展开 <code>extractions[]</code>；默认 <code>include_text=false</code> 控制体积。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-53-全局模块">5.3 全局模块</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>顶栏</strong></td>
+<td>Logo、产品名、主导航、可选用户/帮助</td>
+</tr>
+<tr>
+<td><strong>通知</strong></td>
+<td>Toast：上传成功、索引成功/失败、限流等</td>
+</tr>
+<tr>
+<td><strong>全局错误边界</strong></td>
+<td>未捕获错误时友好页，避免白屏</td>
+</tr>
+<tr>
+<td><strong>鉴权占位</strong></td>
+<td>未来 <code>Authorization</code> 头；v1.0 可不展示登录</td>
+</tr>
+</tbody></table></div>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-6-关键节点与核心功能交互逻辑">6. 关键节点与核心功能交互逻辑</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-61-上传与创建索引">6.1 上传与创建索引</h6>
+<ul>
+<li><strong>触发</strong>：用户点击上传并确认。  </li>
+<li><strong>前置条件</strong>：网络可用；文件通过前端基础校验。  </li>
+<li><strong>交互</strong>：上传中按钮 loading；成功后展示 <code>size_bytes</code>；「建索引」使用最新 <code>file_id</code>。  </li>
+<li><strong>后置</strong>：进入索引详情并开始轮询；失败按 §4.5 展示。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-62-索引进度轮询">6.2 索引进度轮询</h6>
+<ul>
+<li><strong>启动时机</strong>：<code>POST /indexes</code> 返回 202 后立即开始。  </li>
+<li><strong>停止条件</strong>：<code>status</code> 为 <code>succeeded</code>、<code>failed</code> 或 <code>cancelled</code>（若实现）。  </li>
+<li><strong>频率</strong>：建议 2–5s；<code>document.visibilityState === 'hidden'</code> 时降低频率，可见时立即补拉一次。  </li>
+<li><strong>防重复</strong>：切换 <code>index_id</code> 时清除旧定时器；组件卸载 <code>AbortController</code> 取消进行中的请求（若使用）。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-63-对话agentic-rag">6.3 对话（Agentic-RAG）</h6>
+<ul>
+<li><strong>前置条件</strong>：目标 <code>index_id</code> 对应状态为 <code>succeeded</code>；否则禁用发送并提示 <code>INDEX_NOT_READY</code> 类体验。  </li>
+<li><strong>请求</strong>：<code>messages</code> 至少一条 user；首轮可不传 <code>conversation_id</code>，若服务端返回 <code>meta.conversation_id</code>，后续轮次携带（与 §7.7 一致）。  </li>
+<li><strong>响应成功</strong>：渲染 <code>answer</code>（支持 Markdown 子集）；脚注区可选 <code>graph_stats</code>。  </li>
+<li><strong>响应失败</strong>：解析 <code>error_code</code>、<code>error_message</code>；429 时禁用连点并倒计时提示。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-64-图谱加载">6.4 图谱加载</h6>
+<ul>
+<li><strong>策略</strong>：首屏可用 <code>?summary=1</code>（若后端支持）展示 <code>metadata</code> 与计数，再加载全图；避免一次性渲染超大图导致卡顿。  </li>
+<li><strong>交互</strong>：节点点击、类型筛选（若产品实现）；与 <code>node_types</code> 分布展示一致。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-65-产物与抽取">6.5 产物与抽取</h6>
+<ul>
+<li><strong>产物</strong>：以列表为主，点击下载/新窗口打开 <code>uri</code>。  </li>
+<li><strong>抽取</strong>：默认预览摘要；全文/长文本需二次确认或折叠，防止 DOM 过大。</li>
+</ul>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-7-ui-布局配色响应式与组件样式">7. UI 布局、配色、响应式与组件样式</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-71-整体布局">7.1 整体布局</h6>
+<ul>
+<li><strong>结构</strong>：顶栏 + 左侧导航（可选）+ 主内容区 + 右侧上下文栏（对话页可选）。  </li>
+<li><strong>主内容区</strong>：白底卡片承载表单与列表；页面背景浅灰（<code>#f5f7fb</code> 级）与内容区分层。  </li>
+<li><strong>对话区</strong>：助手消息左对齐、用户消息右对齐；输入区固定在主内容底部（桌面）或视口底部（移动）。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-72-配色与品牌">7.2 配色与品牌</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>用途</th>
+<th>建议</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主色</td>
+<td><code>#667eea</code> → <code>#764ba2</code> 渐变</td>
+<td>与现有 <code>integration/static/index.html</code> 品牌延续；用于主按钮、关键进度、顶栏背景可选</td>
+</tr>
+<tr>
+<td>主文字</td>
+<td><code>#1a1a2e</code></td>
+<td>正文</td>
+</tr>
+<tr>
+<td>次要文字</td>
+<td><code>#6b7280</code></td>
+<td>辅助说明、时间</td>
+</tr>
+<tr>
+<td>成功</td>
+<td><code>#059669</code></td>
+<td><code>succeeded</code></td>
+</tr>
+<tr>
+<td>危险</td>
+<td><code>#dc2626</code></td>
+<td><code>failed</code>、破坏性操作</td>
+</tr>
+<tr>
+<td>表面/卡片</td>
+<td><code>#ffffff</code></td>
+<td>卡片背景</td>
+</tr>
+<tr>
+<td>边框</td>
+<td><code>#e5e7eb</code></td>
+<td>分割线、输入框</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-73-字体与排版">7.3 字体与排版</h6>
+<ul>
+<li><strong>字体栈</strong>：<code>-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif</code>。  </li>
+<li><strong>字号</strong>：页面标题 20–24px；正文 14–16px；辅助 12–13px。  </li>
+<li><strong>行高</strong>：正文 ≥ 1.5；对话气泡略宽于表单列宽以提升可读性。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-74-响应式">7.4 响应式</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>断点</th>
+<th>宽度（参考）</th>
+<th>布局调整</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>手机</td>
+<td>&lt; 576px</td>
+<td>单栏；侧栏收入抽屉/汉堡菜单；右栏改为底部 Sheet 或 Tab</td>
+</tr>
+<tr>
+<td>平板</td>
+<td>576–1199px</td>
+<td>可折叠侧栏；主内容优先</td>
+</tr>
+<tr>
+<td>桌面</td>
+<td>≥ 1200px</td>
+<td>完整导航 + 可选三栏</td>
+</tr>
+</tbody></table></div>
+<p><strong>触控</strong>：可点击区域最小约 44×44px；重要操作避免仅依赖 hover。</p>
+<h6 class="source-heading source-level-3" id="case-rag-prd-75-组件样式规范摘要">7.5 组件样式规范（摘要）</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>样式要点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>按钮</strong></td>
+<td>主按钮：渐变或实色主色，圆角 8px；禁用降低透明度并禁用点击</td>
+</tr>
+<tr>
+<td><strong>输入框</strong></td>
+<td>边框 <code>#e5e7eb</code>，focus 环主色；错误态红边框 + 错误文案</td>
+</tr>
+<tr>
+<td><strong>卡片</strong></td>
+<td>圆角 12px，阴影 <code>0 4px 24px rgba(0,0,0,.08)</code></td>
+</tr>
+<tr>
+<td><strong>步骤条/进度条</strong></td>
+<td><code>stage</code> 映射到 4 段：MinerU → Adapter → LangExtract → KG；<code>progress</code> 0–1 线性进度</td>
+</tr>
+<tr>
+<td><strong>表格</strong></td>
+<td>产物列表：斑马纹可选；小屏横向滚动</td>
+</tr>
+<tr>
+<td><strong>Toast</strong></td>
+<td>顶或底固定，3–5s 自动消失；错误可手动关闭</td>
+</tr>
+<tr>
+<td><strong>加载</strong></td>
+<td>按钮内 Spinner；列表骨架屏；禁止长时间全屏遮罩（除非阻塞性操作）</td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-76-动效">7.6 动效</h6>
+<ul>
+<li>进度与步骤切换：200–300ms ease。  </li>
+<li>新消息进入：轻微上滑或淡入，避免炫光干扰阅读。</li>
+</ul>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-8-与后端-api-的验收对齐">8. 与后端 API 的验收对齐</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-81-必须实现的接口对照p0">8.1 必须实现的接口对照（P0）</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>PRD 能力</th>
+<th>HTTP</th>
+<th>路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上传</td>
+<td>POST</td>
+<td><code>/api/v1/files</code></td>
+</tr>
+<tr>
+<td>建索引</td>
+<td>POST</td>
+<td><code>/api/v1/indexes</code></td>
+</tr>
+<tr>
+<td>轮询</td>
+<td>GET</td>
+<td><code>/api/v1/indexes/{index_id}</code></td>
+</tr>
+<tr>
+<td>问答</td>
+<td>POST</td>
+<td><code>/api/v1/chat/completions</code></td>
+</tr>
+<tr>
+<td>健康（可选）</td>
+<td>GET</td>
+<td><code>/api/v1/health</code></td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-82-字段与状态验收">8.2 字段与状态验收</h6>
+<ul>
+<li>上传响应含 <strong><code>size_bytes</code></strong>；索引轮询含 <code>stage</code>、<code>progress、message</code>；成功含 <strong><code>result_summary</code></strong>。  </li>
+<li>问答响应与 <code>agentic-rag-kg-specification</code> §6.2 及后端 <strong>§7.7</strong> 扩展字段一致（<code>answer</code>、<code>graph_stats</code>、<code>meta</code>、<code>error_code</code> 等）。  </li>
+<li>错误响应与后端 <strong>§8</strong> 统一错误体一致。</li>
+</ul>
+<h6 class="source-heading source-level-3" id="case-rag-prd-83-安全与合规产品侧">8.3 安全与合规（产品侧）</h6>
+<ul>
+<li>不在前端写死 <strong>DeepSeek / MinerU</strong> 等密钥；若未来有 Token，走环境变量或登录会话，由后端代理。  </li>
+<li>下载敏感产物时，产品需与后端 <strong>鉴权策略</strong> 同步（规范 §9）。</li>
+</ul>
+<hr/>
+<h5 class="source-heading source-level-2" id="case-rag-prd-9-附录">9. 附录</h5>
+<h6 class="source-heading source-level-3" id="case-rag-prd-91-参考文档">9.1 参考文档</h6>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>文档</th>
+<th>路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>后端 API 规范</td>
+<td><code>docs/multimodal-rag-backend-api-specification-v1.0.md</code></td>
+</tr>
+<tr>
+<td>Agentic-RAG（KG）问答</td>
+<td><code>docs/agentic-rag-kg-specification-v1.0.md</code></td>
+</tr>
+<tr>
+<td>前端产品规划</td>
+<td><code>docs/frontend-product-specification-v1.0.md</code></td>
+</tr>
+</tbody></table></div>
+<h6 class="source-heading source-level-3" id="case-rag-prd-92-索引状态与阶段后端-3273">9.2 索引状态与阶段（后端 §3.2–7.3）</h6>
+<ul>
+<li><strong>状态</strong>：<code>queued</code> / <code>running</code> / <code>succeeded</code> / <code>failed</code>（及可选 <code>cancelled</code>）。  </li>
+<li><strong>子阶段（stage）</strong>：可与 <code>mineru</code> / <code>adapter</code> / <code>langextract</code> / <code>kg_builder</code> 及 <code>done</code> 等映射到 UI 步骤条。</li>
+</ul>
+<hr/>
+<p><strong>文档结束</strong></p>
+</div>
+</details>
+</section>
+<p class="body-prose">PRD 中带有“若实现”“若后端支持”的能力仍未确定范围。拆任务时，应将每项条件明确为本期实现、延期或需要调查，避免前端按可选能力开发，而后端只实现最小接口。</p>
+<p class="body-prose">本地看板的 <code>PRD.md</code> 对自然语言操作设置了更具体的边界：询问项目情况不得修改数据，删除同名项目必须确认，信息不足时需要追问。这些都是产品内助手的行为规则，应进入产品验收；<code>AGENTS.md</code> 中的开发规则则用于约束修改代码的 Agent。</p>
+<span class="anchor-alias" id="真实案例中的设计与维护经验"></span><section aria-labelledby="case-board-product-title" class="real-case" id="case-board-product">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">全文</span></div>
+<h4 class="case-title" id="case-board-product-title">PRD.md · 本地项目看板</h4>
+<p class="case-provenance">熠辉编程 · 5.5 Harness Engineering · 最终源码<br/><span class="case-filename">docs/PRD.md</span></p>
+<p class="case-note">本地看板的需求文件：项目字段、持久化、对话历史与自然语言操作规则。</p>
+<details class="case-fold" id="case-board-product-fold"><summary><span>展开全文</span><small>184 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 docs/PRD.md" class="copy-case" data-case="board-product" type="button">复制全文</button></div>
+<div aria-label="PRD.md · 本地项目看板；可上下滚动" class="case-reader" role="region" tabindex="0"><h4 class="source-heading source-level-1" id="case-board-product-prdmd">PRD.md</h4>
+<h5 class="source-heading source-level-2" id="case-board-product-产品名称">产品名称</h5>
+<p>本地项目看板</p>
+<h5 class="source-heading source-level-2" id="case-board-product-产品简介">产品简介</h5>
+<p>本项目是一个本地运行的 AI 开发项目看板，用来帮助用户管理多个并行开发的项目。</p>
+<p>页面左侧是项目看板，右侧是 Agent 对话面板。</p>
+<p>用户可以手动新增项目卡片，也可以通过右侧 Agent 面板用自然语言新增、删除或修改项目卡片。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-目标用户">目标用户</h5>
+<p class="source-prose">本项目面向正在学习 AI 编程、使用 Codex、Claude Code、Cursor 等工具开发项目的个人开发者或小团队。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-核心问题">核心问题</h5>
+<p>当用户同时开发多个项目时，容易遇到这些问题：</p>
+<ul>
+<li>不知道每个项目当前处于什么状态。</li>
+<li>忘记每个项目主要使用哪个开发工具。</li>
+<li>项目状态需要手动维护，操作麻烦。</li>
+<li>希望通过自然语言快速新增、删除或修改项目卡片。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-product-页面布局">页面布局</h5>
+<p>页面分为两个区域：</p>
+<ol>
+<li>左侧是项目看板区域，宽度为 calc(100% - 380px)。</li>
+<li>右侧是 Agent 对话面板，固定宽度为 380px。</li>
+</ol>
+<p>左侧看板用于展示项目卡片。</p>
+<p>右侧 Agent 面板用于接收用户自然语言输入，并根据用户意图修改看板数据。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-看板状态">看板状态</h5>
+<p>第一版只支持以下 4 个状态：</p>
+<ul>
+<li>规划中</li>
+<li>进行中</li>
+<li>阻塞中</li>
+<li>已完成</li>
+</ul>
+<p>内部状态值：</p>
+<ul>
+<li>planning</li>
+<li>in_progress</li>
+<li>blocked</li>
+<li>done</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-product-项目卡片字段">项目卡片字段</h5>
+<p>每个项目卡片只包含以下字段：</p>
+<ul>
+<li>项目名称</li>
+<li>使用工具</li>
+<li>当前状态</li>
+<li>更新时间</li>
+</ul>
+<p>使用工具只支持：</p>
+<ul>
+<li>Codex</li>
+<li>Claude Code</li>
+<li>Cursor</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-product-手动新增项目">手动新增项目</h5>
+<p>用户可以点击“新增项目”按钮，打开弹框表单。</p>
+<p>弹框表单包含：</p>
+<ul>
+<li>项目名称</li>
+<li>使用工具</li>
+<li>当前状态</li>
+</ul>
+<p>用户提交后，系统创建一张新的项目卡片，并显示在对应状态列中。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-拖拽功能">拖拽功能</h5>
+<p>用户可以拖拽项目卡片。</p>
+<p>拖拽需要支持两种行为：</p>
+<ol>
+<li>在同一个状态列中拖拽，调整卡片顺序。</li>
+<li>拖拽到其他状态列，修改项目当前状态。</li>
+</ol>
+<p>拖拽完成后，需要更新项目的状态、排序和更新时间。</p>
+<p>刷新页面后，拖拽后的状态和顺序应该继续保留。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-agent-面板定义">Agent 面板定义</h5>
+<p>右侧 Agent 面板是本项目的核心功能之一。</p>
+<p>用户可以在 Agent 面板中输入自然语言，例如：</p>
+<ul>
+<li>帮我新增一个项目，叫 AI 简历生成器，工具用 Codex，状态是规划中。</li>
+<li>把客户管理系统改成进行中。</li>
+<li>把 Chrome 插件项目标记为阻塞中。</li>
+<li>把知识库网站的工具改成 Claude Code。</li>
+<li>删除 AI 简历生成器这个项目。</li>
+</ul>
+<p>Agent 需要识别用户意图，并返回结构化结果，让前端修改本地项目数据。</p>
+<p>Agent 面板需要支持历史对话记录。</p>
+<p class="source-prose">历史对话入口以图标按钮放在新建对话按钮左侧。点击历史图标后，Agent 面板切换为历史视图并替换当前对话区和输入区；点击返回后回到当前 Agent 对话。</p>
+<p>用户可以在历史视图中切换不同对话。</p>
+<p>如果当前对话还是空对话，系统不允许新建对话，避免生成无内容的历史记录。</p>
+<p>同一个对话中的历史消息需要作为上下文发送给大模型，让模型能够理解连续追问和前文提到的项目。</p>
+<p>历史对话保存在浏览器本地 IndexedDB 中，刷新页面后仍然保留。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-agent-支持的操作">Agent 支持的操作</h5>
+<p>第一版 Agent 只支持以下操作：</p>
+<ol>
+<li>新增项目卡片</li>
+<li>删除项目卡片</li>
+<li>修改项目状态</li>
+<li>修改项目使用工具</li>
+<li>只回答问题，不修改数据</li>
+</ol>
+<h5 class="source-heading source-level-2" id="case-board-product-agent-操作规则">Agent 操作规则</h5>
+<p>Agent 只能在用户明确表达修改意图时修改数据。</p>
+<p>如果用户只是询问项目情况，Agent 只回答问题，不修改数据。</p>
+<p>如果用户要求删除项目，但存在多个同名项目，Agent 必须询问用户确认，不能直接删除。</p>
+<p>如果用户提到的项目不存在，Agent 应该提示用户未找到项目，并询问是否需要新建。</p>
+<p>如果用户输入的信息不完整，Agent 应该向用户追问必要信息。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-本地数据要求">本地数据要求</h5>
+<p>项目数据保存在浏览器本地 IndexedDB 中。</p>
+<p>刷新页面后，项目数据应该继续存在。</p>
+<p>本项目不使用后端数据库。</p>
+<h5 class="source-heading source-level-2" id="case-board-product-当前版本范围">当前版本范围</h5>
+<p>第一版需要完成：</p>
+<ul>
+<li>展示项目看板</li>
+<li>通过弹框表单新增项目卡片</li>
+<li>拖拽项目卡片调整状态和顺序</li>
+<li>使用 IndexedDB 保存项目数据</li>
+<li>刷新页面后恢复项目数据</li>
+<li>支持右侧 Agent 面板</li>
+<li>支持 Agent 历史对话记录</li>
+<li>支持切换 Agent 历史对话</li>
+<li>支持历史视图替换当前 Agent 对话区</li>
+<li>空对话不允许新建对话</li>
+<li>同一 Agent 对话调用大模型时携带上下文</li>
+<li>Agent 支持新增项目</li>
+<li>Agent 支持删除项目</li>
+<li>Agent 支持修改项目状态</li>
+<li>Agent 支持修改项目使用工具</li>
+<li>支持基础错误提示</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-product-暂不支持">暂不支持</h5>
+<p>第一版不做以下功能：</p>
+<ul>
+<li>用户登录</li>
+<li>云端同步</li>
+<li>团队协作</li>
+<li>真实 GitHub API 集成</li>
+<li>后端数据库</li>
+<li>支付功能</li>
+<li>项目详情页</li>
+<li>复杂筛选</li>
+<li>多工作区</li>
+</ul>
+</div>
+</details>
+</section>
+<p class="body-prose">验收场景应先于实现确定。例如，“索引未就绪时禁止问答”需要明确由前端阻止提交、后端拒绝执行，还是两端都检查。若将这项选择留给 Agent，它可能同时写出允许请求的代码和断言请求成功的测试；这组测试无法暴露业务规则的遗漏。</p>
+<h3 id="项目技术方案模块数据与接口">项目技术方案：模块、数据与接口</h3>
+<span class="anchor-alias" id="2-技术设计与任务规划"></span>
+<span class="anchor-alias" id="项目技术方案维护共同设计"></span>
+<p class="body-prose"><code>ARCHITECTURE.md</code> 主要解决需要多个任务共同遵守的设计问题。以“上传后建索引”为例，上传结果由谁持久化，索引任务如何关联文件，哪些状态允许问答，失败由哪一层转换成 API 错误，都需要在模块并行开发前确定。函数内部怎样拆分，通常不需要在项目方案中提前展开。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>设计对象</th>
+<th>项目方案需要保留的约定</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>技术与运行条件</td>
+<td>选型理由、依赖限制、配置方式和部署前提</td>
+</tr>
+<tr>
+<td>模块与调用关系</td>
+<td>职责、依赖方向、处理链路及相关代码入口</td>
+</tr>
+<tr>
+<td>数据与状态</td>
+<td>核心模型、合法状态转换、数据归属、必须保持的不变量</td>
+</tr>
+<tr>
+<td>接口与异常</td>
+<td>输入输出、错误映射、超时、重试与取消的责任边界</td>
+</tr>
+<tr>
+<td>存储与恢复</td>
+<td>持久化方式、刷新或重启恢复、旧数据兼容和迁移</td>
+</tr>
+<tr>
+<td>验证安排</td>
+<td>测试层次、关键场景、检查入口及真实依赖的验证条件</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">涉及模型输出的功能，需要在项目方案中确定输出由谁解释、由谁执行，以及失败时是否修改数据。本地看板采用“模型返回结构化操作，前端修改存储”的分工，列出了操作类型、请求响应和失败行为。增加一种操作时，任务需要同时检查响应结构与前端执行分支；模型输出本身不等于存储操作已经完成。</p>
+<section aria-labelledby="case-board-architecture-title" class="real-case" id="case-board-architecture">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">全文</span></div>
+<h4 class="case-title" id="case-board-architecture-title">ARCHITECTURE.md · 看板项目技术方案</h4>
+<p class="case-provenance">熠辉编程 · 5.5 Harness Engineering · 最终源码<br/><span class="case-filename">docs/ARCHITECTURE.md</span></p>
+<p class="case-note">本地存储、Agent API、结构化操作和失败行为的设计。模型名称属于案例配置。</p>
+<details class="case-fold" id="case-board-architecture-fold"><summary><span>展开全文</span><small>282 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 docs/ARCHITECTURE.md" class="copy-case" data-case="board-architecture" type="button">复制全文</button></div>
+<div aria-label="ARCHITECTURE.md · 看板项目技术方案；可上下滚动" class="case-reader" role="region" tabindex="0"><h4 class="source-heading source-level-1" id="case-board-architecture-architecturemd">ARCHITECTURE.md</h4>
+<h5 class="source-heading source-level-2" id="case-board-architecture-技术栈">技术栈</h5>
+<p>本项目使用：</p>
+<ul>
+<li>Next.js</li>
+<li>React</li>
+<li>TypeScript</li>
+<li>shadcn/ui</li>
+<li>IndexedDB</li>
+<li>dnd kit</li>
+<li>OpenRouter API</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-项目性质">项目性质</h5>
+<p>本项目是一个本地优先的前端应用。</p>
+<p class="source-prose">项目数据保存在浏览器 IndexedDB 中，不使用 SQLite、Prisma、PostgreSQL、Supabase 或其他后端数据库。</p>
+<h5 class="source-heading source-level-2" id="case-board-architecture-ui-框架">UI 框架</h5>
+<p>本项目使用 shadcn/ui 构建前端界面。</p>
+<p class="source-prose">当前实现使用 shadcn CLI 生成的 Tailwind CSS v4 + Base UI 版本组件，并通过 <code>components.json</code> 管理组件配置。</p>
+<p>建议使用的 shadcn/ui 组件包括：</p>
+<ul>
+<li>Button</li>
+<li>Card</li>
+<li>Dialog</li>
+<li>Input</li>
+<li>Select</li>
+<li>Textarea</li>
+<li>ScrollArea</li>
+<li>Separator</li>
+</ul>
+<p>弹框表单使用 Dialog 组件实现。</p>
+<p>项目卡片使用 Card 组件实现。</p>
+<h5 class="source-heading source-level-2" id="case-board-architecture-拖拽方案">拖拽方案</h5>
+<p>本项目使用 dnd kit 实现看板卡片拖拽。</p>
+<p>拖拽需要支持：</p>
+<ol>
+<li>同一列内调整卡片顺序。</li>
+<li>跨列移动卡片并修改项目状态。</li>
+</ol>
+<p>拖拽完成后，需要更新：</p>
+<ul>
+<li>status</li>
+<li>order</li>
+<li>updatedAt</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-页面布局">页面布局</h5>
+<p>主页面只有一个核心布局：</p>
+<ul>
+<li>左侧：项目看板区域，宽度为 calc(100% - 380px)</li>
+<li>右侧：Agent 对话面板，固定宽度为 380px</li>
+</ul>
+<p>主页面文件：</p>
+<ul>
+<li>app/page.tsx</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-组件拆分">组件拆分</h5>
+<p>建议组件拆分如下：</p>
+<ul>
+<li>components/Board.tsx：负责渲染整个看板</li>
+<li>components/BoardColumn.tsx：负责渲染单个状态列</li>
+<li>components/ProjectCard.tsx：负责渲染单个项目卡片</li>
+<li>components/AddProjectDialog.tsx：负责弹框新增项目</li>
+<li>components/AgentPanel.tsx：负责右侧 Agent 对话面板</li>
+</ul>
+<p>AgentPanel 同时负责：</p>
+<ul>
+<li>渲染当前对话消息</li>
+<li>渲染当前对话视图和历史对话视图</li>
+<li>新建 Agent 对话</li>
+<li>切换 Agent 对话</li>
+<li>调用 Agent API 时传入当前对话上下文</li>
+</ul>
+<p class="source-prose">AgentPanel 使用内部 <code>chat</code> / <code>history</code> 视图状态控制右侧面板内容。历史入口位于新建对话按钮左侧；进入历史视图后，历史列表替换当前消息区和输入区，点击返回后恢复当前对话视图。当前对话没有用户消息时，不允许新建对话。</p>
+<h5 class="source-heading source-level-2" id="case-board-architecture-数据模型">数据模型</h5>
+<p>项目类型定义放在：</p>
+<ul>
+<li>types/project.ts</li>
+</ul>
+<p>Project 类型包含：</p>
+<ul>
+<li>id</li>
+<li>name</li>
+<li>tool</li>
+<li>status</li>
+<li>order</li>
+<li>createdAt</li>
+<li>updatedAt</li>
+</ul>
+<p>说明：</p>
+<ul>
+<li>name：项目名称</li>
+<li>tool：项目使用的开发工具</li>
+<li>status：项目当前状态</li>
+<li>order：同一状态列中的排序值</li>
+<li>createdAt：创建时间</li>
+<li>updatedAt：更新时间</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-字段取值">字段取值</h5>
+<p>tool 支持：</p>
+<ul>
+<li>codex</li>
+<li>claude_code</li>
+<li>cursor</li>
+</ul>
+<p>status 支持：</p>
+<ul>
+<li>planning</li>
+<li>in_progress</li>
+<li>blocked</li>
+<li>done</li>
+</ul>
+<p>界面展示时，status 对应中文：</p>
+<ul>
+<li>planning：规划中</li>
+<li>in_progress：进行中</li>
+<li>blocked：阻塞中</li>
+<li>done：已完成</li>
+</ul>
+<p>界面展示时，tool 对应：</p>
+<ul>
+<li>codex：Codex</li>
+<li>claude_code：Claude Code</li>
+<li>cursor：Cursor</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-本地数据存储">本地数据存储</h5>
+<p>IndexedDB 相关逻辑放在：</p>
+<ul>
+<li>lib/indexeddb.ts</li>
+<li>lib/project-store.ts</li>
+</ul>
+<p>lib/indexeddb.ts 负责：</p>
+<ul>
+<li>打开 IndexedDB</li>
+<li>创建对象仓库</li>
+<li>处理数据库版本升级</li>
+</ul>
+<p>lib/project-store.ts 负责：</p>
+<ul>
+<li>获取项目列表</li>
+<li>新增项目</li>
+<li>删除项目</li>
+<li>修改项目状态</li>
+<li>修改项目使用工具</li>
+<li>修改项目排序</li>
+<li>更新项目时间</li>
+</ul>
+<p>Agent 历史对话相关逻辑放在：</p>
+<ul>
+<li>lib/agent-conversation-store.ts</li>
+</ul>
+<p>lib/agent-conversation-store.ts 负责：</p>
+<ul>
+<li>获取历史对话列表</li>
+<li>新建 Agent 对话</li>
+<li>保存对话消息</li>
+<li>更新对话标题和更新时间</li>
+</ul>
+<p>数据库名称：</p>
+<ul>
+<li>local-project-board</li>
+</ul>
+<p>对象仓库名称：</p>
+<ul>
+<li>projects</li>
+<li>agent-conversations</li>
+</ul>
+<p>projects 对象仓库建议使用 id 作为主键。</p>
+<p class="source-prose">agent-conversations 对象仓库使用 id 作为主键，并保存 title、messages、createdAt、updatedAt。</p>
+<h5 class="source-heading source-level-2" id="case-board-architecture-agent-api">Agent API</h5>
+<p>右侧 Agent 面板通过以下 API 路由和 OpenRouter 通信：</p>
+<ul>
+<li>app/api/agent/route.ts</li>
+</ul>
+<p>OpenRouter 调用封装在：</p>
+<ul>
+<li>lib/openrouter.ts</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-agent-返回结构">Agent 返回结构</h5>
+<p>Agent 不直接操作 IndexedDB。</p>
+<p>Agent 只识别用户意图，并返回结构化结果。</p>
+<p>前端根据结构化结果修改 IndexedDB。</p>
+<p>Agent 支持的结构化操作：</p>
+<ul>
+<li>create_project</li>
+<li>delete_project</li>
+<li>update_project_status</li>
+<li>update_project_tool</li>
+<li>answer_only</li>
+<li>ask_followup</li>
+</ul>
+<p>说明：</p>
+<ul>
+<li>create_project：新增项目</li>
+<li>delete_project：删除项目</li>
+<li>update_project_status：修改项目状态</li>
+<li>update_project_tool：修改项目使用工具</li>
+<li>answer_only：只回答问题，不修改数据</li>
+<li>ask_followup：信息不足，需要追问用户</li>
+</ul>
+<p>API 请求结构：</p>
+<ul>
+<li><code>message</code>：用户输入的自然语言内容</li>
+<li><code>projects</code>：当前本地项目的 <code>id</code>、<code>name</code>、<code>tool</code>、<code>status</code></li>
+<li><code>conversationMessages</code>：当前 Agent 对话的历史消息上下文</li>
+</ul>
+<p>API 返回结构：</p>
+<ul>
+<li><code>action</code></li>
+<li><code>message</code></li>
+<li><code>project</code></li>
+<li><code>targetProjectId</code></li>
+<li><code>targetProjectName</code></li>
+<li><code>status</code></li>
+<li><code>tool</code></li>
+</ul>
+<p class="source-prose">如果 OpenRouter 环境变量缺失或调用失败，API 会返回 <code>ask_followup</code> 结构化结果，前端只展示错误提示，不修改 IndexedDB。</p>
+<h5 class="source-heading source-level-2" id="case-board-architecture-环境变量">环境变量</h5>
+<p>项目需要以下环境变量：</p>
+<ul>
+<li>OPENROUTER_API_KEY</li>
+<li>OPENROUTER_MODEL</li>
+</ul>
+<p>OPENROUTER_API_KEY 用于访问 OpenRouter API。</p>
+<p>OPENROUTER_MODEL 用于指定调用模型。</p>
+<p>默认示例：</p>
+<ul>
+<li>google/gemini-3.1-pro-preview</li>
+</ul>
+<p>实际模型 ID 以 OpenRouter 控制台当前可用模型为准。</p>
+<h5 class="source-heading source-level-2" id="case-board-architecture-重要边界">重要边界</h5>
+<ul>
+<li>Agent 不直接操作 IndexedDB。</li>
+<li>Agent 只返回结构化操作结果。</li>
+<li>前端应用根据结构化结果执行本地数据操作。</li>
+<li>如果用户意图不明确，Agent 应该返回追问。</li>
+<li>如果用户要求删除项目但匹配多个结果，必须先确认。</li>
+<li>如果用户提到不存在的项目，不能静默失败，必须提示用户。</li>
+<li>拖拽后的状态和顺序必须写入 IndexedDB。</li>
+<li>刷新页面后状态和顺序必须保留。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-architecture-不允许引入的内容">不允许引入的内容</h5>
+<p>第一版不要引入：</p>
+<ul>
+<li>Prisma</li>
+<li>SQLite</li>
+<li>PostgreSQL</li>
+<li>Supabase</li>
+<li>Firebase</li>
+<li>NextAuth</li>
+<li>后端数据库</li>
+<li>云同步</li>
+<li>用户登录</li>
+</ul>
+</div>
+</details>
+</section>
+<p class="body-prose">多组件流程可以按输入输出划分职责。下面的对接方案将数据转换、流程协调和图谱构建分别放入 adapter、pipeline 与 kg_builder，并给出目录和接口草图。这类方案用于拆分任务；其中的 pass 仍是待实现入口，不能据此判断模块已经可运行。</p>
+<section aria-labelledby="case-mineru-design-title" class="real-case" id="case-mineru-design">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">节选</span></div>
+<h4 class="case-title" id="case-mineru-design-title">ARCHITECTURE.md · MinerU 对接设计（节选）</h4>
+<p class="case-provenance">西瓜老师 · 第八章多模态知识库 · GraphRAG-Agent 课件<br/><span class="case-filename">ARCHITECTURE.md §3</span></p>
+<p class="case-note">解析、转换、抽取与图谱构建的职责和接口草图。pass 为待实现接口；独立虚拟环境是本项目的配置。</p>
+<details class="case-fold" id="case-mineru-design-fold"><summary><span>展开节选</span><small>142 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 ARCHITECTURE.md §3" class="copy-case" data-case="mineru-design" type="button">复制全文</button></div>
+<div aria-label="ARCHITECTURE.md · MinerU 对接设计（节选）；可上下滚动" class="case-reader" role="region" tabindex="0"><h5 class="source-heading source-level-2" id="case-mineru-design-3-对接架构设计">3. 对接架构设计</h5>
+<h6 class="source-heading source-level-3" id="case-mineru-design-31-整体架构">3.1 整体架构</h6>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                        对接 Pipeline                             │
+└─────────────────────────────────────────────────────────────────┘
+
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   MinerU     │      │   对接层     │      │ LangExtract  │
+│   组件       │─────▶│  (Adapter)   │─────▶│   组件       │
+│              │      │              │      │              │
+│ .venv (独立) │      │ .venv (独立) │      │ .venv (独立) │
+└──────────────┘      └──────────────┘      └──────────────┘
+       │                     │                     │
+       ▼                     ▼                     ▼
+  output/              shared_data/           output/
+  ├── doc.md          ├── processed/         ├── entities.jsonl
+  └── doc.json        └── metadata/          └── graph.json
+
+┌─────────────────────────────────────────────────────────────────┐
+│                      知识图谱生成层                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │  知识图谱存储    │
+                    │  (Neo4j/JSON)    │
+                    └──────────────────┘
+</code></pre>
+<h6 class="source-heading source-level-3" id="case-mineru-design-32-目录结构设计">3.2 目录结构设计</h6>
+<pre><code>GraphRAG-Agent/
+├── mineru_mvp_test/              # MinerU 组件
+│   ├── .venv/                    # 独立虚拟环境
+│   ├── output/                   # MinerU 输出目录
+│   │   ├── document.md           # ✅ 对接输入源
+│   │   ├── document_content_list.json
+│   │   └── ...
+│   └── main.py
+│
+├── langextract/                  # LangExtract 组件
+│   ├── .venv/                    # 独立虚拟环境
+│   ├── output/                   # LangExtract 输出目录
+│   │   └── extractions.jsonl    # ✅ 对接输出
+│   └── test_deepseek_mvp.py
+│
+├── integration/                  # 对接层（新建）⭐
+│   ├── .venv/                    # 独立虚拟环境
+│   ├── adapter.py                # 数据转换适配器
+│   ├── pipeline.py               # 完整对接流程
+│   ├── kg_builder.py             # 知识图谱构建器
+│   ├── config.py                 # 配置管理
+│   ├── requirements.txt          # 依赖清单
+│   ├── .env                      # 环境变量
+│   ├── AGENTS.md                 # 使用说明
+│   └── output/                   # 最终输出
+│       ├── knowledge_graph.json  # 知识图谱 JSON
+│       ├── knowledge_graph.gexf  # 图文件（可选）
+│       └── statistics.json       # 统计信息
+│
+└── docs/
+    ├── MinerU_MVP测试配置指南_v1.0.md
+    ├── LangExtract_规范文档-v1.0.md
+    └── ARCHITECTURE.md  # 本文档
+</code></pre>
+<h6 class="source-heading source-level-3" id="case-mineru-design-33-模块职责划分">3.3 模块职责划分</h6>
+<h6 class="source-heading source-level-4" id="case-mineru-design-331-adapterpy---数据转换适配器">3.3.1 adapter.py - 数据转换适配器</h6>
+<p><strong>职责</strong>：</p>
+<ul>
+<li>读取 MinerU 输出文件</li>
+<li>清洗和预处理文本</li>
+<li>转换为 LangExtract 输入格式</li>
+<li>保留元数据映射</li>
+</ul>
+<p><strong>核心函数</strong>：</p>
+<pre><code class="language-python">def load_mineru_output(output_dir: str) -&gt; dict:
+    """加载 MinerU 输出文件"""
+    pass
+
+def preprocess_markdown(markdown_text: str) -&gt; str:
+    """预处理 Markdown 文本"""
+    pass
+
+def create_langextract_input(text: str, metadata: dict) -&gt; dict:
+    """创建 LangExtract 输入"""
+    pass
+</code></pre>
+<h6 class="source-heading source-level-4" id="case-mineru-design-332-pipelinepy---完整对接流程">3.3.2 pipeline.py - 完整对接流程</h6>
+<p><strong>职责</strong>：</p>
+<ul>
+<li>协调整个对接流程</li>
+<li>调用 MinerU 和 LangExtract</li>
+<li>处理错误和异常</li>
+<li>生成执行日志</li>
+</ul>
+<p><strong>核心函数</strong>：</p>
+<pre><code class="language-python">def run_mineru_parsing(file_path: str) -&gt; str:
+    """运行 MinerU 解析"""
+    pass
+
+def run_langextract_extraction(text: str, config: dict) -&gt; list:
+    """运行 LangExtract 提取"""
+    pass
+
+def run_full_pipeline(input_file: str, output_dir: str) -&gt; dict:
+    """运行完整 Pipeline"""
+    pass
+</code></pre>
+<h6 class="source-heading source-level-4" id="case-mineru-design-333-kg_builderpy---知识图谱构建器">3.3.3 kg_builder.py - 知识图谱构建器</h6>
+<p><strong>职责</strong>：</p>
+<ul>
+<li>从提取结果构建图结构</li>
+<li>实体去重和合并</li>
+<li>关系推理和补全</li>
+<li>导出多种格式</li>
+</ul>
+<p><strong>核心函数</strong>：</p>
+<pre><code class="language-python">def build_knowledge_graph(extractions: list) -&gt; nx.Graph:
+    """构建知识图谱"""
+    pass
+
+def merge_entities(entities: list) -&gt; list:
+    """实体去重和合并"""
+    pass
+
+def export_graph(graph: nx.Graph, output_path: str, format: str):
+    """导出知识图谱"""
+    pass
+</code></pre>
+<hr/>
+</div>
+</details>
+</section>
+<p class="body-prose">方案中的接口草图与实际可用能力需要区分。例如，SDK 是否支持取消不能从接口名推断；没有核对之前，应将它列为设计假设及验证项。方案页首可以保存简短的实现状态，避免后续 Agent 把尚未实现的接口当作可直接调用的代码。</p>
+<details class="file-example" id="file-example-3"><summary><span class="example-title">ARCHITECTURE.md · 实现状态</span><span class="example-kind">整理示例</span></summary><div class="code-shell"><div class="code-head"><span>Markdown · 4 行 · 框内滚动</span><button aria-label="复制 ARCHITECTURE.md · 实现状态" class="copy-code" data-code="code-3" type="button">复制</button></div><pre aria-label="ARCHITECTURE.md · 实现状态；展开后可上下及左右滚动" id="code-3" role="region" tabindex="0"><code class="language-markdown">适用范围：当前版本的查询服务
+实现状态：查询主链路已实现；可选超时参数待实现
+关联需求：PRD.md 的查询与异常处理部分
+当前限制：远程调用取消能力尚未验证
+</code></pre></div></details>
+<h3 id="项目-plan任务拆分与依赖">项目 Plan：任务拆分与依赖</h3>
+<p class="body-prose">项目 Plan 不只排列功能，还要把依赖变成可检查的交接结果。上传任务的输出不能仅是“接口完成”，而应包括 <code>file_id</code> 的格式、持久化位置、错误响应和可供下游运行的样例。这样，索引任务才能在不重新猜测接口的情况下开始开发。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>任务</th>
+<th>前置条件</th>
+<th>交给下游的结果</th>
+<th>本任务必须检查的边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上传与文件存储</td>
+<td>文件类型、大小和存储约定已确认</td>
+<td>有效 file_id、元信息和样例文件</td>
+<td>上传失败不会留下可被错误引用的记录</td>
+</tr>
+<tr>
+<td>索引任务与状态查询</td>
+<td>文件可读取，状态模型已确认</td>
+<td>index_id、状态查询接口和可控失败样例</td>
+<td>成功与失败均能进入终态，结果归属正确文件</td>
+</tr>
+<tr>
+<td>问答与引用展示</td>
+<td>成功索引可查询，响应格式已确认</td>
+<td>可运行的问答链路和错误反馈</td>
+<td>未就绪索引、错误索引和服务失败</td>
+</tr>
+<tr>
+<td>主流程联调</td>
+<td>以上能力可运行</td>
+<td>上传 → 建索引 → 问答的检查结果</td>
+<td>参数衔接、切换索引、刷新恢复及失败路径</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">上表是一种任务拆分示例。每项任务交接时，应提供下一项能够实际使用的接口、样例与测试入口，而不仅是完成状态。共享字段和状态确认后，前端可使用响应样例开发，后端按同一契约实现；主流程联调单独列为任务，明确由谁检查参数衔接和失败路径。</p>
+<h3 id="方案与-plan-的审阅">方案与 Plan 的审阅</h3>
+<span class="anchor-alias" id="人的介入与plan审阅"></span>
+<p class="body-prose">审阅 Agent 的 Plan，可以先对照三份材料：确认后的需求、当前代码入口和拟修改的差异。重点检查方案是否基于真实实现、是否漏掉调用方，以及验收能否区分正确结果与“只是没有报错”。对技术细节尚不熟悉时，可以让另一个 AI 只读调查相关位置，但实际业务选择仍由负责人确认。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Plan 中常见的缺口</th>
+<th>具体审阅动作</th>
+<th>需要 Agent 补充的结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>只写“修改某模块”，未说明现状</td>
+<td>打开它引用的入口、调用方和已有测试</td>
+<td>实际修改位置，现有实现可复用与需改变的部分</td>
+</tr>
+<tr>
+<td>增加功能但扩大了原定范围</td>
+<td>将改动逐项对应到本轮需求</td>
+<td>本轮必要修改与可独立延期的重构</td>
+</tr>
+<tr>
+<td>改公共字段，只安排一个模块的任务</td>
+<td>检查字段的生产方、消费方及存储位置</td>
+<td>相关调用方、兼容方式和联调安排</td>
+</tr>
+<tr>
+<td>步骤依赖尚未交付的结果</td>
+<td>核对前序任务的接口、样例和状态</td>
+<td>哪些步骤可执行，哪些被阻塞，是否需要调整顺序</td>
+</tr>
+<tr>
+<td>验收只写“功能正常”</td>
+<td>选择一个正常输入、一个边界和一个失败场景</td>
+<td>明确预期、验证入口及未覆盖的条件</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">反馈应指出实际缺口。例如：“响应字段改名后，旧客户端和持久化数据是否仍使用原字段？请列出调用方并补充兼容检查。”Agent 补充后，再核对相应代码与测试。实现结束时，审阅实际 diff 是否超出确认范围、关键测试是否运行，以及最终设计是否与项目文件一致；不必重新讨论未发生变化的技术选型。</p>
+</section><section class="chapter" id="工程初始化与任务开发" aria-labelledby="chapter-title-3"><h2 id="chapter-title-3"><span aria-hidden="true" class="num">03</span>工程初始化与任务开发</h2>
+<h3 id="工程初始化运行环境与开发规则">工程初始化：运行环境与开发规则</h3>
+<span class="anchor-alias" id="3-工程初始化"></span>
+<p class="body-prose">工程初始化可以作为第一项开发任务，交付依赖清单与锁文件、配置示例、启动入口和检查脚本。让 Agent 按 README.md 的说明实际安装、启动并运行检查，记录需要额外设置的变量或目录。测试工具可以先接入；尚无业务行为时，不必编写仅用于证明目录或函数存在的测试。</p>
+<span class="anchor-alias" id="readme运行与使用入口"></span>
+<span class="anchor-alias" id="agents规定开发方式"></span>
+<p class="body-prose">README.md 与 AGENTS.md 的内容可能部分重合，但它们承担不同职责。README.md 让使用或维护项目的人知道如何运行系统；AGENTS.md 约束 Coding Agent 如何开展修改。两者可以在设计时起草，命令、环境变量和目录则应在初始化后按实际结果补齐。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>主要内容</th>
+<th>避免积累的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>README.md</td>
+<td>项目用途、能力与限制、安装配置、启动、测试、构建、部署和文档入口</td>
+<td>每轮临时任务进度与开发推理</td>
+</tr>
+<tr>
+<td>AGENTS.md</td>
+<td>阅读顺序、改动边界、代码约定、检查时机、失败处理和文档更新规则</td>
+<td>全部业务规则、逐次验收明细和冗长命令历史</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">AGENTS.md 可以引用 README.md 中的命令，减少两份文件各自维护造成的漂移。格式、类型和测试要求最好同时落实到脚本或 CI，AGENTS.md 再规定何时执行、失败后如何处理。文件是否自动加载、子目录规则如何生效，应按实际使用的客户端核对，不能把文件存在等同于规则已经生效。</p>
+<section aria-labelledby="case-board-agents-title" class="real-case" id="case-board-agents">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">全文</span></div>
+<h4 class="case-title" id="case-board-agents-title">AGENTS.md · 开发规则</h4>
+<p class="case-provenance">熠辉编程 · 5.5 Harness Engineering · 最终源码<br/><span class="case-filename">AGENTS.md</span></p>
+<p class="case-note">开发规则示例：文档阅读顺序、范围限制、更新义务与完成标准。测试命令需另行补齐。</p>
+<details class="case-fold" id="case-board-agents-fold"><summary><span>展开全文</span><small>45 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 AGENTS.md" class="copy-case" data-case="board-agents" type="button">复制全文</button></div>
+<div aria-label="AGENTS.md · 开发规则；可上下滚动" class="case-reader" role="region" tabindex="0"><h4 class="source-heading source-level-1" id="case-board-agents-agentsmd">AGENTS.md</h4>
+<h5 class="source-heading source-level-2" id="case-board-agents-你的角色">你的角色</h5>
+<p>你是这个项目的开发 Agent。</p>
+<p>你的任务是根据本项目的 Harness 文档，完成一个本地项目看板应用。</p>
+<p class="source-prose">项目使用 Next.js、React、TypeScript、shadcn/ui、IndexedDB、dnd kit 和 OpenRouter API。</p>
+<h5 class="source-heading source-level-2" id="case-board-agents-开始前必须阅读">开始前必须阅读</h5>
+<p>每次开始修改代码前，必须先阅读：</p>
+<ol>
+<li>docs/PRD.md</li>
+<li>docs/ARCHITECTURE.md</li>
+<li>session-handoff.md</li>
+</ol>
+<p>如果用户最新需求和这些文档冲突，以用户最新明确表达的需求为准，但你必须同步更新相关文档。</p>
+<h5 class="source-heading source-level-2" id="case-board-agents-工作原则">工作原则</h5>
+<ul>
+<li>一次只处理一个明确目标。</li>
+<li>不要擅自增加产品范围之外的功能。</li>
+<li>如果需求不明确，先向用户提问。</li>
+<li>如果涉及产品需求变更，必须更新 docs/PRD.md。</li>
+<li>如果涉及重大架构变更，必须更新 docs/ARCHITECTURE.md。</li>
+<li>每轮开发结束后，必须更新 session-handoff.md。</li>
+<li>面向用户的界面文案优先使用中文。</li>
+<li>不要引入后端数据库，本地数据使用 IndexedDB。</li>
+<li>不要添加登录、云同步、团队协作或真实 GitHub API。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-agents-完成标准">完成标准</h5>
+<p>只有满足以下条件，才能说明任务完成：</p>
+<ul>
+<li>页面能够正常运行。</li>
+<li>看板能够显示项目卡片。</li>
+<li>可以通过弹框表单新增项目。</li>
+<li>可以拖拽卡片改变状态和顺序。</li>
+<li>可以通过 Agent 面板新增、删除、修改项目。</li>
+<li>IndexedDB 能保存数据。</li>
+<li>刷新页面后数据仍然存在。</li>
+<li>相关文档已经同步更新。</li>
+<li>session-handoff.md 已经更新。</li>
+</ul>
+</div>
+</details>
+</section>
+<p class="body-prose">下面的规则模板补充检查失败、变更范围和任务清理的处理方式。落入仓库时，“相关检查”应替换为实际脚本或 README.md 中的对应入口，否则 Agent 无法据此确定需要执行的命令。</p>
+<details class="file-example" id="file-example-5"><summary><span class="example-title">AGENTS.md · 任务与文档维护</span><span class="example-kind">补充规则模板</span></summary><div class="code-shell"><div class="code-head"><span>Markdown · 17 行 · 框内滚动</span><button aria-label="复制 AGENTS.md · 任务与文档维护" class="copy-code" data-code="code-5" type="button">复制</button></div><pre aria-label="AGENTS.md · 任务与文档维护；展开后可上下及左右滚动" id="code-5" role="region" tabindex="0"><code class="language-markdown">## 任务执行与文档维护
+
+- 开始修改前，阅读相关需求、当前技术方案和本轮任务文件，核对代码、测试及未提交差异。
+- 本轮的局部技术方案、Plan、验收要求和实际结果维护在同一份任务文件中。
+- 路径明确的小任务沿用已有设计；存在未定规则或技术取舍时，补充局部方案后实施。
+- 不自行扩大产品范围，不顺手重构无关模块，不覆盖范围外已有改动。
+- 新增依赖、抽象层或共享机制时，说明当前需求及沿用现有结构的限制。
+- 新增行为和缺陷修复按影响维护有价值的测试，预期以已确认需求为依据。
+- 开发中运行相关检查；任务收尾根据影响扩大回归，并执行仓库约定的检查。
+- 发现检查失败时区分原有问题与本轮问题，不通过放宽断言或删除检查掩盖偏差。
+- 产品行为变化时更新 PRD.md；接口、数据或模块职责变化时更新 ARCHITECTURE.md。
+- 运行、配置与检查命令变化时更新 README.md；通用开发规则变化时更新本文件。
+- 验收只记录实际执行的结果，未执行场景、环境限制和遗留问题单独说明。
+- 暂停、换会话或交接前更新 session-handoff.md，保留关键决定、证据位置和下一步。
+- ARCHITECTURE.md 长期保留；共同设计变化时修改对应章节，区分已实现与待实现。
+- 任务验收后，将最终设计、实际检查结果和遗留工作迁入对应项目文件，再清理任务文件及失效引用。
+- 清理临时任务文件时保留测试代码；需要 Git 追溯的内容必须实际进入提交。
+</code></pre></div></details>
+<h3 id="任务实施局部方案与-plan">任务实施：局部方案与 Plan</h3>
+<span class="anchor-alias" id="4-逐项实现与验收"></span>
+<span class="anchor-alias" id="任务文件的执行与清理"></span>
+<span class="anchor-alias" id="项目方案与任务方案的关系"></span>
+<p class="body-prose">项目技术方案维护在 <code>ARCHITECTURE.md</code> 中，用于说明系统当前采用的结构和约定；任务文件用于组织一次具体改动。两者的区别在于后续是否仍要依赖其中的内容：模块职责、数据模型和公共接口会被后续任务反复使用，需要长期维护；本轮修改哪些位置、采用什么局部做法、按什么顺序实施，则可以随任务结束清理。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>项目技术方案：ARCHITECTURE.md</th>
+<th>任务文件：局部技术方案与 Plan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>保存内容</td>
+<td>当前模块关系、共享接口、数据与状态规则、重要设计理由及限制</td>
+<td>本轮目标、范围、相关代码位置、局部设计、实施顺序、验收与执行状态</td>
+</tr>
+<tr>
+<td>建立时机</td>
+<td>PRD 确认后、拆分开发任务时</td>
+<td>具体任务开始时，结合当前代码补充</td>
+</tr>
+<tr>
+<td>执行中怎样更新</td>
+<td>共同约定发生变化时，修改对应章节；未采用的提议不混入当前设计</td>
+<td>调查取得新证据或步骤变化时，更新同一文件，区分已决定、待确认与已完成</td>
+</tr>
+<tr>
+<td>任务结束后</td>
+<td>接收最终采用、后续仍需遵循的设计，保持与已实现代码一致</td>
+<td>迁出长期结论和验收结果后可以删除</td>
+</tr>
+<tr>
+<td>后续 Agent 从哪里读取</td>
+<td>项目设计从这里读取，不要求翻阅已完成任务</td>
+<td>未完成任务续接时读取；已清理任务不再作为依赖入口</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">任务文件中把技术方案与 Plan 合并即可。局部方案说明修改位置、采用的做法及理由，Plan 安排实施步骤和相应检查。已经有明确实现路径的小改动，记录范围和验收即可，无需再写一轮选型比较；存在未定行为、跨模块变更或迁移时，再补足局部设计。任务涉及的共同接口直接引用项目方案，不复制一份后单独更新。</p>
+<p class="body-prose">开发中发现原设计不适用，先在任务文件中记录现状、拟调整内容和影响。方案确认后，同步修改 <code>ARCHITECTURE.md</code> 的对应章节，标明已实现与待实现部分；不能把尚未采用的候选方案直接写成当前架构。只改变函数内部实现而不影响共同约定时，项目方案无需随每次提交更新。</p>
+<p class="body-prose">任务完成不等于立即删除文件。清理前，确认最终设计已写回项目文档，测试代码已保留，实际检查结果已有记录，剩余问题已转入任务清单或交接文件；若其他文件仍引用本任务中的规则，也要改为引用长期文档。完成这些迁移后，可以删除任务文件，项目方案则保留并持续更新。后续功能修改再次建立任务文件，不在旧任务上不断追加新工作。</p>
+<h3 id="任务文件示例查询超时控制">任务文件示例：查询超时控制</h3>
+<p class="body-prose">下面是一份待实施的任务模板。计时范围、输入类型和取消能力尚未确认，集中列在“现状调查与局部设计”中；确认后的决定直接补入该节，不再额外建立一份任务技术方案。</p>
+<details class="file-example" id="file-example-8"><summary><span class="example-title">docs/tasks/T014-query-timeout.md · 查询超时控制</span><span class="example-kind">整理示例</span></summary><div class="code-shell"><div class="code-head"><span>Markdown · 43 行 · 框内滚动</span><button aria-label="复制 docs/tasks/T014-query-timeout.md · 查询超时控制" class="copy-code" data-code="code-8" type="button">复制</button></div><pre aria-label="docs/tasks/T014-query-timeout.md · 查询超时控制；展开后可上下及左右滚动" id="code-8" role="region" tabindex="0"><code class="language-markdown"># T014：查询超时控制
+状态：待实现
+
+## 目标与行为
+- POST /query 增加可选 timeout_ms。
+- 不传时沿用 10000 ms；允许范围为 1–30000 ms。
+- 参数越界返回 422。
+- 等待超限返回 504，并保留 request_id。
+- 正常响应字段与原查询路径保持兼容。
+
+## 范围
+- 请求 Schema、API、pipeline 的超时传递与相关测试。
+- 本轮不调整检索策略、SQL 生成提示、鉴权和依赖版本。
+
+## 现状调查与局部设计
+- 查明 Schema → API → pipeline → 模型调用的当前路径。
+- 列出客户端、服务端、SDK 和重试中的现有超时设置。
+- 确定计时是否覆盖排队、检索、模型调用和重试。
+- 确定参数类型及字符串、浮点数、null 等输入的处理规则。
+- 明确错误映射位置，以及后台与远程调用的取消能力。
+- 将上述决定写入本节后再实施；未确认内容不能由测试自行定义。
+
+## 实施 Plan
+1. 核对现状与项目接口约定，补齐局部设计。
+2. 修改参数校验、超时传递和错误映射。
+3. 添加边界与受控慢调用测试。
+4. 验证原请求兼容性及超时后的执行状态。
+5. 审查差异，执行影响范围内的回归。
+
+## 验收
+- 不传参数时，原请求行为保持兼容。
+- 1、30000 为合法边界；0、负数、30001 被拒绝。
+- 其他类型按已确认规则处理。
+- 用可控制的慢调用验证超时，不依赖线上模型偶然变慢。
+- 检查 504 是否携带正确 request_id。
+- 检查超时后后台是否继续；无法取消的调用单独记录。
+
+## 实际结果与收尾
+- 实际修改：实施后填写。
+- 检查结果：填写实际命令、case 与结果。
+- 未验证与遗留项：实施后填写。
+- 长期内容按变化类型更新到对应项目文档和验收记录。
+- 确认结果可追溯、遗留问题有去处后，清理本文件。
+</code></pre></div></details>
+<h3 id="任务测试场景代码与回归">任务测试：场景、代码与回归</h3>
+<span class="anchor-alias" id="测试规划实现与回归"></span>
+<span class="anchor-alias" id="测试在各阶段的安排"></span>
+<span class="anchor-alias" id="tests-目录与项目级测试"></span>
+<p class="body-prose">测试代码随功能进入仓库，但预期应来自已经确认的业务规则。测试按模块与行为组织，而不是按临时任务编号分组：同一接口在多个任务中演进时，修改原有用例并补充新场景，避免每个任务复制一套测试后各自维护。<code>tests/</code> 在接入测试工具或首次编写测试时建立；是否与源码并置按工程习惯决定。</p>
+<span class="anchor-alias" id="从真实-prd-得到具体-case"></span>
+<p class="body-prose">异步流程的竞态测试应控制响应顺序，而非等待线上服务偶然变慢。下面以文档问答为例列出测试场景；这些是测试设计，不是执行记录：</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>预期结果</th>
+<th>适合的验证位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上传后创建索引</td>
+<td>请求使用本次返回的 file_id，响应绑定正确 index_id</td>
+<td>API 集成与主流程</td>
+</tr>
+<tr>
+<td>索引进入成功或失败状态</td>
+<td>停止轮询，展示相应结果或错误</td>
+<td>前端状态与交互</td>
+</tr>
+<tr>
+<td>A 的查询请求未返回时切换到 B，再让 A 返回</td>
+<td>清理 A 的轮询；即使请求已经发出，其迟到响应也不能覆盖 B</td>
+<td>可控 Promise 或请求响应顺序</td>
+</tr>
+<tr>
+<td>索引未成功时提交问答</td>
+<td>按已确认规则阻止请求或拒绝执行，并提示原因</td>
+<td>业务接口与前端</td>
+</tr>
+<tr>
+<td>索引成功后问答</td>
+<td>使用正确索引并展示回答，错误路径有明确反馈</td>
+<td>跨模块主流程</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">算法流程要分别检查模块行为、链路联跑和输出质量。转换模块通过样例，只能证明这组输入能够转换；完整流程输出文件，也不能证明实体与关系正确。下面的验证清单给出了这三类检查入口，实际项目还需配置评测集与质量阈值。</p>
+<section aria-labelledby="case-mineru-tests-title" class="real-case" id="case-mineru-tests">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">节选</span></div>
+<h4 class="case-title" id="case-mineru-tests-title">ARCHITECTURE.md · 测试与验证（节选）</h4>
+<p class="case-provenance">西瓜老师 · 第八章多模态知识库 · GraphRAG-Agent 课件<br/><span class="case-filename">ARCHITECTURE.md §7.4</span></p>
+<p class="case-note">模块测试、pipeline 联跑与抽取质量的验证清单。包含案例排期和环境命令，不是已执行的测试报告。</p>
+<details class="case-fold" id="case-mineru-tests-fold"><summary><span>展开节选</span><small>52 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 ARCHITECTURE.md §7.4" class="copy-case" data-case="mineru-tests" type="button">复制全文</button></div>
+<div aria-label="ARCHITECTURE.md · 测试与验证（节选）；可上下滚动" class="case-reader" role="region" tabindex="0"><h6 class="source-heading source-level-3" id="case-mineru-tests-74-测试与验证第-4-周">7.4 测试与验证（第 4 周）</h6>
+<h6 class="source-heading source-level-4" id="case-mineru-tests-任务-41单元测试">任务 4.1：单元测试</h6>
+<p><strong>测试 adapter.py</strong>：</p>
+<pre><code class="language-bash">cd integration
+source .venv/Scripts/activate
+python -m pytest tests/test_adapter.py -v
+</code></pre>
+<p><strong>测试 kg_builder.py</strong>：</p>
+<pre><code class="language-bash">python -m pytest tests/test_kg_builder.py -v
+</code></pre>
+<h6 class="source-heading source-level-4" id="case-mineru-tests-任务-42集成测试">任务 4.2：集成测试</h6>
+<p><strong>测试完整 Pipeline</strong>：</p>
+<pre><code class="language-bash">cd integration
+source .venv/Scripts/activate
+
+# 使用示例文档测试
+python pipeline.py \
+    --input-file ../mineru_mvp_test/test_files/sample.pdf \
+    --output-dir ./output \
+    --config ./config/pipeline_config.json
+</code></pre>
+<p><strong>验证输出</strong>：</p>
+<pre><code class="language-bash"># 检查输出文件
+ls -lh output/
+
+# 查看知识图谱
+cat output/knowledge_graph_*.json | jq '.metadata'
+
+# 查看统计信息
+cat output/pipeline_summary_*.json | jq '.kg_output'
+</code></pre>
+<h6 class="source-heading source-level-4" id="case-mineru-tests-任务-43质量验证">任务 4.3：质量验证</h6>
+<p><strong>验证清单</strong>：</p>
+<ul>
+<li><input disabled="" type="checkbox"/> MinerU 输出文件完整性</li>
+<li><input disabled="" type="checkbox"/> 文本预处理正确性</li>
+<li><input disabled="" type="checkbox"/> LangExtract 提取准确性</li>
+<li><input disabled="" type="checkbox"/> 实体去重效果</li>
+<li><input disabled="" type="checkbox"/> 关系推理合理性</li>
+<li><input disabled="" type="checkbox"/> 图谱结构完整性</li>
+<li><input disabled="" type="checkbox"/> 导出格式正确性</li>
+</ul>
+</div>
+</details>
+</section>
+<span class="anchor-alias" id="根据影响选择回归范围"></span>
+<p class="body-prose">回归范围沿改动的调用方与数据影响确定。增加请求字段时，检查默认值、合法边界、非法类型和旧请求兼容性；修改公共响应结构时，加入各调用方的解析与界面状态；更改存储模型时，加入旧数据加载与迁移样例。开发期间先用这些定向测试定位问题，合并与交付再执行仓库规定的完整检查。完整测试耗时很短时，每次任务结束都运行也可行。</p>
+<h3 id="任务收尾文档更新与会话交接">任务收尾：文档更新与会话交接</h3>
+<span class="anchor-alias" id="执行中发现方案不适用"></span>
+<span class="anchor-alias" id="任务完成后的信息迁移"></span>
+<p class="body-prose">收尾时可以让 Agent 列出“本轮实际变更 → 对应长期文件 → 已更新位置”，再核对差异。以下按信息类型确定去处，避免将所有内容追加到 ARCHITECTURE.md：</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>本轮确认或改变的内容</th>
+<th>需要更新的长期位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>产品行为、业务规则与本期范围</td>
+<td><code>PRD.md</code> 及相关验收场景</td>
+</tr>
+<tr>
+<td>最终接口、数据结构、模块职责、恢复与迁移约定</td>
+<td><code>ARCHITECTURE.md</code></td>
+</tr>
+<tr>
+<td>环境、配置、运行或检查命令</td>
+<td><code>README.md</code> 及引用这些命令的规则</td>
+</tr>
+<tr>
+<td>对未来任务通用的开发与验证要求</td>
+<td><code>AGENTS.md</code></td>
+</tr>
+<tr>
+<td>实际验收结果、证据及未验证限制</td>
+<td><code>ACCEPTANCE.md</code></td>
+</tr>
+<tr>
+<td>剩余工作与续接状态</td>
+<td>项目任务清单（可在 <code>ARCHITECTURE.md</code> 中维护）或 <code>session-handoff.md</code></td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">更新项目方案时，替换已经失效的设计及引用，保留仍影响后续选择的理由；不要把整个任务文件原样追加进去。测试代码和报告继续保存，清理时还要检查文档链接是否指向将被删除的文件。需要追溯任务过程时，可先将相关内容提交到 Git，再删除工作区中的任务文件。</p>
+<span class="anchor-alias" id="handoff-与验收记录分别保存进度和证据"></span>
+<p class="body-prose"><code>session-handoff.md</code> 记录尚未结束的工作，不替代技术方案和验收报告。更新时机写入 AGENTS.md，具体状态保存在交接文件中；压缩或切换会话前再更新一次。下面的记录将“API 路由完成”与“真实模型调用未验证”分开，下次接手时可以直接安排接入验证。</p>
+<section aria-labelledby="case-board-handoff-title" class="real-case" id="case-board-handoff">
+<div class="case-head"><span class="case-badge">课程案例</span><span class="case-kind">全文</span></div>
+<h4 class="case-title" id="case-board-handoff-title">session-handoff.md · 会话交接</h4>
+<p class="case-provenance">熠辉编程 · 5.5 Harness Engineering · 最终源码<br/><span class="case-filename">session-handoff.md</span></p>
+<p class="case-note">课程开发时的交接记录，区分已完成路由与尚未验证的真实模型调用；勾选状态为案例记录。</p>
+<details class="case-fold" id="case-board-handoff-fold"><summary><span>展开全文</span><small>70 行 · 展开后上下滚动</small></summary>
+<div class="case-toolbar"><span>文件内容</span><button aria-label="复制 session-handoff.md" class="copy-case" data-case="board-handoff" type="button">复制全文</button></div>
+<div aria-label="session-handoff.md · 会话交接；可上下滚动" class="case-reader" role="region" tabindex="0"><h4 class="source-heading source-level-1" id="case-board-handoff-session-handoffmd">session-handoff.md</h4>
+<h5 class="source-heading source-level-2" id="case-board-handoff-未完成--待处理">未完成 / 待处理</h5>
+<ul>
+<li><input disabled="" type="checkbox"/> 使用真实 <code>OPENROUTER_API_KEY</code> 和 <code>OPENROUTER_MODEL</code> 验证 Agent 对 OpenRouter 的实际调用结果。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-handoff-已完成">已完成</h5>
+<ul>
+<li><input checked="" disabled="" type="checkbox"/> 已创建基础 Next.js 项目结构。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已准备 AGENTS.md。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已准备 docs/PRD.md。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已准备 docs/ARCHITECTURE.md。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已确定使用 IndexedDB 作为本地数据存储。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已确定使用 shadcn/ui 作为 UI 组件方案。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已确定使用 dnd kit 作为拖拽方案。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已确定页面布局为左侧看板 + 右侧 380px Agent 面板。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已确定项目卡片字段为项目名称、使用工具、当前状态、更新时间。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成左侧项目看板 UI。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成右侧 Agent 对话面板 UI。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成弹框表单新增项目功能。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成项目卡片拖拽功能。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成拖拽后状态和顺序保存。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 IndexedDB 数据读写。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成刷新页面后数据恢复。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 OpenRouter 环境变量读取。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 Agent 自然语言识别 API 路由。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 Agent 新增项目结构化操作接入。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 Agent 删除项目结构化操作接入。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 Agent 修改项目状态结构化操作接入。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 Agent 修改项目使用工具结构化操作接入。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 shadcn/ui、Tailwind CSS、dnd kit 和 OpenRouter 封装接入。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已新增 <code>.env.example</code>，包含 OpenRouter 环境变量示例。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已将 OpenRouter 默认模型和文档示例更新为 <code>google/gemini-3.1-pro-preview</code>。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成 Agent 历史对话记录和切换功能。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已完成同一 Agent 对话携带历史上下文调用大模型。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已将 Agent 历史入口改为独立图标按钮，历史视图会替换当前对话区。</li>
+<li><input checked="" disabled="" type="checkbox"/> 已限制空 Agent 对话不能继续新建对话。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-handoff-已验证">已验证</h5>
+<ul>
+<li><input checked="" disabled="" type="checkbox"/> <code>pnpm lint</code> 通过。</li>
+<li><input checked="" disabled="" type="checkbox"/> <code>pnpm build</code> 通过。</li>
+<li><input checked="" disabled="" type="checkbox"/> 页面可以在 <code>http://localhost:3000</code> 正常运行。</li>
+<li><input checked="" disabled="" type="checkbox"/> 四列看板可以正常渲染。</li>
+<li><input checked="" disabled="" type="checkbox"/> 弹框表单可以正常新增项目。</li>
+<li><input checked="" disabled="" type="checkbox"/> IndexedDB 可以保存新增项目。</li>
+<li><input checked="" disabled="" type="checkbox"/> 刷新页面后项目数据仍然保留。</li>
+<li><input checked="" disabled="" type="checkbox"/> 拖拽可以调整同列顺序。</li>
+<li><input checked="" disabled="" type="checkbox"/> 拖拽可以跨列调整项目状态。</li>
+<li><input checked="" disabled="" type="checkbox"/> 拖拽后的状态和顺序刷新后仍然保留。</li>
+<li><input checked="" disabled="" type="checkbox"/> 未配置 <code>OPENROUTER_API_KEY</code> 时，Agent 面板显示错误提示且不修改数据。</li>
+<li><input checked="" disabled="" type="checkbox"/> <code>pnpm lint</code> 通过 Agent 历史视图与空对话限制改动。</li>
+<li><input checked="" disabled="" type="checkbox"/> <code>pnpm build</code> 通过 Agent 历史视图与空对话限制改动。</li>
+<li><input checked="" disabled="" type="checkbox"/> Agent 历史对话列表可以新建、切换，并在刷新后保留。</li>
+<li><input checked="" disabled="" type="checkbox"/> Agent 历史图标位于新建对话图标左侧。</li>
+<li><input checked="" disabled="" type="checkbox"/> 点击 Agent 历史图标会切换到历史视图，点击返回可回到当前对话。</li>
+<li><input checked="" disabled="" type="checkbox"/> 当前 Agent 对话为空时，新建对话按钮处于不可用状态。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-handoff-未验证">未验证</h5>
+<ul>
+<li><input disabled="" type="checkbox"/> Agent 是否可以调用 OpenRouter。</li>
+<li><input disabled="" type="checkbox"/> Agent 是否可以新增项目。</li>
+<li><input disabled="" type="checkbox"/> Agent 是否可以删除项目。</li>
+<li><input disabled="" type="checkbox"/> Agent 是否可以修改项目状态。</li>
+<li><input disabled="" type="checkbox"/> Agent 是否可以修改项目使用工具。</li>
+<li><input disabled="" type="checkbox"/> 配置真实 OpenRouter 后，同一 Agent 对话是否能基于历史上下文连续追问。</li>
+</ul>
+<h5 class="source-heading source-level-2" id="case-board-handoff-下一步最佳动作">下一步最佳动作</h5>
+<p class="source-prose">配置真实 <code>OPENROUTER_API_KEY</code> 和 <code>OPENROUTER_MODEL</code> 后，重新启动 <code>pnpm dev</code>，在 Agent 面板验证新增、删除、修改状态、修改工具和只回答问题五类操作。</p>
+</div>
+</details>
+</section>
+</section><section class="chapter" id="整体验收与交付" aria-labelledby="chapter-title-4"><h2 id="chapter-title-4"><span aria-hidden="true" class="num">04</span>整体验收与交付</h2>
+<h3 id="集成验收跨模块流程与验证记录">集成验收：跨模块流程与验证记录</h3>
+<span class="anchor-alias" id="5-整体验收与交付"></span>
+<p class="body-prose">整体验收需要让同一份数据走完主流程。例如，上传后创建索引，再使用该索引问答，核对问答请求的 index_id、引用来源和失败反馈。分别使用固定假数据测试三个接口，无法发现它们之间传错标识的问题。刷新、重启和切换数据源也应插入流程检查，而不是只验证一次顺利完成的路径。</p>
+<p class="body-prose"><code>ACCEPTANCE.md</code> 将检查结果绑定到代码版本和运行条件。至少保存提交或基线、输入数据、环境配置、实际执行的命令及报告位置；只有“通过”而没有这些信息，代码更新后就无法判断结论是否仍适用。任务文件中的验收结果可在清理前迁入此处。</p>
+<details class="file-example" id="file-example-7"><summary><span class="example-title">ACCEPTANCE.md · 验收记录</span><span class="example-kind">整理示例</span></summary><div class="code-shell"><div class="code-head"><span>Markdown · 16 行 · 框内滚动</span><button aria-label="复制 ACCEPTANCE.md · 验收记录" class="copy-code" data-code="code-7" type="button">复制</button></div><pre aria-label="ACCEPTANCE.md · 验收记录；展开后可上下及左右滚动" id="code-7" role="region" tabindex="0"><code class="language-markdown">## 本轮验收
+
+代码基线：填写实际提交
+范围：查询超时控制
+环境：填写运行配置、依赖及测试输入
+
+| 要求 | 验证方式 | 实际结果 | 证据 |
+| --- | --- | --- | --- |
+| 默认请求兼容 | 原请求回归 | 待填写 | 实际测试或报告 |
+| 参数边界 | 参数化测试 | 待填写 | 实际测试或报告 |
+| 受控慢调用返回 504 | 超时集成测试 | 待填写 | 实际测试或报告 |
+| 超时后的执行状态 | 取消与后台状态检查 | 待填写 | 实际日志或报告 |
+
+未验证：填写未执行的场景、原因及影响。
+遗留问题：填写后续任务或处理安排。
+结论：根据实际结果填写，不将未验证能力写成通过。
+</code></pre></div></details>
+<h3 id="模型与算法项目的验证">模型与算法项目的验证</h3>
+<p class="body-prose">模型和算法项目至少存在三类不同结论：工程行为是否正确，真实依赖是否接通，算法效果是否达标。三者需要不同证据，不能相互替代。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>验证对象</th>
+<th>应控制或记录的条件</th>
+<th>能证明什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工程行为</td>
+<td>固定输入、可控慢调用或错误响应、状态与错误映射</td>
+<td>参数、流程、超时和异常处理是否符合约定</td>
+</tr>
+<tr>
+<td>真实服务接入</td>
+<td>实际鉴权、模型或服务标识、请求配置和失败路径</td>
+<td>目标环境下依赖是否可用</td>
+</tr>
+<tr>
+<td>算法效果</td>
+<td>评测数据、基线、模型与配置、指标、典型错误、时延和成本</td>
+<td>在这些条件下，策略是否达到目标或优于基线</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">算法评测除总体指标外，还应保留典型失败样本及其所在阶段。例如，检索命中了正确片段，但回答没有使用它，与索引根本缺少目标内容需要不同的修复。长文档、空内容、重复实体和跨页关系等样本也应单独观察，避免平均分掩盖某类输入的退化。</p>
+<p class="body-prose">比较策略时，应记录实际改变的因素。更换模型、调整分块并扩大检索数量后，结果即使改善，也不能直接归因于某一项修改。效果变化需要与工程回归一并观察，避免算法指标提升的同时，引入无法接受的时延、费用或失败率。</p>
+<h3 id="交付检查与后续维护">交付检查与后续维护</h3>
+<p class="body-prose">交付验证从干净环境开始按 README.md 安装、配置和启动，可以暴露开发机上未记录的依赖、文件路径及环境变量。随后使用交付配置运行关键流程；开发环境中的真实服务验证不能自动证明另一套密钥、模型或存储配置可用。</p>
+<p class="body-prose">发布记录应注明代码版本、配置要求和当前限制。涉及存储模型变更时，还要提供旧数据迁移及失败后的恢复办法；只保留旧代码版本，并不能撤销已经发生的数据变化。文档中的未验证项和延期功能应与该版本的验收记录一致，避免使用说明承诺尚未交付的能力。</p>
+</section><section class="chapter" id="开发过程中的专项问题" aria-labelledby="chapter-title-5"><h2 id="chapter-title-5"><span aria-hidden="true" class="num">05</span>开发过程中的专项问题</h2>
+<span class="anchor-alias" id="专项注意事项"></span>
+<span class="anchor-alias" id="执行过程中的上下文管理方案审查与纠偏"></span>
+<h3 id="会话上下文的压缩与重启">会话上下文的压缩与重启</h3>
+<p class="body-prose">压缩与新开会话解决不同问题。任务仍在推进、主要负担来自日志和工具输出时，可以在一个完整的调查步骤结束后压缩。需求讨论已经结束、准备实施，或者旧方案反复干扰当前判断时，新开会话更便于从确认后的文件重新建立上下文。固定百分比只能提示容量，不能判断哪些信息可以丢弃。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>处理方式</th>
+<th>需要先保存的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同一任务正常推进，但上下文接近容量限制</td>
+<td>完成当前检查后压缩，继续本任务</td>
+<td>当前设计、已修改文件、检查结果与下一步</td>
+</tr>
+<tr>
+<td>由方案讨论转入实现</td>
+<td>可新开执行会话，读取已确认文件</td>
+<td>决定、任务范围和尚未确认的问题</td>
+</tr>
+<tr>
+<td>多次失败后重复尝试旧方案</td>
+<td>停止追加修改，核对事实后再新开调查会话</td>
+<td>已排除假设、对应证据、累计 diff</td>
+</tr>
+<tr>
+<td>转向无关任务或不同代码版本</td>
+<td>分开会话</td>
+<td>对应工作区与版本，避免继承无关改动</td>
+</tr>
+</tbody></table></div>
+<p class="body-prose">交接摘要最容易丢失的是“结论的成立条件”。查询超时任务不应只写“超时已实现，取消待修复”，而应记录：受控慢调用已验证返回 504；该检查使用的是假服务，尚未核对真实 SDK；线程内调用仍继续；下一步观察实际调用结束与迟到结果处理。日志保存到文件时保留路径和可定位的请求标识，不必把全部输出塞进摘要。</p>
+<p class="body-prose">续接后的第一次调查应核对工作区、代码基线和未提交 diff，再读取 AGENTS.md、相关项目设计与任务文件。摘要中的路径、接口和测试结果需要与当前状态对照；代码或环境变化后，旧的“已通过”不能自动沿用。新会话可以减少旧讨论的干扰，但不能纠正交接材料中的错误事实。</p>
+<h3 id="过度设计的识别与控制">过度设计的识别与控制</h3>
+<p class="body-prose">过度设计的审查应落到新增机制及其调用方。查询超时任务如果只涉及一条已有调用链，沿参数传递和统一错误边界实现，通常比引入调度框架更容易验证。但当多个调用方分别重试、重复映射异常或重置预算时，共同入口也可能比继续追加分支更简单；不能只按新增代码行数判断。</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Agent 提议增加的机制</th>
+<th>审阅时需要的依据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>通用接口或基类</td>
+<td>当前调用方有哪些差异，抽象之后具体消除了什么重复；只有设想中的扩展时先保留具体实现</td>
+</tr>
+<tr>
+<td>新依赖或框架</td>
+<td>现有工具缺少什么必要能力，初始化、升级和部署成本是否值得</td>
+</tr>
+<tr>
+<td>新配置项</td>
+<td>谁需要改变这个值，默认行为是什么，非法配置如何处理；没有使用场景时不必把常量全部配置化</td>
+</tr>
+<tr>
+<td>大范围重构</td>
+<td>哪条已确认需求被原结构阻塞，迁移与回归怎样拆开；风格统一可另设任务</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>为新增依赖、抽象或共享机制列出当前调用方、必要能力，以及沿用现有结构的具体限制。将本轮必需修改与可独立延期的重构分开，先提交能满足当前需求的方案。</p>
+</blockquote>
+<p class="body-prose">审查 diff 时重点看未使用的扩展点、只为单一实现包装的多层接口，以及与本轮行为无关的公共 API 变化。对有依据的结构调整，要求给出调用方迁移和兼容性检查，而不是一概拒绝抽象。</p>
+<h3 id="根因定位与修复验证">根因定位与修复验证</h3>
+<p class="body-prose">Agent 连续修复仍失败时，应先冻结新增改动，保存可复现输入与累计 diff。已有补丁可能已经改变现场；在这些补丁之上继续推断，容易把新产生的问题误认为原故障。每个根因假设都需要一个能够支持或排除它的检查。</p>
+<p class="body-prose">以更换 embedding 模型后检索下降为例，可以按下表组织诊断。增大 top_k 改变返回数量，但无法据此证明编码一致；先保存失败样本，再分别检查各阶段。以下为说明性示例：</p>
+<div aria-label="数据表；窄屏可横向滚动" class="table-wrap" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>假设</th>
+<th>检查对象</th>
+<th>后续处理依据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>查询与索引使用不同编码模型</td>
+<td>两侧实际配置、模型标识和索引生成记录；维度相同仍不足以证明一致</td>
+<td>确认不一致后修正配置或重建索引</td>
+</tr>
+<tr>
+<td>索引缺少目标内容</td>
+<td>检索失败样本对应的文档、分块结果和入库记录</td>
+<td>区分解析遗漏、分块丢失与入库失败</td>
+</tr>
+<tr>
+<td>候选正确，但排序或过滤移除了结果</td>
+<td>保存过滤与重排前后的候选及分数</td>
+<td>在发生丢失的阶段修复，而非统一扩大检索数量</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>先不要修改代码。保存已确认现象，列出待查假设及可区分它们的检查。取得证据后，再确定修复位置与回归范围。</p>
+</blockquote>
+<p class="body-prose">回归用例应能让旧实现暴露缺陷，再在修复后得到需求规定的结果，并检查相邻正常输入。若只是放宽断言、吞掉异常或针对测试输入特判，测试失去了约束修复的作用。需要先做临时缓解时，应分别记录其效果、未解决的原因和后续调查；不要把“报错不再出现”直接写成“根因已修复”。</p>
+</section></main>
+<aside class="rail" aria-label="案例快捷入口"><div class="side-title">文件与案例</div><div class="rail-card"><h3>项目文件示例</h3><ul><li><a href="#case-board-product">PRD.md · 看板需求</a></li><li><a href="#case-rag-prd">PRD.md · 知识库需求</a></li><li><a href="#case-board-architecture">ARCHITECTURE.md · 看板</a></li><li><a href="#case-mineru-design">ARCHITECTURE.md · MinerU 对接</a></li><li><a href="#case-board-agents">AGENTS.md · 工作规则</a></li><li><a href="#case-board-handoff">session-handoff.md · 会话交接</a></li><li><a href="#case-mineru-tests">测试与质量清单</a></li></ul></div><div class="rail-card"><h3>文件模板</h3><ul><li><a href="#file-example-3">方案实现状态</a></li><li><a href="#file-example-5">AGENTS.md 补充规则</a></li><li><a href="#file-example-8">查询超时任务文件</a></li><li><a href="#file-example-7">验收记录</a></li></ul></div></aside></div>
+<footer class="page-footer"><span>AI Coding 从零开发 · 工程实践 · 更新于 2026-10-05</span><a href="#top">返回顶部 ↑</a></footer><button class="back" id="back" type="button" aria-label="返回顶部">↑</button><div id="copy-status" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></div><script type="application/json" id="case-sources">{"rag-prd": "# 多模态 RAG 问答系统 — 产品需求文档（PRD）v1.0\n\n| 文档属性 | 内容 |\n|----------|------|\n| **文档版本** | 1.0 |\n| **状态** | 草案（可评审） |\n| **制定日期** | 2026-04-08 |\n| **产品名称（工作名）** | 多模态 RAG 问答系统（GraphRAG-Agent Web 端） |\n| **后端规范依据** | `docs/multimodal-rag-backend-api-specification-v1.0.md` |\n| **问答格式依据** | `docs/agentic-rag-kg-specification-v1.0.md` §6.2 |\n| **关联设计** | `docs/frontend-product-specification-v1.0.md` |\n\n---\n\n## 文档修订记录\n\n| 版本 | 日期 | 修订说明 | 作者 |\n|------|------|----------|------|\n| 1.0 | 2026-04-08 | 首版：目标与场景、端到端流程、页面与模块、交互、UI 与响应式 | — |\n\n---\n\n## 目录\n\n1. [概述](#1-概述)\n2. [核心目标、场景、痛点与用户](#2-核心目标场景痛点与用户)\n3. [产品范围与非目标](#3-产品范围与非目标)\n4. [端到端产品流程](#4-端到端产品流程)\n5. [关键页面与模块清单及设计说明](#5-关键页面与模块清单及设计说明)\n6. [关键节点与核心功能交互逻辑](#6-关键节点与核心功能交互逻辑)\n7. [UI 布局、配色、响应式与组件样式](#7-ui-布局配色响应式与组件样式)\n8. [与后端 API 的验收对齐](#8-与后端-api-的验收对齐)\n9. [附录](#9-附录)\n\n---\n\n## 1. 概述\n\n### 1.1 背景\n\n企业或教研场景中，大量 **PDF / DOCX / PPTX** 等文档需要被 **解析、结构化抽取并构建知识图谱**，进而支持 **基于图谱的 Agentic 问答**。传统方式依赖命令行与多工具串联，门槛高、可观测性差。本 PRD 描述 **浏览器端 Web 产品**：在 **REST API v1**（`/api/v1`）之上，完成 **上传 → 异步建索引 → 图谱与抽取只读浏览 → 知识图谱问答** 的闭环体验。\n\n### 1.2 术语\n\n| 术语 | 说明 |\n|------|------|\n| **Indexing** | 自上传文件起的完整管线：MinerU → Adapter → LangExtract → KG Builder（见后端规范 §4） |\n| **`file_id`** | `POST /files` 返回的已落盘文件标识 |\n| **`index_id`** | 一次 Indexing 任务实例，与产物目录绑定 |\n| **`conversation_id`** | 多轮问答会话标识（可选） |\n\n### 1.3 文档读者\n\n产品经理、UX/UI、前端与后端研发、测试；用于需求评审、迭代排期与验收。\n\n---\n\n## 2. 核心目标、场景、痛点与用户\n\n### 2.1 核心目标\n\n1. **降低使用门槛**：非工程用户可在 Web 内完成文档入库与问答，无需本地安装链路与命令行。  \n2. **过程可观测**：Indexing 为 **异步任务**，界面须展示 **状态、阶段（stage）、进度（progress）**，避免「长时间无反馈」。  \n3. **结果可核验**：成功后可查看 **图谱统计、产物列表、抽取摘要**；问答结果可附带 **`graph_stats`** 增强可信度（与后端 §7.7 对齐）。  \n4. **与架构一致**：所有主流程与 **《多模态 RAG 后端 API 规范 v1.0》** 中的资源模型、HTTP 语义、错误码一致，便于联调与自动化测试。\n\n### 2.2 核心业务场景\n\n| 编号 | 场景名称 | 描述 | 成功标准 |\n|------|----------|------|----------|\n| S1 | 文档入库与建索引 | 用户上传合规文档，创建 Indexing 任务并等待至 `succeeded` | 用户获得可用 `index_id`，并看到摘要统计（如 `node_count` / `edge_count`） |\n| S2 | 索引进度跟踪 | 用户离开详情页后返回，或保持页面打开 | 状态与后端 `GET /indexes/{id}` 一致；轮询不造成明显卡顿 |\n| S3 | 知识图谱问答 | 用户基于已成功索引提问，可多轮（若后端支持 `conversation_id`） | 展示 `answer`；可选展示 `graph_stats`、`meta.duration_ms` |\n| S4 | 图谱与产物查阅 | 用户查看图谱 JSON 或可视化、下载/预览产物 | 调用 `GET .../graph`、`.../artifacts`、`.../extractions`；大内容采用摘要/分页策略（与规范一致） |\n| S5 | 失败与限流处理 | 索引失败、文件过大、索引未就绪就问答等 | 展示统一错误体中的 `error_code` / `error_message`；提供可理解的下一步操作 |\n\n### 2.3 业务痛点与产品对策\n\n| 痛点 | 说明 | 产品对策 |\n|------|------|----------|\n| 管线耗时长、易误以为卡死 | MinerU/LangExtract 等阶段耗时不定 | 异步 + **轮询** `GET /indexes/{id}`；步骤条 + `message`；页面隐藏时降低轮询频率 |\n| 上传与建索引耦合过紧 | 大文件需先传再决策是否建索引 | 严格遵循 **先 `POST /files` 再 `POST /indexes`**（规范 §7.1–7.2） |\n| 问答依赖索引就绪 | `INDEX_NOT_READY` 等冲突 | 对话入口校验索引状态；错误码映射为中文引导 |\n| 证据难追溯 | 用户不信任纯文本回答 | 展示 `graph_stats`；提供图谱页与产物入口 |\n| 密钥与敏感数据 | 规范要求密钥不入响应、产物可能含 PII | 前端不存储 API Key；下载与调试功能预留鉴权后的行为（见 §8） |\n\n### 2.4 面向用户群体\n\n| 用户类型 | 特征 | 核心诉求 |\n|----------|------|----------|\n| **业务分析 / 研究员** | 熟悉业务文档，弱技术 | 简单上传、看懂进度、直接提问 |\n| **实施顾问 / 售前** | 需要演示与可核验结果 | 索引摘要、图谱可视化、稳定演示路径 |\n| **工程与运维** | 关注健康与排错 | `GET /health`、错误码、日志入口（若产品提供链接） |\n\n**v1.0 假设**：单租户或内网部署为主；多租户账号体系为后续版本，本 PRD 仅 **预留** `Authorization: Bearer` 的 UI 与请求头扩展点。\n\n---\n\n## 3. 产品范围与非目标\n\n### 3.1 v1.0 范围内\n\n- 基于 `/api/v1` 的 **文件上传、创建索引、轮询状态、产物列表、图谱 GET、抽取 GET、聊天 completions、健康检查**。  \n- **Indexing 状态机**：`queued` / `running` / `succeeded` / `failed`（及可选 `cancelled`）的展示与终态处理。  \n- **对话**：请求体与响应体字段与后端 §7.7、`agentic-rag-kg-specification` §6.2 对齐。\n\n### 3.2 v1.0 非目标（可列 backlog）\n\n- 服务端 **SSE/WebSocket** 推送索引进度（规范推荐轮询；推送为增强项）。  \n- 完整 **向量检索模式**切换（规范边界以 KG 为主）。  \n- 独立多模态资产库（图片/音频单独索引）的完整 UI。  \n- 细粒度 **RBAC** 与审计日志前端（仅预留入口）。\n\n---\n\n## 4. 端到端产品流程\n\n以下流程与 **后端规范 §6 API 总览** 一致，按用户从入口到「完成问答」的最短路径描述；**分支**单独列出。\n\n### 4.1 主流程：从进入到完成首次问答\n\n| 步骤 | 用户动作 | 系统行为 | 数据/API |\n|------|----------|----------|----------|\n| 1 | 打开 Web 应用 | 可选调用 `GET /api/v1/health` 展示服务可用/版本 | `GET /health` |\n| 2 | 进入「上传/新建索引」 | 展示上传区：格式说明（pdf/docx/pptx）、大小上限提示（如 200MB，与后端一致） | — |\n| 3 | 选择或拖拽文件 | 前端校验扩展名；可选客户端大小提示 | — |\n| 4 | 确认上传 | `multipart/form-data` 上传 `file` | `POST /api/v1/files` |\n| 5 | 收到上传成功 | 展示 `file_id`、`original_filename`、**`size_bytes`（建议同时展示人类可读单位，避免小文件显示为 0.00MB）** | 响应体 §7.1 |\n| 6 | 点击「开始建索引」 | 请求体携带 `file_id` 与可选 `options` | `POST /api/v1/indexes` |\n| 7 | 收到 202 | 保存 `index_id`、`poll_url`；**跳转或展开「索引详情」** | 响应体 §7.2 |\n| 8 | 停留在索引详情 | **定时轮询**（建议 2–5s，终态停止） | `GET /api/v1/indexes/{index_id}` |\n| 9 | 运行中 | 展示 `status`、`stage`（如 mineru/adapter/langextract/kg_builder）、`progress`、`message` | §7.3 |\n| 10 | 成功 `succeeded` | 展示 `result_summary`（如 `node_count`、`edge_count`、`document_id` 等） | §7.3 |\n| 11 | 用户进入「对话」 | 必须绑定当前 `index_id` | — |\n| 12 | 输入问题并发送 | 请求体：`index_id`、`messages`、可选 `conversation_id`、`options` | `POST /api/v1/chat/completions` |\n| 13 | 收到回答 | 展示 `answer`；可选展示 `graph_stats`、`meta`；`include_debug` 为 true 时展示 `debug`（内部/高级用户） | §7.7 |\n\n### 4.2 分支流程 A：查看产物\n\n| 步骤 | 用户动作 | 系统行为 | API |\n|------|----------|----------|-----|\n| A1 | 在成功索引后进入「产物」 | 列表展示 `artifacts[].type` 与获取方式（链接或内联说明） | `GET /api/v1/indexes/{id}/artifacts` §7.4 |\n| A2 | 下载或跳转 | 按 `uri` 拉取；大文件以链接为主，避免阻塞 UI | 规范 §7.4 |\n\n### 4.3 分支流程 B：查看知识图谱\n\n| 步骤 | 用户动作 | 系统行为 | API |\n|------|----------|----------|-----|\n| B1 | 进入「图谱」 | 拉取完整 JSON 或 `?summary=1` 先展示统计再加载全量 | `GET /api/v1/indexes/{id}/graph` §7.5 |\n| B2 | 交互 | 可视化（若实现）：节点点击展示属性；与 `nodes`/`edges` 结构一致 | — |\n\n### 4.4 分支流程 C：查看抽取\n\n| 步骤 | 用户动作 | 系统行为 | API |\n|------|----------|----------|-----|\n| C1 | 进入「抽取」 | 默认摘要；`include_text` 按需开启 | `GET /api/v1/indexes/{id}/extractions` §7.6 |\n\n### 4.5 异常流程（与 §8 错误码一致）\n\n| 条件 | 用户可见反馈 | 建议操作 |\n|------|--------------|----------|\n| `FILE_TOO_LARGE` / `INVALID_FILE_TYPE` | 明确文案 + 格式/大小约束重述 | 更换文件 |\n| `INDEX_NOT_FOUND` / `FILE_NOT_FOUND` | 资源不存在 | 返回列表或重新上传 |\n| `INDEX_NOT_READY`（问答时） | 提示索引仍为 `running` 等 | 跳转索引详情等待 |\n| `INDEXING_FAILED` | 展示 `error_message` | 联系管理员或重试新建索引 |\n| `RATE_LIMITED` | 限流提示 | 稍后重试 |\n| `INTERNAL_ERROR` | 通用失败 + 重试 | 重试或反馈 |\n\n---\n\n## 5. 关键页面与模块清单及设计说明\n\n### 5.1 信息架构（IA）与路由建议\n\n| 路由（示例） | 页面名称 | 优先级 | 说明 |\n|--------------|----------|--------|------|\n| `/` | 首页/控制台 | P0 | 入口、最近索引、快捷操作 |\n| `/upload` | 上传与创建索引 | P0 | 串联 `POST /files` → `POST /indexes` |\n| `/indexes/:indexId` | 索引任务详情 | P0 | 轮询核心页 |\n| `/indexes/:indexId/artifacts` | 产物浏览 | P1 | 对齐 §7.4 |\n| `/indexes/:indexId/graph` | 图谱探索 | P1 | 对齐 §7.5 |\n| `/indexes/:indexId/extractions` | 抽取浏览 | P1 | 对齐 §7.6，注意性能 |\n| `/chat` | 对话（选择索引） | P0 | 未选索引时阻断或引导 |\n| `/chat/:indexId` | 指定索引对话 | P0 | 深链、分享 |\n| `*` | 404 | P1 | 返回首页或索引列表 |\n\n### 5.2 页面级设计说明\n\n#### 5.2.1 首页/控制台\n\n- **目的**：降低冷启动成本，展示「新建索引」主 CTA 与 **最近成功的 `index_id`**（可来自 localStorage 或后端列表接口若存在）。  \n- **模块**：顶部栏、快捷卡片、环境/健康状态（可选，`GET /health`）。  \n- **空态**：无历史时强调「上传第一个文档」。\n\n#### 5.2.2 上传与创建索引\n\n- **目的**：完成 §4 步骤 2–7。  \n- **模块**：拖拽上传区、文件信息回显、`开始建索引` 按钮（仅在 `file_id` 就绪后可用）、可选高级选项折叠（`options` 与后端 §7.2 字段对应）。  \n- **约束展示**：扩展名 pdf/docx/pptx；单文件上限 200MB（与后端 §7.1 一致）。\n\n#### 5.2.3 索引任务详情\n\n- **目的**：满足 **S2**，核心为轮询展示。  \n- **模块**：状态徽章、`stage` 步骤指示、`progress` 进度条、`message` 文案、时间戳 `updated_at`、失败时 `error` 区块、成功时 `result_summary` 卡片与「去对话」「看图谱」按钮。\n\n#### 5.2.4 对话页\n\n- **目的**：满足 **S3**。  \n- **模块**：`index_id` 选择器、消息列表（用户/助手）、输入框、发送按钮、可选侧栏展示 `graph_stats` 与 `meta.duration_ms`。  \n- **开发者选项**：`include_debug` 开关（默认关闭），展开 `debug.tools_used` 等。\n\n#### 5.2.5 图谱页\n\n- **目的**：满足 **S4-B**。  \n- **模块**：摘要模式与全量加载、图可视化区域、节点详情侧栏（数据源于 `nodes[]`）。\n\n#### 5.2.6 产物页\n\n- **目的**：满足 **S4-A**。  \n- **模块**：表格或卡片列表 `artifacts[]`，类型可读名映射（如 `knowledge_graph_json` →「知识图谱 JSON」）。\n\n#### 5.2.7 抽取页\n\n- **目的**：满足 **S4-C**。  \n- **模块**：`extraction_count`、`text_preview`、折叠展开 `extractions[]`；默认 `include_text=false` 控制体积。\n\n### 5.3 全局模块\n\n| 模块 | 说明 |\n|------|------|\n| **顶栏** | Logo、产品名、主导航、可选用户/帮助 |\n| **通知** | Toast：上传成功、索引成功/失败、限流等 |\n| **全局错误边界** | 未捕获错误时友好页，避免白屏 |\n| **鉴权占位** | 未来 `Authorization` 头；v1.0 可不展示登录 |\n\n---\n\n## 6. 关键节点与核心功能交互逻辑\n\n### 6.1 上传与创建索引\n\n- **触发**：用户点击上传并确认。  \n- **前置条件**：网络可用；文件通过前端基础校验。  \n- **交互**：上传中按钮 loading；成功后展示 `size_bytes`；「建索引」使用最新 `file_id`。  \n- **后置**：进入索引详情并开始轮询；失败按 §4.5 展示。\n\n### 6.2 索引进度轮询\n\n- **启动时机**：`POST /indexes` 返回 202 后立即开始。  \n- **停止条件**：`status` 为 `succeeded`、`failed` 或 `cancelled`（若实现）。  \n- **频率**：建议 2–5s；`document.visibilityState === 'hidden'` 时降低频率，可见时立即补拉一次。  \n- **防重复**：切换 `index_id` 时清除旧定时器；组件卸载 `AbortController` 取消进行中的请求（若使用）。\n\n### 6.3 对话（Agentic-RAG）\n\n- **前置条件**：目标 `index_id` 对应状态为 `succeeded`；否则禁用发送并提示 `INDEX_NOT_READY` 类体验。  \n- **请求**：`messages` 至少一条 user；首轮可不传 `conversation_id`，若服务端返回 `meta.conversation_id`，后续轮次携带（与 §7.7 一致）。  \n- **响应成功**：渲染 `answer`（支持 Markdown 子集）；脚注区可选 `graph_stats`。  \n- **响应失败**：解析 `error_code`、`error_message`；429 时禁用连点并倒计时提示。\n\n### 6.4 图谱加载\n\n- **策略**：首屏可用 `?summary=1`（若后端支持）展示 `metadata` 与计数，再加载全图；避免一次性渲染超大图导致卡顿。  \n- **交互**：节点点击、类型筛选（若产品实现）；与 `node_types` 分布展示一致。\n\n### 6.5 产物与抽取\n\n- **产物**：以列表为主，点击下载/新窗口打开 `uri`。  \n- **抽取**：默认预览摘要；全文/长文本需二次确认或折叠，防止 DOM 过大。\n\n---\n\n## 7. UI 布局、配色、响应式与组件样式\n\n### 7.1 整体布局\n\n- **结构**：**顶栏 + 左侧导航（可选）+ 主内容区 + 右侧上下文栏（对话页可选）**。  \n- **主内容区**：白底卡片承载表单与列表；页面背景浅灰（`#f5f7fb` 级）与内容区分层。  \n- **对话区**：助手消息左对齐、用户消息右对齐；输入区固定在主内容底部（桌面）或视口底部（移动）。\n\n### 7.2 配色与品牌\n\n| 用途 | 建议 | 说明 |\n|------|------|------|\n| 主色 | `#667eea` → `#764ba2` 渐变 | 与现有 `integration/static/index.html` 品牌延续；用于主按钮、关键进度、顶栏背景可选 |\n| 主文字 | `#1a1a2e` | 正文 |\n| 次要文字 | `#6b7280` | 辅助说明、时间 |\n| 成功 | `#059669` | `succeeded` |\n| 危险 | `#dc2626` | `failed`、破坏性操作 |\n| 表面/卡片 | `#ffffff` | 卡片背景 |\n| 边框 | `#e5e7eb` | 分割线、输入框 |\n\n### 7.3 字体与排版\n\n- **字体栈**：`-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"PingFang SC\", \"Microsoft YaHei\", sans-serif`。  \n- **字号**：页面标题 20–24px；正文 14–16px；辅助 12–13px。  \n- **行高**：正文 ≥ 1.5；对话气泡略宽于表单列宽以提升可读性。\n\n### 7.4 响应式\n\n| 断点 | 宽度（参考） | 布局调整 |\n|------|--------------|----------|\n| 手机 | &lt; 576px | 单栏；侧栏收入抽屉/汉堡菜单；右栏改为底部 Sheet 或 Tab |\n| 平板 | 576–1199px | 可折叠侧栏；主内容优先 |\n| 桌面 | ≥ 1200px | 完整导航 + 可选三栏 |\n\n**触控**：可点击区域最小约 44×44px；重要操作避免仅依赖 hover。\n\n### 7.5 组件样式规范（摘要）\n\n| 组件 | 样式要点 |\n|------|----------|\n| **按钮** | 主按钮：渐变或实色主色，圆角 8px；禁用降低透明度并禁用点击 |\n| **输入框** | 边框 `#e5e7eb`，focus 环主色；错误态红边框 + 错误文案 |\n| **卡片** | 圆角 12px，阴影 `0 4px 24px rgba(0,0,0,.08)` |\n| **步骤条/进度条** | `stage` 映射到 4 段：MinerU → Adapter → LangExtract → KG；`progress` 0–1 线性进度 |\n| **表格** | 产物列表：斑马纹可选；小屏横向滚动 |\n| **Toast** | 顶或底固定，3–5s 自动消失；错误可手动关闭 |\n| **加载** | 按钮内 Spinner；列表骨架屏；禁止长时间全屏遮罩（除非阻塞性操作） |\n\n### 7.6 动效\n\n- 进度与步骤切换：200–300ms ease。  \n- 新消息进入：轻微上滑或淡入，避免炫光干扰阅读。\n\n---\n\n## 8. 与后端 API 的验收对齐\n\n### 8.1 必须实现的接口对照（P0）\n\n| PRD 能力 | HTTP | 路径 |\n|----------|------|------|\n| 上传 | POST | `/api/v1/files` |\n| 建索引 | POST | `/api/v1/indexes` |\n| 轮询 | GET | `/api/v1/indexes/{index_id}` |\n| 问答 | POST | `/api/v1/chat/completions` |\n| 健康（可选） | GET | `/api/v1/health` |\n\n### 8.2 字段与状态验收\n\n- 上传响应含 **`size_bytes`**；索引轮询含 **`stage`、`progress、message`**；成功含 **`result_summary`**。  \n- 问答响应与 **`agentic-rag-kg-specification` §6.2** 及后端 **§7.7** 扩展字段一致（`answer`、`graph_stats`、`meta`、`error_code` 等）。  \n- 错误响应与后端 **§8** 统一错误体一致。\n\n### 8.3 安全与合规（产品侧）\n\n- 不在前端写死 **DeepSeek / MinerU** 等密钥；若未来有 Token，走环境变量或登录会话，由后端代理。  \n- 下载敏感产物时，产品需与后端 **鉴权策略** 同步（规范 §9）。\n\n---\n\n## 9. 附录\n\n### 9.1 参考文档\n\n| 文档 | 路径 |\n|------|------|\n| 后端 API 规范 | `docs/multimodal-rag-backend-api-specification-v1.0.md` |\n| Agentic-RAG（KG）问答 | `docs/agentic-rag-kg-specification-v1.0.md` |\n| 前端产品规划 | `docs/frontend-product-specification-v1.0.md` |\n\n### 9.2 索引状态与阶段（后端 §3.2–7.3）\n\n- **状态**：`queued` / `running` / `succeeded` / `failed`（及可选 `cancelled`）。  \n- **子阶段（stage）**：可与 `mineru` / `adapter` / `langextract` / `kg_builder` 及 `done` 等映射到 UI 步骤条。\n\n---\n\n**文档结束**\n", "board-product": "# PRD.md\n\n## 产品名称\n\n本地项目看板\n\n## 产品简介\n\n本项目是一个本地运行的 AI 开发项目看板，用来帮助用户管理多个并行开发的项目。\n\n页面左侧是项目看板，右侧是 Agent 对话面板。\n\n用户可以手动新增项目卡片，也可以通过右侧 Agent 面板用自然语言新增、删除或修改项目卡片。\n\n## 目标用户\n\n本项目面向正在学习 AI 编程、使用 Codex、Claude Code、Cursor 等工具开发项目的个人开发者或小团队。\n\n## 核心问题\n\n当用户同时开发多个项目时，容易遇到这些问题：\n\n- 不知道每个项目当前处于什么状态。\n- 忘记每个项目主要使用哪个开发工具。\n- 项目状态需要手动维护，操作麻烦。\n- 希望通过自然语言快速新增、删除或修改项目卡片。\n\n## 页面布局\n\n页面分为两个区域：\n\n1. 左侧是项目看板区域，宽度为 calc(100% - 380px)。\n2. 右侧是 Agent 对话面板，固定宽度为 380px。\n\n左侧看板用于展示项目卡片。\n\n右侧 Agent 面板用于接收用户自然语言输入，并根据用户意图修改看板数据。\n\n## 看板状态\n\n第一版只支持以下 4 个状态：\n\n- 规划中\n- 进行中\n- 阻塞中\n- 已完成\n\n内部状态值：\n\n- planning\n- in_progress\n- blocked\n- done\n\n## 项目卡片字段\n\n每个项目卡片只包含以下字段：\n\n- 项目名称\n- 使用工具\n- 当前状态\n- 更新时间\n\n使用工具只支持：\n\n- Codex\n- Claude Code\n- Cursor\n\n## 手动新增项目\n\n用户可以点击“新增项目”按钮，打开弹框表单。\n\n弹框表单包含：\n\n- 项目名称\n- 使用工具\n- 当前状态\n\n用户提交后，系统创建一张新的项目卡片，并显示在对应状态列中。\n\n## 拖拽功能\n\n用户可以拖拽项目卡片。\n\n拖拽需要支持两种行为：\n\n1. 在同一个状态列中拖拽，调整卡片顺序。\n2. 拖拽到其他状态列，修改项目当前状态。\n\n拖拽完成后，需要更新项目的状态、排序和更新时间。\n\n刷新页面后，拖拽后的状态和顺序应该继续保留。\n\n## Agent 面板定义\n\n右侧 Agent 面板是本项目的核心功能之一。\n\n用户可以在 Agent 面板中输入自然语言，例如：\n\n- 帮我新增一个项目，叫 AI 简历生成器，工具用 Codex，状态是规划中。\n- 把客户管理系统改成进行中。\n- 把 Chrome 插件项目标记为阻塞中。\n- 把知识库网站的工具改成 Claude Code。\n- 删除 AI 简历生成器这个项目。\n\nAgent 需要识别用户意图，并返回结构化结果，让前端修改本地项目数据。\n\nAgent 面板需要支持历史对话记录。\n\n历史对话入口以图标按钮放在新建对话按钮左侧。点击历史图标后，Agent 面板切换为历史视图并替换当前对话区和输入区；点击返回后回到当前 Agent 对话。\n\n用户可以在历史视图中切换不同对话。\n\n如果当前对话还是空对话，系统不允许新建对话，避免生成无内容的历史记录。\n\n同一个对话中的历史消息需要作为上下文发送给大模型，让模型能够理解连续追问和前文提到的项目。\n\n历史对话保存在浏览器本地 IndexedDB 中，刷新页面后仍然保留。\n\n## Agent 支持的操作\n\n第一版 Agent 只支持以下操作：\n\n1. 新增项目卡片\n2. 删除项目卡片\n3. 修改项目状态\n4. 修改项目使用工具\n5. 只回答问题，不修改数据\n\n## Agent 操作规则\n\nAgent 只能在用户明确表达修改意图时修改数据。\n\n如果用户只是询问项目情况，Agent 只回答问题，不修改数据。\n\n如果用户要求删除项目，但存在多个同名项目，Agent 必须询问用户确认，不能直接删除。\n\n如果用户提到的项目不存在，Agent 应该提示用户未找到项目，并询问是否需要新建。\n\n如果用户输入的信息不完整，Agent 应该向用户追问必要信息。\n\n## 本地数据要求\n\n项目数据保存在浏览器本地 IndexedDB 中。\n\n刷新页面后，项目数据应该继续存在。\n\n本项目不使用后端数据库。\n\n## 当前版本范围\n\n第一版需要完成：\n\n- 展示项目看板\n- 通过弹框表单新增项目卡片\n- 拖拽项目卡片调整状态和顺序\n- 使用 IndexedDB 保存项目数据\n- 刷新页面后恢复项目数据\n- 支持右侧 Agent 面板\n- 支持 Agent 历史对话记录\n- 支持切换 Agent 历史对话\n- 支持历史视图替换当前 Agent 对话区\n- 空对话不允许新建对话\n- 同一 Agent 对话调用大模型时携带上下文\n- Agent 支持新增项目\n- Agent 支持删除项目\n- Agent 支持修改项目状态\n- Agent 支持修改项目使用工具\n- 支持基础错误提示\n\n## 暂不支持\n\n第一版不做以下功能：\n\n- 用户登录\n- 云端同步\n- 团队协作\n- 真实 GitHub API 集成\n- 后端数据库\n- 支付功能\n- 项目详情页\n- 复杂筛选\n- 多工作区\n", "board-architecture": "# ARCHITECTURE.md\n\n## 技术栈\n\n本项目使用：\n\n- Next.js\n- React\n- TypeScript\n- shadcn/ui\n- IndexedDB\n- dnd kit\n- OpenRouter API\n\n## 项目性质\n\n本项目是一个本地优先的前端应用。\n\n项目数据保存在浏览器 IndexedDB 中，不使用 SQLite、Prisma、PostgreSQL、Supabase 或其他后端数据库。\n\n## UI 框架\n\n本项目使用 shadcn/ui 构建前端界面。\n\n当前实现使用 shadcn CLI 生成的 Tailwind CSS v4 + Base UI 版本组件，并通过 `components.json` 管理组件配置。\n\n建议使用的 shadcn/ui 组件包括：\n\n- Button\n- Card\n- Dialog\n- Input\n- Select\n- Textarea\n- ScrollArea\n- Separator\n\n弹框表单使用 Dialog 组件实现。\n\n项目卡片使用 Card 组件实现。\n\n## 拖拽方案\n\n本项目使用 dnd kit 实现看板卡片拖拽。\n\n拖拽需要支持：\n\n1. 同一列内调整卡片顺序。\n2. 跨列移动卡片并修改项目状态。\n\n拖拽完成后，需要更新：\n\n- status\n- order\n- updatedAt\n\n## 页面布局\n\n主页面只有一个核心布局：\n\n- 左侧：项目看板区域，宽度为 calc(100% - 380px)\n- 右侧：Agent 对话面板，固定宽度为 380px\n\n主页面文件：\n\n- app/page.tsx\n\n## 组件拆分\n\n建议组件拆分如下：\n\n- components/Board.tsx：负责渲染整个看板\n- components/BoardColumn.tsx：负责渲染单个状态列\n- components/ProjectCard.tsx：负责渲染单个项目卡片\n- components/AddProjectDialog.tsx：负责弹框新增项目\n- components/AgentPanel.tsx：负责右侧 Agent 对话面板\n\nAgentPanel 同时负责：\n\n- 渲染当前对话消息\n- 渲染当前对话视图和历史对话视图\n- 新建 Agent 对话\n- 切换 Agent 对话\n- 调用 Agent API 时传入当前对话上下文\n\nAgentPanel 使用内部 `chat` / `history` 视图状态控制右侧面板内容。历史入口位于新建对话按钮左侧；进入历史视图后，历史列表替换当前消息区和输入区，点击返回后恢复当前对话视图。当前对话没有用户消息时，不允许新建对话。\n\n## 数据模型\n\n项目类型定义放在：\n\n- types/project.ts\n\nProject 类型包含：\n\n- id\n- name\n- tool\n- status\n- order\n- createdAt\n- updatedAt\n\n说明：\n\n- name：项目名称\n- tool：项目使用的开发工具\n- status：项目当前状态\n- order：同一状态列中的排序值\n- createdAt：创建时间\n- updatedAt：更新时间\n\n## 字段取值\n\ntool 支持：\n\n- codex\n- claude_code\n- cursor\n\nstatus 支持：\n\n- planning\n- in_progress\n- blocked\n- done\n\n界面展示时，status 对应中文：\n\n- planning：规划中\n- in_progress：进行中\n- blocked：阻塞中\n- done：已完成\n\n界面展示时，tool 对应：\n\n- codex：Codex\n- claude_code：Claude Code\n- cursor：Cursor\n\n## 本地数据存储\n\nIndexedDB 相关逻辑放在：\n\n- lib/indexeddb.ts\n- lib/project-store.ts\n\nlib/indexeddb.ts 负责：\n\n- 打开 IndexedDB\n- 创建对象仓库\n- 处理数据库版本升级\n\nlib/project-store.ts 负责：\n\n- 获取项目列表\n- 新增项目\n- 删除项目\n- 修改项目状态\n- 修改项目使用工具\n- 修改项目排序\n- 更新项目时间\n\nAgent 历史对话相关逻辑放在：\n\n- lib/agent-conversation-store.ts\n\nlib/agent-conversation-store.ts 负责：\n\n- 获取历史对话列表\n- 新建 Agent 对话\n- 保存对话消息\n- 更新对话标题和更新时间\n\n数据库名称：\n\n- local-project-board\n\n对象仓库名称：\n\n- projects\n- agent-conversations\n\nprojects 对象仓库建议使用 id 作为主键。\n\nagent-conversations 对象仓库使用 id 作为主键，并保存 title、messages、createdAt、updatedAt。\n\n## Agent API\n\n右侧 Agent 面板通过以下 API 路由和 OpenRouter 通信：\n\n- app/api/agent/route.ts\n\nOpenRouter 调用封装在：\n\n- lib/openrouter.ts\n\n## Agent 返回结构\n\nAgent 不直接操作 IndexedDB。\n\nAgent 只识别用户意图，并返回结构化结果。\n\n前端根据结构化结果修改 IndexedDB。\n\nAgent 支持的结构化操作：\n\n- create_project\n- delete_project\n- update_project_status\n- update_project_tool\n- answer_only\n- ask_followup\n\n说明：\n\n- create_project：新增项目\n- delete_project：删除项目\n- update_project_status：修改项目状态\n- update_project_tool：修改项目使用工具\n- answer_only：只回答问题，不修改数据\n- ask_followup：信息不足，需要追问用户\n\nAPI 请求结构：\n\n- `message`：用户输入的自然语言内容\n- `projects`：当前本地项目的 `id`、`name`、`tool`、`status`\n- `conversationMessages`：当前 Agent 对话的历史消息上下文\n\nAPI 返回结构：\n\n- `action`\n- `message`\n- `project`\n- `targetProjectId`\n- `targetProjectName`\n- `status`\n- `tool`\n\n如果 OpenRouter 环境变量缺失或调用失败，API 会返回 `ask_followup` 结构化结果，前端只展示错误提示，不修改 IndexedDB。\n\n## 环境变量\n\n项目需要以下环境变量：\n\n- OPENROUTER_API_KEY\n- OPENROUTER_MODEL\n\nOPENROUTER_API_KEY 用于访问 OpenRouter API。\n\nOPENROUTER_MODEL 用于指定调用模型。\n\n默认示例：\n\n- google/gemini-3.1-pro-preview\n\n实际模型 ID 以 OpenRouter 控制台当前可用模型为准。\n\n## 重要边界\n\n- Agent 不直接操作 IndexedDB。\n- Agent 只返回结构化操作结果。\n- 前端应用根据结构化结果执行本地数据操作。\n- 如果用户意图不明确，Agent 应该返回追问。\n- 如果用户要求删除项目但匹配多个结果，必须先确认。\n- 如果用户提到不存在的项目，不能静默失败，必须提示用户。\n- 拖拽后的状态和顺序必须写入 IndexedDB。\n- 刷新页面后状态和顺序必须保留。\n\n## 不允许引入的内容\n\n第一版不要引入：\n\n- Prisma\n- SQLite\n- PostgreSQL\n- Supabase\n- Firebase\n- NextAuth\n- 后端数据库\n- 云同步\n- 用户登录\n", "mineru-design": "## 3. 对接架构设计\n\n### 3.1 整体架构\n\n```\n┌─────────────────────────────────────────────────────────────────┐\n│                        对接 Pipeline                             │\n└─────────────────────────────────────────────────────────────────┘\n\n┌──────────────┐      ┌──────────────┐      ┌──────────────┐\n│   MinerU     │      │   对接层     │      │ LangExtract  │\n│   组件       │─────▶│  (Adapter)   │─────▶│   组件       │\n│              │      │              │      │              │\n│ .venv (独立) │      │ .venv (独立) │      │ .venv (独立) │\n└──────────────┘      └──────────────┘      └──────────────┘\n       │                     │                     │\n       ▼                     ▼                     ▼\n  output/              shared_data/           output/\n  ├── doc.md          ├── processed/         ├── entities.jsonl\n  └── doc.json        └── metadata/          └── graph.json\n\n┌─────────────────────────────────────────────────────────────────┐\n│                      知识图谱生成层                              │\n└─────────────────────────────────────────────────────────────────┘\n                              │\n                              ▼\n                    ┌──────────────────┐\n                    │  知识图谱存储    │\n                    │  (Neo4j/JSON)    │\n                    └──────────────────┘\n```\n\n### 3.2 目录结构设计\n\n```\nGraphRAG-Agent/\n├── mineru_mvp_test/              # MinerU 组件\n│   ├── .venv/                    # 独立虚拟环境\n│   ├── output/                   # MinerU 输出目录\n│   │   ├── document.md           # ✅ 对接输入源\n│   │   ├── document_content_list.json\n│   │   └── ...\n│   └── main.py\n│\n├── langextract/                  # LangExtract 组件\n│   ├── .venv/                    # 独立虚拟环境\n│   ├── output/                   # LangExtract 输出目录\n│   │   └── extractions.jsonl    # ✅ 对接输出\n│   └── test_deepseek_mvp.py\n│\n├── integration/                  # 对接层（新建）⭐\n│   ├── .venv/                    # 独立虚拟环境\n│   ├── adapter.py                # 数据转换适配器\n│   ├── pipeline.py               # 完整对接流程\n│   ├── kg_builder.py             # 知识图谱构建器\n│   ├── config.py                 # 配置管理\n│   ├── requirements.txt          # 依赖清单\n│   ├── .env                      # 环境变量\n│   ├── AGENTS.md                 # 使用说明\n│   └── output/                   # 最终输出\n│       ├── knowledge_graph.json  # 知识图谱 JSON\n│       ├── knowledge_graph.gexf  # 图文件（可选）\n│       └── statistics.json       # 统计信息\n│\n└── docs/\n    ├── MinerU_MVP测试配置指南_v1.0.md\n    ├── LangExtract_规范文档-v1.0.md\n    └── ARCHITECTURE.md  # 本文档\n```\n\n### 3.3 模块职责划分\n\n#### 3.3.1 adapter.py - 数据转换适配器\n\n**职责**：\n- 读取 MinerU 输出文件\n- 清洗和预处理文本\n- 转换为 LangExtract 输入格式\n- 保留元数据映射\n\n**核心函数**：\n```python\ndef load_mineru_output(output_dir: str) -> dict:\n    \"\"\"加载 MinerU 输出文件\"\"\"\n    pass\n\ndef preprocess_markdown(markdown_text: str) -> str:\n    \"\"\"预处理 Markdown 文本\"\"\"\n    pass\n\ndef create_langextract_input(text: str, metadata: dict) -> dict:\n    \"\"\"创建 LangExtract 输入\"\"\"\n    pass\n```\n\n#### 3.3.2 pipeline.py - 完整对接流程\n\n**职责**：\n- 协调整个对接流程\n- 调用 MinerU 和 LangExtract\n- 处理错误和异常\n- 生成执行日志\n\n**核心函数**：\n```python\ndef run_mineru_parsing(file_path: str) -> str:\n    \"\"\"运行 MinerU 解析\"\"\"\n    pass\n\ndef run_langextract_extraction(text: str, config: dict) -> list:\n    \"\"\"运行 LangExtract 提取\"\"\"\n    pass\n\ndef run_full_pipeline(input_file: str, output_dir: str) -> dict:\n    \"\"\"运行完整 Pipeline\"\"\"\n    pass\n```\n\n#### 3.3.3 kg_builder.py - 知识图谱构建器\n\n**职责**：\n- 从提取结果构建图结构\n- 实体去重和合并\n- 关系推理和补全\n- 导出多种格式\n\n**核心函数**：\n```python\ndef build_knowledge_graph(extractions: list) -> nx.Graph:\n    \"\"\"构建知识图谱\"\"\"\n    pass\n\ndef merge_entities(entities: list) -> list:\n    \"\"\"实体去重和合并\"\"\"\n    pass\n\ndef export_graph(graph: nx.Graph, output_path: str, format: str):\n    \"\"\"导出知识图谱\"\"\"\n    pass\n```\n\n---\n", "board-agents": "# AGENTS.md\n\n## 你的角色\n\n你是这个项目的开发 Agent。\n\n你的任务是根据本项目的 Harness 文档，完成一个本地项目看板应用。\n\n项目使用 Next.js、React、TypeScript、shadcn/ui、IndexedDB、dnd kit 和 OpenRouter API。\n\n## 开始前必须阅读\n\n每次开始修改代码前，必须先阅读：\n\n1. docs/PRD.md\n2. docs/ARCHITECTURE.md\n3. session-handoff.md\n\n如果用户最新需求和这些文档冲突，以用户最新明确表达的需求为准，但你必须同步更新相关文档。\n\n## 工作原则\n\n- 一次只处理一个明确目标。\n- 不要擅自增加产品范围之外的功能。\n- 如果需求不明确，先向用户提问。\n- 如果涉及产品需求变更，必须更新 docs/PRD.md。\n- 如果涉及重大架构变更，必须更新 docs/ARCHITECTURE.md。\n- 每轮开发结束后，必须更新 session-handoff.md。\n- 面向用户的界面文案优先使用中文。\n- 不要引入后端数据库，本地数据使用 IndexedDB。\n- 不要添加登录、云同步、团队协作或真实 GitHub API。\n\n## 完成标准\n\n只有满足以下条件，才能说明任务完成：\n\n- 页面能够正常运行。\n- 看板能够显示项目卡片。\n- 可以通过弹框表单新增项目。\n- 可以拖拽卡片改变状态和顺序。\n- 可以通过 Agent 面板新增、删除、修改项目。\n- IndexedDB 能保存数据。\n- 刷新页面后数据仍然存在。\n- 相关文档已经同步更新。\n- session-handoff.md 已经更新。\n", "mineru-tests": "### 7.4 测试与验证（第 4 周）\n\n#### 任务 4.1：单元测试\n\n**测试 adapter.py**：\n```bash\ncd integration\nsource .venv/Scripts/activate\npython -m pytest tests/test_adapter.py -v\n```\n\n**测试 kg_builder.py**：\n```bash\npython -m pytest tests/test_kg_builder.py -v\n```\n\n#### 任务 4.2：集成测试\n\n**测试完整 Pipeline**：\n```bash\ncd integration\nsource .venv/Scripts/activate\n\n# 使用示例文档测试\npython pipeline.py \\\n    --input-file ../mineru_mvp_test/test_files/sample.pdf \\\n    --output-dir ./output \\\n    --config ./config/pipeline_config.json\n```\n\n**验证输出**：\n```bash\n# 检查输出文件\nls -lh output/\n\n# 查看知识图谱\ncat output/knowledge_graph_*.json | jq '.metadata'\n\n# 查看统计信息\ncat output/pipeline_summary_*.json | jq '.kg_output'\n```\n\n#### 任务 4.3：质量验证\n\n**验证清单**：\n- [ ] MinerU 输出文件完整性\n- [ ] 文本预处理正确性\n- [ ] LangExtract 提取准确性\n- [ ] 实体去重效果\n- [ ] 关系推理合理性\n- [ ] 图谱结构完整性\n- [ ] 导出格式正确性\n", "board-handoff": "# session-handoff.md\n\n## 未完成 / 待处理\n\n- [ ] 使用真实 `OPENROUTER_API_KEY` 和 `OPENROUTER_MODEL` 验证 Agent 对 OpenRouter 的实际调用结果。\n\n## 已完成\n\n- [x] 已创建基础 Next.js 项目结构。\n- [x] 已准备 AGENTS.md。\n- [x] 已准备 docs/PRD.md。\n- [x] 已准备 docs/ARCHITECTURE.md。\n- [x] 已确定使用 IndexedDB 作为本地数据存储。\n- [x] 已确定使用 shadcn/ui 作为 UI 组件方案。\n- [x] 已确定使用 dnd kit 作为拖拽方案。\n- [x] 已确定页面布局为左侧看板 + 右侧 380px Agent 面板。\n- [x] 已确定项目卡片字段为项目名称、使用工具、当前状态、更新时间。\n- [x] 已完成左侧项目看板 UI。\n- [x] 已完成右侧 Agent 对话面板 UI。\n- [x] 已完成弹框表单新增项目功能。\n- [x] 已完成项目卡片拖拽功能。\n- [x] 已完成拖拽后状态和顺序保存。\n- [x] 已完成 IndexedDB 数据读写。\n- [x] 已完成刷新页面后数据恢复。\n- [x] 已完成 OpenRouter 环境变量读取。\n- [x] 已完成 Agent 自然语言识别 API 路由。\n- [x] 已完成 Agent 新增项目结构化操作接入。\n- [x] 已完成 Agent 删除项目结构化操作接入。\n- [x] 已完成 Agent 修改项目状态结构化操作接入。\n- [x] 已完成 Agent 修改项目使用工具结构化操作接入。\n- [x] 已完成 shadcn/ui、Tailwind CSS、dnd kit 和 OpenRouter 封装接入。\n- [x] 已新增 `.env.example`，包含 OpenRouter 环境变量示例。\n- [x] 已将 OpenRouter 默认模型和文档示例更新为 `google/gemini-3.1-pro-preview`。\n- [x] 已完成 Agent 历史对话记录和切换功能。\n- [x] 已完成同一 Agent 对话携带历史上下文调用大模型。\n- [x] 已将 Agent 历史入口改为独立图标按钮，历史视图会替换当前对话区。\n- [x] 已限制空 Agent 对话不能继续新建对话。\n\n## 已验证\n\n- [x] `pnpm lint` 通过。\n- [x] `pnpm build` 通过。\n- [x] 页面可以在 `http://localhost:3000` 正常运行。\n- [x] 四列看板可以正常渲染。\n- [x] 弹框表单可以正常新增项目。\n- [x] IndexedDB 可以保存新增项目。\n- [x] 刷新页面后项目数据仍然保留。\n- [x] 拖拽可以调整同列顺序。\n- [x] 拖拽可以跨列调整项目状态。\n- [x] 拖拽后的状态和顺序刷新后仍然保留。\n- [x] 未配置 `OPENROUTER_API_KEY` 时，Agent 面板显示错误提示且不修改数据。\n- [x] `pnpm lint` 通过 Agent 历史视图与空对话限制改动。\n- [x] `pnpm build` 通过 Agent 历史视图与空对话限制改动。\n- [x] Agent 历史对话列表可以新建、切换，并在刷新后保留。\n- [x] Agent 历史图标位于新建对话图标左侧。\n- [x] 点击 Agent 历史图标会切换到历史视图，点击返回可回到当前对话。\n- [x] 当前 Agent 对话为空时，新建对话按钮处于不可用状态。\n\n## 未验证\n\n- [ ] Agent 是否可以调用 OpenRouter。\n- [ ] Agent 是否可以新增项目。\n- [ ] Agent 是否可以删除项目。\n- [ ] Agent 是否可以修改项目状态。\n- [ ] Agent 是否可以修改项目使用工具。\n- [ ] 配置真实 OpenRouter 后，同一 Agent 对话是否能基于历史上下文连续追问。\n\n## 下一步最佳动作\n\n配置真实 `OPENROUTER_API_KEY` 和 `OPENROUTER_MODEL` 后，重新启动 `pnpm dev`，在 Agent 面板验证新增、删除、修改状态、修改工具和只回答问题五类操作。\n"}</script><script>
+(()=>{
+ const body=document.body,theme=document.getElementById('theme'),back=document.getElementById('back'),progress=document.getElementById('progress');
+ const links=[...document.querySelectorAll('.toc a[data-section]')],sections=links.map(a=>document.getElementById(a.dataset.section));
+ const toc=document.querySelector('.toc details');
+ if(innerWidth<=820)toc.open=false;
+ let saved=null;try{saved=localStorage.getItem('video-report-theme')}catch(e){}
+ if(saved==='dark'||(!saved&&matchMedia('(prefers-color-scheme:dark)').matches))body.classList.add('dark');
+ const label=()=>{const dark=body.classList.contains('dark');theme.setAttribute('aria-pressed',String(dark));theme.textContent=dark?'◐ 切换浅色':'◐ 切换深色'};
+ label();theme.addEventListener('click',()=>{body.classList.toggle('dark');label();try{localStorage.setItem('video-report-theme',body.classList.contains('dark')?'dark':'light')}catch(e){}});
+ document.getElementById('print').addEventListener('click',()=>window.print());
+ const reduce=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+ back.addEventListener('click',()=>scrollTo({top:0,behavior:reduce()?'auto':'smooth'}));
+ let queued=false;
+ function update(){
+  queued=false;const total=document.documentElement.scrollHeight-innerHeight;
+  progress.style.width=(total>0?Math.max(0,Math.min(100,scrollY/total*100)):0)+'%';back.classList.toggle('show',scrollY>650);
+  let active=sections[0];for(const section of sections)if(section.getBoundingClientRect().top<=150)active=section;
+  links.forEach(a=>{const yes=a.dataset.section===active.id;a.classList.toggle('active',yes);if(yes)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});
+ }
+ addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(update)}},{passive:true});addEventListener('resize',update);addEventListener('hashchange',update);update();
+ async function copyText(text){
+  if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);return true}catch(e){}}
+  const field=document.createElement('textarea');field.value=text;field.style.cssText='position:fixed;top:0;left:-9999px';document.body.append(field);field.select();
+  let ok=false;try{ok=document.execCommand('copy')}catch(e){}field.remove();return ok;
+ }
+ const caseSources=JSON.parse(document.getElementById('case-sources').textContent);
+ document.querySelectorAll('.copy-case').forEach(button=>button.addEventListener('click',async()=>{
+  const ok=await copyText(caseSources[button.dataset.case]);button.textContent=ok?'已复制':'请选中文字复制';document.getElementById('copy-status').textContent=button.textContent;setTimeout(()=>button.textContent='复制全文',1800);
+ }));
+ document.querySelectorAll('.copy-code').forEach(button=>button.addEventListener('click',async()=>{
+  const code=document.getElementById(button.dataset.code).querySelector('code');const ok=await copyText(code.textContent);
+  button.textContent=ok?'已复制':'请选中文字复制';document.getElementById('copy-status').textContent=button.textContent;setTimeout(()=>button.textContent='复制',1800);
+ }));
+ function revealHash(){
+  let id='';try{id=decodeURIComponent(location.hash.slice(1))}catch(e){return}
+  const target=document.getElementById(id);if(!target)return;
+  let parent=target.closest('details');while(parent){parent.open=true;parent=parent.parentElement.closest('details')}
+ }
+ addEventListener('hashchange',revealHash);revealHash();
+ document.querySelectorAll('.file-example,.case-fold').forEach(d=>d.addEventListener('toggle',update));
+ let printState=[];
+ addEventListener('beforeprint',()=>{printState=[...document.querySelectorAll('.file-example,.case-fold')].map(d=>[d,d.open]);printState.forEach(([d])=>d.open=true)});
+ addEventListener('afterprint',()=>{printState.forEach(([d,open])=>d.open=open);printState=[]});
+})();
+</script><script src="../library-nav.js" data-material-type="document"></script></body></html>
