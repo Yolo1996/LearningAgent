@@ -3,306 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<meta name="description" content="Hierarchical Experimentalist Agents 中文长篇精读：问题、方法、流程、实验与研究边界">
-<title>HExA：主动干预、层级技能积累与跨任务迁移｜论文精读</title>
+<meta name="color-scheme" content="light">
+<meta name="description" content="在真实模拟反馈中主动试验，把成功与失败压缩成有条件的技能，再检索回下一轮实验决策。">
+<title>HExA：主动干预、层级技能积累与跨任务迁移</title>
 <style>
-:root{--bg:#eef3f9;--surface:#fff;--surface2:#f7f9fc;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--navy:#08172d;--blue:#2468e8;--purple:#7b55d9;--lime:#baf35b;--green:#0c8a62;--orange:#c46a13;--red:#c43d54;--shadow:0 13px 34px rgba(21,39,66,.08);--sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;--mono:"SFMono-Regular",Consolas,monospace}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.72 var(--sans);-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;z-index:99;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--lime))}.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(186,243,91,.19),transparent 26%),radial-gradient(circle at 8% 90%,rgba(123,85,217,.31),transparent 32%),linear-gradient(125deg,var(--navy),#142959 58%,#48166b)}.hero:after{content:"";position:absolute;inset:0;opacity:.11;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:44px 44px}.hero-in{position:relative;z-index:1;max-width:1460px;margin:auto;padding:42px 28px 32px}.eyebrow{display:flex;align-items:center;gap:10px;color:#c6d0e5;font-size:12px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.eyebrow:before{content:"";width:34px;height:2px;background:var(--lime)}h1{max-width:1160px;margin:13px 0 0;font-size:clamp(29px,3.8vw,51px);line-height:1.12;letter-spacing:-.035em}.subtitle{max-width:1060px;margin:14px 0 0;color:#d1daeb;font-size:17px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.action,.theme{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid rgba(255,255,255,.19);border-radius:9px;color:#f2f6ff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.action:hover,.theme:hover{background:rgba(255,255,255,.14);text-decoration:none}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:28px}.metric{min-height:86px;padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(3,16,38,.34);backdrop-filter:blur(5px)}.metric small{color:#aebbd3;font-size:11px;letter-spacing:.06em}.metric b{display:block;margin-top:4px;color:#fff;font-size:18px;line-height:1.2}.metric span{display:block;margin-top:5px;color:#aebbd3;font-size:11px;line-height:1.35}.layout{display:grid;grid-template-columns:235px minmax(0,960px) 210px;gap:22px;max-width:1460px;margin:auto;padding:26px 24px 80px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 10px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.toc ol{margin:0;padding:0;list-style:none}.toc li{margin:2px 0}.toc a{display:block;padding:7px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.35}.toc a:hover{color:var(--ink);background:var(--surface);text-decoration:none}.toc a.active{color:var(--blue);border-left-color:var(--blue);background:#e8f1ff;font-weight:750}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);box-shadow:0 5px 18px rgba(20,38,64,.04)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 8px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12px;line-height:1.55}.rail-card ul{margin:0;padding-left:17px}.chapter{margin-bottom:20px;padding:24px 28px 27px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}h2{display:flex;align-items:center;margin:0 0 19px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.25;letter-spacing:-.02em}h2:after{content:"";flex:1;height:1px;margin-left:16px;background:linear-gradient(90deg,#c9d4e1,transparent)}.num{display:inline-flex;align-items:center;justify-content:center;min-width:31px;height:24px;margin-right:8px;padding:0 8px;border-radius:7px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:12px;font-weight:850}.lead{margin:0;padding:17px 19px;border-left:4px solid var(--lime);border-radius:0 10px 10px 0;background:linear-gradient(90deg,#eaf2ff,var(--surface2));font-size:17px;font-weight:650}.correction{margin:14px 0 0;padding:11px 13px;border-left:4px solid var(--orange);border-radius:0 8px 8px 0;background:#fff3e5;color:#8a4a0c;font-size:13px}.dense-list{margin:8px 0 0;padding:0;list-style:none}.dense-list li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-size:13.5px}.dense-list li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mini{padding:14px 15px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,var(--surface2),var(--surface))}.mini h3{margin:0 0 7px;color:#17325a;font-size:15px}.mini p{margin:0;color:#425168;font-size:13px}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;counter-reset:f}.flow div{position:relative;padding:42px 14px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);font-size:13px;font-weight:650;counter-increment:f}.flow div:before{content:counter(f,decimal-leading-zero);position:absolute;left:14px;top:11px;color:var(--purple);font-weight:850;font-size:11px;font-family:var(--sans)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-17px;top:40%;z-index:2;color:var(--blue);font-weight:900}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;background:var(--surface);font-size:13px;line-height:1.48}th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#415168;background:var(--surface2);font-size:12px;white-space:nowrap}tr:last-child td{border-bottom:0}.verdict{margin:0;padding:16px 18px;border-left:4px solid var(--purple);border-radius:0 10px 10px 0;background:#f2edff;font-size:16px;font-weight:700}.source-note{color:var(--muted);font-size:12px}.back{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.2s}.back.show{opacity:1;pointer-events:auto}body.dark{--bg:#0d1420;--surface:#151e2c;--surface2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2a394c;--blue:#6aa8ff;--shadow:0 13px 34px rgba(0,0,0,.24)}body.dark .toc a.active{background:#182d4b}body.dark .lead{background:linear-gradient(90deg,#182d4b,var(--surface2))}body.dark .mini h3{color:#e8eef6}body.dark .verdict{background:#2b2344}body.dark .correction{background:#3b2a1a;color:#ffcc8d}@media(max-width:1230px){.layout{grid-template-columns:220px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){.hero-in{padding:34px 18px 26px}.layout{display:block;padding:16px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.toc ol{display:grid;grid-template-columns:repeat(2,1fr)}.chapter{padding:20px 18px}.metrics{grid-template-columns:repeat(2,1fr)}.card-grid,.flow{grid-template-columns:1fr}.flow div:not(:last-child):after{display:none}}@media print{body{background:#fff;color:#111;font-size:11pt}.hero{background:#fff;color:#111;border-bottom:2px solid #111}.hero:after,.toc,.rail,.back,.theme,.progress{display:none!important}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.chapter{break-inside:avoid}a{color:#111;text-decoration:underline}}
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
-.section-intro{margin:-5px 0 18px;color:var(--muted);font-size:13px}.prose{font-size:15px;line-height:1.84}.prose p{margin:0 0 13px}.prose p:last-child{margin-bottom:0}.subhead{display:flex;align-items:center;gap:9px;margin:24px 0 11px;font-size:16px}.subhead:before{content:"";width:5px;height:18px;border-radius:3px;background:linear-gradient(var(--blue),var(--purple))}.figure{margin:18px 0 4px;padding:18px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#f8fbff,#f2f5fb);overflow:hidden}.figure-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:16px}.figure-kicker{color:var(--purple);font-weight:850;font-size:10px;font-family:var(--sans);letter-spacing:.12em}.figure-title{margin:3px 0 0;font-size:16px;line-height:1.35}.figure-note{max-width:310px;color:var(--muted);font-size:11px;text-align:right}.architecture{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;align-items:stretch}.arch-step{position:relative;min-height:152px;padding:15px 14px 13px;border:1px solid #cedaea;border-radius:11px;background:rgba(255,255,255,.85)}.arch-step:not(:last-child):after{content:"→";position:absolute;z-index:2;right:-18px;top:50%;width:24px;height:24px;margin-top:-12px;border:1px solid #c9d7ea;border-radius:50%;color:var(--blue);background:#fff;text-align:center;font-weight:900;line-height:21px}.arch-no{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));font-weight:800;font-size:11px;font-family:var(--sans)}.arch-step h4{margin:11px 0 6px;font-size:14px}.arch-step p{margin:0;color:#485970;font-size:12px;line-height:1.55}.loopbar{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:11px;padding:8px;border-radius:8px;color:#385175;background:#e7effa;font-size:11px;font-weight:750}.loopbar:before,.loopbar:after{content:"";flex:1;height:1px;background:#9fb4d0}.causal-map{display:grid;gap:8px}.causal-row{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr;align-items:center}.causal-box{height:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:12px;line-height:1.55}.causal-box b{display:block;margin-bottom:4px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.causal-box.problem b{color:var(--red)}.causal-box.intervention b{color:var(--blue)}.causal-box.effect b{color:var(--green)}.causal-arrow{color:var(--purple);text-align:center;font-size:18px;font-weight:900}.walkthrough{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;counter-reset:walk}.walk{position:relative;min-height:118px;padding:15px 15px 14px 51px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);counter-increment:walk}.walk:before{content:counter(walk,decimal-leading-zero);position:absolute;left:14px;top:14px;color:var(--purple);font-weight:850;font-size:14px;font-family:var(--sans)}.walk h3{margin:0 0 6px;font-size:15px}.walk p{margin:0;color:#485970;font-size:13px}.compare{display:grid;grid-template-columns:150px 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}.compare>div{padding:12px 13px;border-bottom:1px solid var(--line)}.compare>div:nth-last-child(-n+2){border-bottom:0}.compare .label{color:#284c7a;background:#edf4ff;font-size:12px;font-weight:800}.compare .desc{background:var(--surface);font-size:13px}.evidence-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:13px}.evidence{position:relative;min-height:150px;padding:15px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(150deg,#fff,#f5f8fd);overflow:hidden}.evidence:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(var(--blue),var(--purple))}.evidence small{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.evidence strong{display:block;margin:8px 0;color:#17345e;font-size:16px;line-height:1.35}.evidence p{margin:0;color:#536279;font-size:12px;line-height:1.55}.reading-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.reading-card{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}.reading-card .read-no{color:var(--purple);font-weight:850;font-size:11px;font-family:var(--sans)}.reading-card p{margin:7px 0 0;font-size:13px}.callout{margin-top:15px;padding:14px 16px;border:1px dashed #9bb1cc;border-radius:10px;color:#40546f;background:#f7faff;font-size:13px}.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;color:var(--muted);font-size:10px}.legend span:before{content:"";display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;background:var(--blue)}.legend span:nth-child(2):before{background:var(--purple)}.legend span:nth-child(3):before{background:var(--green)}body.dark .figure{background:linear-gradient(145deg,#172334,#121b29)}body.dark .arch-step,body.dark .causal-box,body.dark .evidence{background:#192536;border-color:var(--line)}body.dark .arch-step p,body.dark .walk p,body.dark .evidence p{color:#aebdd0}body.dark .arch-step:not(:last-child):after{background:#172334;border-color:#3b4d65}body.dark .loopbar{color:#b8cae3;background:#21344e}body.dark .compare .label{color:#bcd4f7;background:#1d314a}body.dark .compare .desc{background:#172230}body.dark .evidence strong{color:#dbeaff}body.dark .callout{color:#bfd0e5;background:#172333;border-color:#4b6482}@media(max-width:980px){.architecture{grid-template-columns:repeat(2,1fr)}.arch-step:nth-child(2):after{display:none}.evidence-board,.reading-grid{grid-template-columns:1fr}.causal-row{grid-template-columns:1fr}.causal-arrow{transform:rotate(90deg);height:28px;line-height:28px}.figure-note{display:none}}@media(max-width:820px){.architecture,.walkthrough{grid-template-columns:1fr}.arch-step:not(:last-child):after{display:none}.compare{grid-template-columns:1fr}.compare>div{border-bottom:1px solid var(--line)!important}.compare>div:last-child{border-bottom:0!important}.figure{padding:14px}.chapter{border-radius:11px}h2{font-size:21px}}@media print{.architecture{grid-template-columns:repeat(4,1fr)}.evidence-board,.reading-grid{grid-template-columns:repeat(3,1fr)}.figure{background:#fff}.chapter{break-inside:auto}.figure,.evidence,.walk,.mini{break-inside:avoid}}
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
+
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
+
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
+
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
 
 
-/* publication layout */
-:root{--bg:#f2f0eb;--surface:#fffefb;--surface2:#f7f6f2;--ink:#17202d;--muted:#667085;--line:#dedbd3;--blue:#255fbd;--purple:#7554b8;--shadow:0 16px 44px rgba(39,44,51,.07)}
-body{font-size:16px;line-height:1.86;background:linear-gradient(180deg,#efede7 0,#f5f3ee 380px,var(--bg) 100%)}
-.hero-in{padding-top:52px;padding-bottom:36px}.subtitle{font-size:18px;line-height:1.65}.layout{grid-template-columns:220px minmax(0,900px) 200px;gap:30px;padding-top:34px}.chapter{margin-bottom:30px;padding:36px 42px 40px;border-radius:18px;box-shadow:0 12px 36px rgba(39,44,51,.055)}
-h2{margin-bottom:25px;padding-bottom:18px;font-size:26px}.section-intro{margin:-7px 0 22px;font-size:14px;line-height:1.75}.prose{font-size:16px;line-height:1.95}.prose p{text-indent:2em;text-align:justify}.prose p:first-child{margin-top:0}.bridge{margin-top:34px;padding-top:26px;border-top:1px solid var(--line)}
-.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict){line-height:1.92}.lead{padding:20px 22px;font-size:17px;line-height:1.78}.mini,.walk,.reading-card,.evidence{border-radius:12px}.mini p,.walk p,.reading-card p,.evidence p{line-height:1.7}.callout{line-height:1.75}.toc a{padding-top:9px;padding-bottom:9px}.figure-badge{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid rgba(186,243,91,.45);border-radius:9px;color:#e9ffc6;background:rgba(186,243,91,.09);font-size:13px;font-weight:700}
-.paper-figure{margin:28px 0 10px;border:1px solid var(--line);border-radius:16px;background:#fbfaf7;overflow:hidden;box-shadow:0 14px 34px rgba(25,35,50,.07)}.paper-figure .paper-figure-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);color:var(--muted);background:#f3f1ec;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.paper-figure .paper-figure-head span:first-child{color:var(--purple)}.paper-figure>a{display:block;padding:20px;background:#fff;text-align:center}.paper-figure img{display:block;width:100%;height:auto;max-height:720px;margin:auto;object-fit:contain}.paper-figure figcaption{padding:18px 22px 20px;border-top:1px solid var(--line)}.paper-figure figcaption strong{display:block;margin-bottom:8px;font-size:15px;line-height:1.55}.paper-figure figcaption p{margin:0;color:#475467;font-size:13px;line-height:1.75;text-indent:0}.paper-figure .figure-reading{margin-top:11px;padding:11px 13px;border-left:3px solid var(--blue);background:#eef4fb}.paper-figure .figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:12px;color:var(--muted);font-size:11px}.paper-figure .figure-source a{white-space:nowrap}
-.rail-card{box-shadow:none}.rail-card p,.rail-card li{line-height:1.7}body.dark{--surface:#151e2c;--surface2:#1a2535;--line:#2f3b4a}body.dark .paper-figure{background:#141d2a}body.dark .paper-figure .paper-figure-head{background:#1b2635}body.dark .paper-figure>a{background:#eef1f4}body.dark .paper-figure figcaption p{color:#b9c5d3}body.dark .paper-figure .figure-reading{background:#192c43}
-@media(max-width:1230px){.layout{grid-template-columns:210px minmax(0,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding-top:38px}.chapter{padding:25px 20px 29px;margin-bottom:18px}.toc ol{grid-template-columns:1fr}.paper-figure>a{padding:10px}.paper-figure figcaption{padding:15px 16px}.paper-figure .figure-source{display:block}.paper-figure .figure-source a{display:block;margin-top:5px}.bridge{margin-top:27px;padding-top:21px}}@media print{.paper-figure{box-shadow:none;break-inside:avoid}.paper-figure>a{padding:8px}.paper-figure img{max-height:620px}.figure-badge{display:none}}
-
-
-/* publication baseline */
-main,.chapter,.table-wrap{min-width:0}.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict){max-width:760px;margin-bottom:14px;font-size:15.5px;line-height:1.88;text-indent:2em;text-align:justify}.prose{max-width:760px}.table-wrap{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}.table-wrap table{min-width:680px}.table-wrap caption{padding:0 0 9px;color:var(--muted);font-size:11px;line-height:1.55;text-align:left;caption-side:top}.paper-figure .paper-figure-head{text-transform:none;letter-spacing:.04em}.paper-figure figcaption strong{font-size:16px}.paper-figure .figure-reading b{color:#284c7a}.source-note{line-height:1.7}body.dark .paper-figure .figure-reading b{color:#a9ccff}body.dark .mini p{color:#b8c5d6}
-@media(max-width:820px){.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict),.prose{max-width:none}.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict){font-size:15px;line-height:1.82}.table-wrap table{min-width:650px}}
-
-
-/* 2026-09 deep-reading upgrade */
-.card-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));align-items:stretch}.mini{min-height:0;padding:12px 14px}.walkthrough{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.walk{min-height:0;padding:13px 13px 13px 45px}.dense-list{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.dense-list li{margin:0;padding:10px 8px 10px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}.dense-list li:last-child{border-bottom:0}.evidence-board{align-items:start}.evidence{min-height:0}.deep-evidence{margin-top:30px;padding-top:4px}.deep-evidence>p{max-width:780px;margin:0 0 15px;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.evidence-table{margin:18px 0 25px}.evidence-table table{min-width:760px}.evidence-table caption{padding:0 0 10px;color:var(--ink);font-size:14px;font-weight:800}.table-source{margin:-16px 0 24px;color:var(--muted);font-size:11px;line-height:1.6}.supplement-figure{margin-top:23px}.supplement-figure .original-label{color:var(--muted);font-size:11px}.subtitle{max-width:1160px}.subtitle .paper-name{display:block;color:#e9eef8;font-size:14px;font-weight:650}.subtitle .reading-scope{display:block;margin-top:5px;color:#becae0;font-size:16px}.index-source-title{display:block;margin-top:6px;color:var(--muted);font-size:12px;font-weight:500;line-height:1.45}
-@media(max-width:1050px){.card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.walkthrough{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:820px){.card-grid,.walkthrough{grid-template-columns:1fr}.deep-evidence>p{max-width:none;font-size:15px;line-height:1.84}.evidence-table table{min-width:700px}}
-/* 2026-09 typography and semantic-color polish */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-  --tint-blue:#edf4fd;--tint-purple:#f4effb;--tint-green:#edf7f2;--tint-amber:#fff5e8;
-  --border-blue:#cbdcf1;--border-purple:#ddd0ef;--border-green:#cce4d9;--border-amber:#efd8b8;
-  --tone-blue:#356db2;--tone-purple:#7654ad;--tone-green:#287a60;--tone-amber:#ad6727;
-}
-body,button,input,select,textarea{font-family:var(--sans);font-kerning:normal;text-rendering:optimizeLegibility}
-h1,h2,h3,h4,strong,b,.metric b{font-family:var(--sans)}
-.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict),.prose,.prose p,.longform,.longform p{font-size:16px}
-.section-intro,.chapter-kicker{font-size:14px}.mini p,.walk p,.reading-card p,.evidence p,.issue-card p,.scope-item span,.analysis-note p,.case-row p,.paper-figure figcaption p{font-size:14px;line-height:1.72}
-.dense-list li,.compare .desc,.callout{font-size:14px;line-height:1.72}table{font-size:13.5px;line-height:1.6}th{font-size:13px}.rail-card p,.rail-card li{font-size:12.5px}.source-note,.table-source{font-size:12px}
-main>.chapter{--chapter-accent:var(--tone-blue);--chapter-tint:var(--tint-blue);border-top:3px solid var(--chapter-accent);background:linear-gradient(180deg,var(--chapter-tint) 0,var(--surface) 150px)}
-main>.chapter:nth-of-type(2){--chapter-accent:var(--tone-purple);--chapter-tint:var(--tint-purple)}
-main>.chapter:nth-of-type(3){--chapter-accent:var(--tone-green);--chapter-tint:var(--tint-green)}
-main>.chapter:nth-of-type(4){--chapter-accent:var(--tone-amber);--chapter-tint:var(--tint-amber)}
-main>.chapter:nth-of-type(5){--chapter-accent:var(--tone-blue);--chapter-tint:var(--tint-blue)}
-.chapter h2{color:#1c2d43}.chapter h2:after{background:linear-gradient(90deg,var(--chapter-accent),transparent)}.chapter .num{background:var(--chapter-accent)}
-.lead,.thesis-line{border-left-color:var(--chapter-accent);background:linear-gradient(90deg,var(--chapter-tint),rgba(255,255,255,.34))}
-.card-grid,.walkthrough,.evidence-board,.reading-grid,.issue-grid,.study-scope{gap:12px}
-.mini,.walk,.reading-card,.evidence,.issue-card,.scope-item{border-width:1px;border-style:solid;box-shadow:0 4px 14px rgba(37,54,76,.035)}
-.card-grid .mini:nth-child(4n+1),.walkthrough .walk:nth-child(4n+1),.reading-grid .reading-card:nth-child(4n+1),.issue-grid .issue-card:nth-child(4n+1){border-color:var(--border-blue);background:var(--tint-blue)}
-.card-grid .mini:nth-child(4n+2),.walkthrough .walk:nth-child(4n+2),.reading-grid .reading-card:nth-child(4n+2),.issue-grid .issue-card:nth-child(4n+2){border-color:var(--border-purple);background:var(--tint-purple)}
-.card-grid .mini:nth-child(4n+3),.walkthrough .walk:nth-child(4n+3),.reading-grid .reading-card:nth-child(4n+3),.issue-grid .issue-card:nth-child(4n+3){border-color:var(--border-green);background:var(--tint-green)}
-.card-grid .mini:nth-child(4n),.walkthrough .walk:nth-child(4n),.reading-grid .reading-card:nth-child(4n),.issue-grid .issue-card:nth-child(4n){border-color:var(--border-amber);background:var(--tint-amber)}
-.mini h3,.walk h3,.issue-card h3{color:#263b55}.walk{border-left-width:3px}.walkthrough .walk:nth-child(4n+1){border-left-color:var(--tone-blue)}.walkthrough .walk:nth-child(4n+2){border-left-color:var(--tone-purple)}.walkthrough .walk:nth-child(4n+3){border-left-color:var(--tone-green)}.walkthrough .walk:nth-child(4n){border-left-color:var(--tone-amber)}
-.walkthrough .walk:nth-child(4n+1):before,.reading-grid .reading-card:nth-child(4n+1) .read-no{color:var(--tone-blue)}.walkthrough .walk:nth-child(4n+2):before,.reading-grid .reading-card:nth-child(4n+2) .read-no{color:var(--tone-purple)}.walkthrough .walk:nth-child(4n+3):before,.reading-grid .reading-card:nth-child(4n+3) .read-no{color:var(--tone-green)}.walkthrough .walk:nth-child(4n):before,.reading-grid .reading-card:nth-child(4n) .read-no{color:var(--tone-amber)}
-.evidence-board .evidence:nth-child(3n+1){border-color:var(--border-blue);background:var(--tint-blue)}.evidence-board .evidence:nth-child(3n+1):before{background:var(--tone-blue)}
-.evidence-board .evidence:nth-child(3n+2){border-color:var(--border-purple);background:var(--tint-purple)}.evidence-board .evidence:nth-child(3n+2):before{background:var(--tone-purple)}
-.evidence-board .evidence:nth-child(3n){border-color:var(--border-green);background:var(--tint-green)}.evidence-board .evidence:nth-child(3n):before{background:var(--tone-green)}
-.dense-list{border:0}.dense-list li{margin:6px 0;border:1px solid var(--border-blue);border-radius:9px;background:var(--tint-blue)}.dense-list li:nth-child(even){border-color:var(--border-purple);background:var(--tint-purple)}.dense-list li:last-child{border-bottom:1px solid var(--border-blue)}.dense-list li:nth-child(even):last-child{border-bottom-color:var(--border-purple)}
-.callout{border:1px solid var(--border-blue);border-left:4px solid var(--tone-blue);background:var(--tint-blue);color:#344f70}.correction{border-color:var(--tone-amber);background:var(--tint-amber)}.verdict{border-color:var(--tone-purple);background:var(--tint-purple)}
-.analysis-note{border-color:var(--tone-blue);background:var(--tint-blue)}.analysis-note.warning{border-color:var(--tone-amber);background:var(--tint-amber)}
-.study-scope .scope-item:nth-child(1){border-top-color:var(--tone-blue);background:var(--tint-blue)}.study-scope .scope-item:nth-child(2){border-top-color:var(--tone-purple);background:var(--tint-purple)}.study-scope .scope-item:nth-child(3){border-top-color:var(--tone-green);background:var(--tint-green)}
-.table-wrap{border-color:var(--border-blue);box-shadow:0 5px 16px rgba(37,54,76,.035)}th{background:var(--tint-blue);color:#324b6a}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:hover td{background:var(--tint-amber)}
-.paper-figure figcaption{background:linear-gradient(180deg,#fff,var(--tint-blue))}.paper-figure .figure-reading{border-left-color:var(--tone-blue);background:var(--tint-blue)}
-.paper{--paper-accent:var(--tone-blue);--paper-tint:var(--tint-blue);border-top:3px solid var(--paper-accent);background:linear-gradient(160deg,var(--paper-tint),var(--surface) 42%)}
-.paper:nth-child(4n+2){--paper-accent:var(--tone-purple);--paper-tint:var(--tint-purple)}.paper:nth-child(4n+3){--paper-accent:var(--tone-green);--paper-tint:var(--tint-green)}.paper:nth-child(4n){--paper-accent:var(--tone-amber);--paper-tint:var(--tint-amber)}
-.paper .kicker{color:var(--paper-accent)}.paper .tags span{color:var(--paper-accent);background:var(--paper-tint);border:1px solid color-mix(in srgb,var(--paper-accent) 24%,transparent)}
-body.dark{--tint-blue:#182a40;--tint-purple:#29223d;--tint-green:#192f29;--tint-amber:#35291d;--border-blue:#2d4a68;--border-purple:#4b3d64;--border-green:#2d5549;--border-amber:#5e4930;--tone-blue:#7db0ef;--tone-purple:#b89ae3;--tone-green:#72b99f;--tone-amber:#e0aa6f}
-body.dark main>.chapter{background:linear-gradient(180deg,var(--chapter-tint) 0,var(--surface) 150px)}body.dark .chapter h2,body.dark .mini h3,body.dark .walk h3,body.dark .issue-card h3{color:var(--ink)}body.dark .mini p,body.dark .walk p,body.dark .reading-card p,body.dark .evidence p,body.dark .issue-card p,body.dark .scope-item span,body.dark .analysis-note p,body.dark .case-row p{color:#c0cbd9}
-body.dark .dense-list li,body.dark .analysis-note,body.dark .analysis-note.warning,body.dark .callout,body.dark .verdict,body.dark .study-scope .scope-item{background:var(--chapter-tint);color:#d5deea}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark tbody tr:hover td{background:var(--tint-amber)}body.dark .paper-figure figcaption{background:linear-gradient(180deg,#151e2c,var(--tint-blue))}
-@media(max-width:820px){.chapter>p:not(.lead):not(.section-intro):not(.source-note):not(.correction):not(.verdict),.prose,.prose p,.longform,.longform p{font-size:15px}.mini p,.walk p,.reading-card p,.evidence p,.issue-card p,.scope-item span,.analysis-note p,.case-row p,.paper-figure figcaption p,.dense-list li,.callout{font-size:13.5px}}
-@media print{main>.chapter,.paper{border-top-color:#777;background:#fff}.mini,.walk,.reading-card,.evidence,.issue-card,.scope-item,.dense-list li,.callout,.analysis-note,.verdict,.correction,.paper-figure figcaption,th,tbody tr:nth-child(even) td{color:#111;background:#fff;border-color:#aaa;box-shadow:none}}
-/* prose-before-visual-blocks */
-.block-intro{max-width:790px;margin:0 0 19px;color:#34445a;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.section-intro+.block-intro{margin-top:-7px}.subhead+.block-intro{margin-top:-2px}.block-intro+div,.block-intro+ul{margin-top:0}body.dark .block-intro{color:#c5d0dd}@media(max-width:820px){.block-intro{max-width:none;margin-bottom:16px;font-size:15px;line-height:1.84}}@media print{.block-intro{color:#222}}
-
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
-
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
 <body>
-<div class="progress"><span id="progress"></span></div>
 <header class="hero"><div class="hero-in">
-<div class="eyebrow">PAPER REVIEW · SELF-EVOLUTION / LONG-HORIZON AGENTS</div>
-<h1>HExA：主动干预、层级技能积累与跨任务迁移｜论文精读</h1>
-<p class="subtitle"><span class="paper-name">原论文：Hierarchical Experimentalist Agents</span><span class="reading-scope">问题、机制、实验、消融与适用边界的完整解读</span></p>
-<div class="actions">
-<a class="action" href="https://arxiv.org/abs/2606.29315" target="_blank" rel="noreferrer">阅读原论文 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button>
-</div>
-<div class="metrics"><div class="metric">
-<small>论文类型</small><b>Training-free Self-Improvement</b><span>研究形态</span>
-</div><div class="metric">
-<small>演化对象</small><b>实验知识 / Skill</b><span>被持续优化的部分</span>
-</div><div class="metric">
-<small>核心机制</small><b>In-context RL</b><span>主要技术路线</span>
-</div><div class="metric">
-<small>证据</small><b>InterPhyre 物理环境</b><span>主要验证范围</span>
-</div></div>
+<h1>HExA：主动干预、层级技能积累与跨任务迁移</h1>
+<p class="paper-name">Hierarchical Experimentalist Agents</p>
+<p class="paper-authors">作者：Abhranil Chandra、Sankaran Vaidyanathan、Utsav Dhanuka、Varun Gandhi、Scott Niekum</p>
+<p class="paper-affiliation">作者单位：单位：University of Massachusetts Amherst</p>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/abs/2606.29315" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
 </div></header>
 <div class="layout">
-<nav class="toc" aria-label="文章目录"><div class="side-title">文章目录</div>
-<ol>
-<li><a href="#s1">01 · 论文概览</a></li>
-<li><a href="#s2">02 · 研究背景与问题定义</a></li>
-<li><a href="#s3">03 · 方法与技术路线</a></li>
-<li><a href="#s4">04 · 实验设计与结果分析</a></li>
-<li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-</ol></nav><main>
-<section class="chapter" id="s1"><h2><span class="num">01</span>论文概览</h2>
-<p class="lead">当先验知识无法回答新环境问题时，Agent 应主动设计实验获取证据；HExA 用 Actor 提出干预、Evolver 从成败批次中蒸馏层级可组合技能，并在新 episode 检索复用，全程不更新参数。</p>
-<p class="source-note">论文首版日期：2026-06-28　·　来源：<a href="https://arxiv.org/abs/2606.29315" target="_blank" rel="noreferrer">arXiv:2606.29315</a></p>
-<h3 class="subhead bridge">问题从何而来：旧范式为何会失效</h3>
-<p class="section-intro">先理解旧范式为什么会在真实长程任务中失效，再看作者的解法是否击中了主要瓶颈。</p>
-<div class="prose">
-<p>HExA 处理的是“世界规律未知”的问题。模型即使记住大量物理知识，也无法仅凭语言先验判断一个具体模拟器中隐藏的质量、摩擦或碰撞规则；它必须主动干预、观察结果并逐步缩小假设空间。</p>
-<p>与一次性 ReAct 不同，HExA 把多次实验中的成功和失败批量交给 Evolver，提炼成带证据、可组合的层级 Skill。下一个任务先读取这些技能，再决定要做哪些新实验。</p>
-</div>
-<h3 class="subhead">论文识别出的具体断点</h3>
-<p class="block-intro" data-role="block-intro-list-1">下面将问题拆成可观测的失效信号。阅读时要区分表面症状与真正的归因线索：只有当这些断点能在轨迹或日志中被定位，后续改进才有明确对象。</p>
-<ul class="key-points">
-<li><strong>直接缺口：</strong>搜索和 RAG 只能找已有知识，面对未知动力学无能为力。</li>
-<li><strong>现有方法限制：</strong>单条实验可能噪声大，直接反思难分辨稳定规律与偶然现象。</li>
-<li><strong>系统性后果：</strong>学到的经验若不组织为可组合技能，很难跨任务迁移。</li>
-</ul></section>
-<section class="chapter" id="s2"><h2><span class="num">02</span>研究背景与问题定义</h2>
-<p class="section-intro">同一个任务可以用提示词、静态工作流或可演化系统解决。差异不在名称，而在反馈进入系统后究竟改变了什么。</p>
-<div class="compare">
-<div class="label">RAG/Search</div>
-<div class="desc">检索已有知识，无法发现当前环境的隐藏规律。</div>
-<div class="label">Reflexion</div>
-<div class="desc">从单条执行反思，容易把偶然结果当规律。</div>
-<div class="label">HExA</div>
-<div class="desc">主动设计实验，并从批量证据抽象层级技能。</div>
-</div>
-</section>
-<section class="chapter" id="s3"><h2><span class="num">03</span>方法与技术路线</h2>
-<p class="section-intro">下面先看系统部件，再看部件之间的信息流。两者缺一不可：组件列表告诉你“有什么”，闭环图告诉你“为什么能工作”。</p>
-<p class="block-intro" data-role="block-intro-components">下面的 6 个概念不是并列标签，而是论文用来划分系统职责的连续视角。阅读时可从“Actor”开始，追踪信息经过中间组件后如何抵达“Training-free”；重点不是记住名称，而是确认每一步消费什么证据、改变什么状态，并向下一步交付什么。</p>
-<div class="card-grid">
-<article class="mini"><h3>Actor</h3>
-<p>把模拟器当工具，围绕查询主动提出假设与干预实验。</p></article><article class="mini"><h3>Batch Evidence</h3>
-<p>同时保留成功和失败观察，以批次而非单轨迹做归纳。</p></article><article class="mini"><h3>Evolver</h3>
-<p>反思实验集合，提炼由奖励和观测支撑的策略。</p></article><article class="mini"><h3>Hierarchical Skills</h3>
-<p>技能从局部规律到组合策略分层组织。</p></article><article class="mini"><h3>Persistent Bank</h3>
-<p>技能跨 episode 持久保存，并在新任务开始时检索注入。</p></article><article class="mini"><h3>Training-free</h3>
-<p>兼容黑盒模型，不需外部监督、oracle、离线数据或参数更新。</p></article>
-</div>
-<figure class="paper-figure"><div class="paper-figure-head">
-<span>研究框架</span><span>方法与系统</span>
-</div>
-<a href="assets/paper-figures/12-12-hexa-paper-figure.png" target="_blank"><img src="assets/paper-figures/12-12-hexa-paper-figure.png" alt="HExA 与 ReAct 对照" loading="lazy" decoding="async"></a><figcaption><strong>HExA 与 ReAct 对照</strong><p>基线 ReAct 在不同物理谜题之间彼此独立；HExA 则把轨迹交给 Evolver 归纳技能，再由 Retriever 在新任务中调用，实现跨任务经验积累。</p>
-<p class="figure-reading"><b>阅读要点：</b>左右对照揭示真正的新增能力：不是一次任务内多想几步，而是把实验、失败和干预结果提炼成可跨 seed 复用的技能。</p>
-<div class="figure-source">
-<span>来源：原论文</span><a href="https://arxiv.org/abs/2606.29315" target="_blank" rel="noreferrer">查看原文 ↗</a>
-</div></figcaption></figure><h3 class="subhead bridge">沿一条轨迹读懂系统的运行顺序</h3>
-<p class="section-intro">把方法落到一次真实运行：每一步消费什么信息、产生什么中间状态，以及这些状态如何影响下一步。</p>
-<p class="block-intro" data-role="block-intro-walkthrough">模块说明回答“系统里有什么”，运行轨迹进一步回答“这些模块在什么时候被调用”。下面从“提出假设”走到“迁移验证”，可以看到状态如何在一次任务中被收集、加工和重新写回；这也是判断方法是否形成可执行闭环的直接方式。</p>
-<div class="walkthrough">
-<article class="walk"><h3>提出假设</h3>
-<p>Actor 根据问题与当前观测列出可能机制及区分它们的实验。</p></article><article class="walk"><h3>执行干预</h3>
-<p>通过 API 改变对象或初始条件，观察状态变化。</p></article><article class="walk"><h3>批量归纳</h3>
-<p>Evolver 横向比较多次成败，提取稳定规律与操作策略。</p></article><article class="walk"><h3>迁移验证</h3>
-<p>在新 episode 检索技能；既可减少实验，也可完全零实验直接迁移。</p></article>
-</div>
-<div class="callout">
-<strong>关键观察：</strong>这类工作真正的创新通常不只是多调用一次模型，而是改变“什么能被持久化、谁有权更新它、更新何时被接受”这三条系统规则。</div></section>
-<section class="chapter" id="s4"><h2><span class="num">04</span>实验设计与结果分析</h2>
-<p class="section-intro">先抓住最能支撑论文主张的三块证据，再回到完整表格核对设置、结果与解释，避免只看一个最高分。</p>
-<p class="block-intro" data-role="block-intro-evidence">下面三块证据不是彼此孤立的结论，而是依次回答评测对象是什么、性能变化发生在哪里，以及结果能被解释到什么范围。先用概览建立证据地图，再回到后续表格核对数据集、基线、预算与指标方向，可以避免只凭最高分判断方法有效。</p>
-<div class="evidence-board">
-<article class="evidence"><small>Evidence 01 · 新 Benchmark</small><strong>InterPhyre：基于 PHYRE 的 2D 程序化物理工具调用任务</strong><p>专门评估主动实验能力</p></article><article class="evidence"><small>Evidence 02 · Claude Sonnet 4.6</small><strong>原始成功率 2%；HExA 最高 77%</strong><p>论文最显著结果</p></article><article class="evidence"><small>Evidence 03 · 跨难度迁移</small><strong>仅用简单关卡技能、不再主动实验，困难任务达到 44%</strong><p>证明 Skill 可迁移</p></article>
-</div>
-<div class="table-wrap"><table>
-<caption>原文设置、结果与解读边界</caption>
-<thead><tr>
-<th>设置 / 维度</th>
-<th>结果</th>
-<th>如何解读</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>新 Benchmark</strong></td>
-<td>InterPhyre：基于 PHYRE 的 2D 程序化物理工具调用任务</td>
-<td>专门评估主动实验能力</td>
-</tr>
-<tr>
-<td><strong>Claude Sonnet 4.6</strong></td>
-<td>原始成功率 2%；HExA 最高 77%</td>
-<td>论文最显著结果</td>
-</tr>
-<tr>
-<td><strong>跨难度迁移</strong></td>
-<td>仅用简单关卡技能、不再主动实验，困难任务达到 44%</td>
-<td>证明 Skill 可迁移</td>
-</tr>
-<tr>
-<td><strong>其他模型</strong></td>
-<td>开放权重模型也改善，并超过 ReAct / Reflexion</td>
-<td>方法不依赖单一闭源模型</td>
-</tr>
-</tbody>
-</table></div>
-<div class="deep-evidence"><h3 class="subhead bridge">从实验协议到因果解释</h3><p>HExA 用 InterPhyre 检验“主动实验”而非一次性规划。Claude Sonnet 4.6 在原始条件下成功率仅 2%，引入分层实验、假设更新和技能沉淀后最高达到 77%；如此大的提升说明任务瓶颈主要在交互策略，而非模型是否知道基础物理常识。</p><p>评测用 50 个训练/测试种子并限制最多 25 次交互，确保方法必须在有限试错中选择信息量高的动作。与 ReAct、Reflexion 的差别是，HExA 会显式维护假设层和实验层：先问“缺少什么因果信息”，再选择能区分多个假设的操作。</p><h3 class="subhead bridge">主结果、消融与成本</h3><p>跨难度迁移更能说明技能是否抽象。只在简单关卡形成技能库、测试困难关卡时不再主动实验，成功率仍达到 44%。这表明技能记录了可复用的实验原则，而非仅保存某个种子的动作序列。</p><p>开放权重模型实验也取得提升，但绝对成绩与闭源模型不同。阅读时要分别看基座能力、在线演化还是离线到在线配置，以及每轮允许的种子数量；这些条件会直接决定系统能否获得足够的反事实证据。</p><p>方法边界是环境必须支持低成本、可重置且结果可观察的实验。现实机器人或生产系统的探索动作可能昂贵甚至不可逆，需要安全约束、模拟器预筛选和更保守的停止策略。</p><div class="table-wrap evidence-table"><table><caption>开放权重模型上的主动实验结果（原论文 S4.T2）</caption><tbody><tr><th>Level</th><th>方法</th><th>Acc. (%)</th><th>Avg Iters</th></tr><tr><th rowspan="4">Down to Earth</th><th>Qwen-2.5-3B ReAct</th><th>0 8.0</th><th>23.8</th></tr><tr><th>Qwen-2.5-3B HExA</th><td>24.0</td><td>18.6</td></tr><tr><th>Qwen-2.5-7B ReAct</th><td>62.0</td><td>12.5</td></tr><tr><th>Qwen-2.5-7B HExA</th><td>72.0</td><td>12.6</td></tr><tr><th rowspan="4">Two Body Problem</th><th>Qwen-2.5-3B ReAct</th><td>0 6.0</td><td>24.0</td></tr><tr><th>Qwen-2.5-3B HExA</th><td>14.0</td><td>21.1</td></tr><tr><th>Qwen-2.5-7B ReAct</th><td>18.0</td><td>22.2</td></tr><tr><th>Qwen-2.5-7B HExA</th><td>34.0</td><td>18.9</td></tr><tr><th rowspan="2">Catapult</th><th>GPT-OSS-120B ReAct</th><td>0 0.0</td><td>25.0</td></tr><tr><th>GPT-OSS-120B HExA</th><td>54.0</td><td>16.2</td></tr></tbody></table></div><p class="table-source">数据来源：原论文公开表格。保留方法名、指标、单位与方向。详细表注与实验条件见原论文对应表格。</p><div class="table-wrap evidence-table"><table><caption>跨难度技能迁移（原论文 A4.T13）</caption><tbody><tr><th>Target</th><th>Levels of Skills</th><th>Solver</th><th>Acc. (%)</th><th>Baseline (%)</th><th>\Delta</th></tr><tr><th>Catapult</th><th>DTE, TBP, PTP</th><th>Sonnet</th><th>44.0 (22/50)</th><th>8.0 (4/50)</th><th>+36.0</th></tr><tr><td>Falling Into Place</td><td>DTE</td><td>Qwen-7B</td><td>32.0 (16/50)</td><td>20.0 (10/50)</td><td>+12.0</td></tr><tr><td>Two Body Problem</td><td>DTE</td><td>Qwen-7B</td><td>34.0 (17/50)</td><td>18.0 (9/50)</td><td>+16.0</td></tr></tbody></table></div><p class="table-source">数据来源：原论文公开表格。保留方法名、指标、单位与方向。详细表注与实验条件见原论文对应表格。</p><figure class="paper-figure supplement-figure"><div class="paper-figure-head"><span>实验与分析</span><span>Figure 1</span></div><a href="assets/paper-figures/12-evidence-1.png" target="_blank"><img src="assets/paper-figures/12-evidence-1.png" alt="HExA：像实验科学家一样主动干预、积累层级技能并跨任务迁移的实验或消融证据" loading="lazy" decoding="async"></a><figcaption><strong>论文实验图 · Figure 1</strong><p>HExA 用 InterPhyre 检验“主动实验”而非一次性规划。Claude Sonnet 4.6 在原始条件下成功率仅 2%，引入分层实验、假设更新和技能沉淀后最高达到 77%；如此大的提升说明任务瓶颈主要在交互策略，而非模型是否知道基础物理常识。</p><p class="original-label">图中坐标、图例、误差范围与数值均保留论文原始口径。</p><div class="figure-source"><span>来源：原论文</span><a href="https://arxiv.org/abs/2606.29315" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure><figure class="paper-figure supplement-figure"><div class="paper-figure-head"><span>实验与分析</span><span>Figure 8</span></div><a href="assets/paper-figures/12-evidence-2.svg" target="_blank"><img src="assets/paper-figures/12-evidence-2.svg" alt="HExA：像实验科学家一样主动干预、积累层级技能并跨任务迁移的实验或消融证据" loading="lazy" decoding="async"></a><figcaption><strong>论文实验图 · Figure 8</strong><p>评测用 50 个训练/测试种子并限制最多 25 次交互，确保方法必须在有限试错中选择信息量高的动作。与 ReAct、Reflexion 的差别是，HExA 会显式维护假设层和实验层：先问“缺少什么因果信息”，再选择能区分多个假设的操作。</p><p class="original-label">图中坐标、图例、误差范围与数值均保留论文原始口径。</p><div class="figure-source"><span>来源：原论文</span><a href="https://arxiv.org/abs/2606.29315" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure></div>
-<p class="source-note">数值以论文摘要/正文公开口径为准；“论文报告”表示尚未经过独立复现。不同论文的模型、预算、环境和评价协议不同，不应把表中数值直接跨论文排位。</p></section>
-<section class="chapter" id="s5"><h2><span class="num">05</span>贡献、局限与综合评价</h2>
-<p class="block-intro" data-role="block-intro-boundary">这里把“论文贡献”和“证据边界与局限”放在同一行讨论，是为了避免把局部有效直接写成普遍规律。前者回答论文真正增加了什么，后者限定结论能够迁移到哪些模型、任务和预算；只有同时阅读，才能形成完整判断。</p>
-<div class="card-grid">
-<article class="mini"><h3>论文贡献</h3>
-<ul class="key-points">
-<li><strong>概念贡献：</strong>把 Agent 改进从“复盘做题”推进到“主动设计实验认识环境”。</li>
-<li><strong>方法贡献：</strong>多轨迹批次证据降低单次失败归因的偶然性。</li>
-<li><strong>经验贡献：</strong>层级、可组合 Skill 更适合跨任务复用。</li>
-</ul></article><article class="mini"><h3>证据边界与局限</h3>
-<ul class="key-points">
-<li><strong>适用范围：</strong>PHYRE 的物理规则稳定且可高频重置，现实经营环境更非平稳。</li>
-<li><strong>因果归因：</strong>最高提升幅度可能受极低基线影响，跨真实领域仍需证明。</li>
-<li><strong>外部效度：</strong>技能抽取与检索由 LLM 完成，冲突和错误归纳风险仍在。</li>
-</ul></article>
-</div>
-<div class="callout">
-<strong>判断标准：</strong>性能上涨只能说明“在当前协议里有效”。若评估器可被利用、成本没有对齐、任务分布固定或记忆持续时间有限，就还不能外推为开放世界中的稳定自进化。</div>
-<h3 class="subhead bridge">复现时最值得核对的证据与变量</h3>
-<p class="section-intro">这三点适合在读原文、看附录或准备复现时逐项核对，也是区分机制收益与工程堆料的最快路径。</p>
-<p class="block-intro" data-role="block-intro-reading">这组阅读线索把本节结论转成三个可核对的问题：核心判断在什么条件下成立，哪些变量可能混入收益，以及复现时仍缺少什么证据。它们不是额外结论，而是帮助读者在原文、附录和实验记录中快速定位证据缺口。</p>
-<div class="reading-grid">
-<article class="reading-card"><span class="read-no">READ 01</span><p>2%→77% 很醒目，但也受极低单次 ReAct 基线影响。</p></article><article class="reading-card"><span class="read-no">READ 02</span><p>44% 零实验迁移是 Skill 可复用性的更有力证据。</p></article><article class="reading-card"><span class="read-no">READ 03</span><p>InterPhyre 可重置且规律稳定，与开放现实世界仍有明显距离。</p></article>
-</div>
-<h3 class="subhead">复现时优先固定的变量</h3>
-<p class="block-intro" data-role="block-intro-list-3">复现实验最容易把模型能力、推理预算与系统设计混在一起。下面列出的变量应在比较前锁定并完整记录，否则性能差异很难归因于论文提出的机制。</p>
-<ul class="key-points">
-<li><strong>预算对齐：</strong>明确区分基础模型能力、推理预算与系统编排带来的收益；至少报告一次等成本对比。</li>
-<li><strong>过程留痕：</strong>保存每轮中间状态、失败轨迹和评估器输出，以便判断提升来自真正学习还是筛选偏差。</li>
-<li><strong>迁移验证：</strong>对记忆、技能、环境或 Harness 的关键模块做消融，并测试跨任务/跨轮次迁移而非只看同分布平均分。</li>
-</ul>
-<h3 class="subhead bridge">独立研究启发</h3>
-<p class="block-intro" data-role="block-intro-list-4">迁移不是照搬原系统，而是先判断自己的任务是否具备相同的反馈、状态和成本条件。下面的检查项把论文结论改写为工程决策，帮助确定哪些设计可直接复用、哪些仍需重新验证。</p>
-<ul class="key-points">
-<li><strong>可迁移设计：</strong>这是与 Master–Worker 较接近的 training-free 参照：Master 提出假设，Worker 执行实验，Evolver 蒸馏策略。</li>
-<li><strong>落地约束：</strong>迁移到现实任务时，关键差异应放在延迟反馈、不可逆动作与多随机种子归因，而不是继续堆叠角色。</li>
-<li><strong>后续方向：</strong>可直接采用“多 rollout 批次后才升格 Skill”的原则。</li>
-</ul>
-<h3 class="subhead">综合判断</h3>
-<p class="verdict">HExA 的核心很明确：未知环境中最缺的不是反思，而是主动实验。更重要的后续方向，是把实验主义扩展到非平稳、延迟回报和真实副作用。</p></section>
-</main>
-</div>
-<button class="back" id="back" type="button" aria-label="返回顶部">↑</button><script>(()=>{const b=document.body,p=document.getElementById('progress'),t=document.getElementById('theme'),u=document.getElementById('back'),links=[...document.querySelectorAll('.toc a')],secs=links.map(x=>document.querySelector(x.getAttribute('href')));if(localStorage.getItem('paper-brief-theme')==='dark')b.classList.add('dark');t.onclick=()=>{b.classList.toggle('dark');localStorage.setItem('paper-brief-theme',b.classList.contains('dark')?'dark':'light')};u.onclick=()=>scrollTo({top:0,behavior:'smooth'});const update=()=>{const m=document.documentElement.scrollHeight-innerHeight;p.style.width=(m>0?scrollY/m*100:0)+'%';u.classList.toggle('show',scrollY>650);let a=secs[0];for(const s of secs)if(s.getBoundingClientRect().top<=110)a=s;links.forEach(x=>x.classList.toggle('active',x.getAttribute('href')==='#'+a.id))};addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update()})();</script>
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">面对陌生物理交互任务，模型常知道一般规律，却不知道当前几何和参数怎样决定结果。一次错误不能只归结为常识不足：代理可能没有提出可检验假设，没有观察关键接触事件，或者下一次仍重复相同试探。把完整历史塞回上下文会记住细节，却不一定形成可迁移的实验策略。</p><p class="prose">HExA 把学习放到主动实验和外部技能库之间。actor 在模拟器中干预并观察，evolver 对一批带奖励轨迹总结可复用技能和错误，retriever 在以后回合取出相关条目。它不更新模型参数；提升来自跨实例积累的上下文策略，而不是隐藏的离线监督或更强教师。</p><div class="table-wrap"><table data-source=""><caption>经验需要从记录变成什么</caption><thead><tr><th>信息</th><th>直接保留的局限</th><th>HExA 要提炼的内容</th></tr></thead><tbody><tr><td>一次成功参数</td><td>换几何与初始状态后可能失效</td><td>适用条件、作用机制与使用步骤</td></tr><tr><td>一次失败</td><td>只知道没成功，容易重复</td><td>失败条件与应该避免的策略</td></tr><tr><td>多轮试验</td><td>局部细节占满上下文</td><td>怎样提出假设、检查结果和安排试验的高阶技能</td></tr></tbody></table></div></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">HExA 以任务族中的多个 seed 为实例流，逐轮生成经验、更新技能库。每个实例内环境按行动实际模拟；跨实例只携带提炼后的外部技能。</p><figure class="method-overview" data-source="primary-method"><figcaption>Actor–Evolver–Retriever：内层实验，外层技能积累</figcaption><div class="state-band"><b>当前技能库 K</b><span>自然语言技能与错误记录，带奖励标签；可空库启动或从基础轨迹热启动。</span></div><div class="flow-box"><h4>Retriever</h4><p>按当前任务与标签选择 top-M 技能和 top-N 错误，作为有界前缀注入 actor。</p></div><div class="flow-connector">↓ 本轮固定技能上下文，开始一批不同 seed 的实例</div><div class="flow-box"><h4>Actor 的内层实验循环</h4><p>检查场景 → 提出干预 → 调用部分/完整模拟与接触日志 → 根据观察修改假设；成功或达到回合上限终止。</p></div><div class="flow-connector">↓ 轨迹附带结果与效率奖励，交给同模型的 evolver 角色</div><div class="flow-box"><h4>Evolver</h4><p>结合旧库与本轮成功/失败轨迹，提炼、修订或组织策略；生成下一轮持久技能库。</p></div><div class="feedback-band">↶ 下一轮重新检索，不把全部实验历史永久追加到 actor 上下文。</div></figure><section class="method-section"><h3>主动实验要产生与假设相关的证据</h3><p class="prose">actor 可调用几何描述、首次接触预测、部分轨迹模拟与完整模拟等工具。工具的价值不只是让代理看见更多数据，而是允许它检查某个动作究竟在哪一段失效，再改变下一次干预。每个实例在有限步数内尝试，终止动作由模拟目标判定成功。</p><p class="prose">方法不规定一套固定实验设计算法，如何选参数、何时查看接触记录仍由 actor 推理。因而主动学习能力不是由工具列表自动保证的，技能库的作用是把此前有效的试验方式带入这个选择过程。</p></section><section class="method-section"><h3>奖励为什么不只区分成功和失败</h3><p class="prose">轨迹奖励综合结果与效率，并使用离散档位。快速成功更有价值；失败若经过充分探索，也比很早退出更能提供学习材料。这个奖励直接给 evolver 作为可解释标签，不是用于梯度训练 actor 的数值损失。</p><p class="prose">因此失败被保留不意味着鼓励永远失败，而是承认失败轨迹中的信息量不同。只学成功例可能漏掉“某种放置看似可行却总是被遮挡”的稳定边界；这些错误知识能减少以后的无效试探。</p></section><section class="method-section"><h3>技能的层级性怎样形成</h3><p class="prose">evolver 读取旧库与新批次轨迹，将操作总结为何时使用、能帮助什么、何时避免。后续技能在已经可用的先前技能基础上产生，可能进一步概括如何实验本身，而非只记录某个物理配置。</p><p class="prose">检索把当前相关技能和错误放入有界前缀，actor 仍可选择忽略不适用条目。论文还把较简单关卡的多份技能库合成后迁移到困难关卡，不需要目标关卡轨迹；这是检验抽象程度的强条件，但不能保证每条自然语言规律都具有物理正确性。</p></section><details class="original-figure"><summary>论文原始结构图 · 点击对照</summary><figure class="main-figure"><a href="assets/paper-figures/12-12-hexa-paper-figure.png" target="_blank" rel="noopener"><img loading="lazy" src="assets/paper-figures/12-12-hexa-paper-figure.png" alt="论文原始结构图"></a><figcaption>主动实验与技能积累框架 · 点击图片查看原始尺寸</figcaption></figure></details></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="evidence-section"><h3>技能积累是否同时提高成功与试验效率</h3><div class="table-wrap"><table data-source="Main results"><caption>代表性开放权重模型结果</caption><thead><tr><th>关卡 / 模型</th><th>ReAct 成功率 / 平均迭代</th><th>HExA 成功率 / 平均迭代</th></tr></thead><tbody><tr><td>Down to Earth / Qwen2.5-3B</td><td>8.0% / 23.8</td><td>24.0% / 18.6</td></tr><tr><td>Two Body Problem / Qwen2.5-7B</td><td>18.0% / 22.2</td><td>34.0% / 18.9</td></tr><tr><td>Catapult / GPT-OSS-120B</td><td>0.0% / 25.0</td><td>54.0% / 16.2</td></tr></tbody></table></div><p class="prose">成功更高且平均迭代更少，支持技能可帮助 actor 避免无效试验。这里的迭代不是全部成本：evolver 的额外分析与以往实例探索形成了前置投入，跨实例摊销后才可讨论整体效率。不同模型和关卡的行不能拼成模型规模定律。</p></section><section class="evidence-section"><h3>没有目标关卡经验时还能迁移吗</h3><div class="table-wrap"><table data-source="Transfer evaluation"><caption>跨难度技能迁移</caption><thead><tr><th>目标 / 模型</th><th>技能来源</th><th>无迁移 → 迁移</th></tr></thead><tbody><tr><td>Catapult / Sonnet</td><td>DTE、TBP、PTP</td><td>8% → 44%</td></tr><tr><td>Falling Into Place / Qwen-7B</td><td>DTE</td><td>20% → 32%</td></tr><tr><td>Two Body Problem / Qwen-7B</td><td>DTE</td><td>18% → 34%</td></tr></tbody></table></div><p class="prose">Catapult 由 4/50 提高到 22/50，较有力地支持技能包含跨实例甚至跨结构的可用知识，而不只是记住目标答案。但目标和来源仍属于同一模拟任务体系，不能据此宣称已具备一般科学发现能力。</p></section></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>贡献是把实验过程本身作为可学习经验</h3><p class="prose">HExA 不只是保存成功操作，还学习怎样收集能改变判断的证据，并把失败条件纳入可重用策略。目标级迁移说明其部分表示超出了单个配置，支持“从 interaction 学会更会 interaction”的研究方向。</p></section><section class="method-section"><h3>迁移增益需要和来源探索投入一起解释</h3><p class="prose">目标关卡不需要先产生轨迹，是较强的迁移条件；但技能已经吸收来源关卡上的大量交互。目标平均迭代下降说明这些经验能加速求解，不意味着整个过程比从零基线无条件便宜。更有意义的效率问题是：来源技能被多少新实例复用后能够摊销，以及面对分布变化是否仍节约试验。若少量陌生几何就迫使重新构库，贡献更接近同族经验缓存；若多种结构共享实验技能，则更接近持久的方法学习。</p></section><section class="method-section"><h3>语言技能是否真实概括，需要反事实验证</h3><p class="prose">技能由同一 LLM 从相关轨迹归纳，可能把共同出现的几何特征误作因果条件。检索标签也主要来自经验结果，未直接验证规则在适用域内是否稳定成立。高成功率证明实用性，却不自动证明技能内容正确。</p><p class="prose">更有区分力的测试是对技能声称关键的条件作受控改变，再测 actor 是否相应调整干预，并比较等量原始轨迹摘要的控制。若自然语言技能能在这些反事实中保持有效，才更支持层级抽象；若收益主要来自先前探索和提示容量，则应将贡献定位为高效经验复用。现有结果说明该机制值得研究，抽象边界仍应通过干预而非措辞判断。</p></section></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>

@@ -1,227 +1,103 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="SkillCAT 论文中文深度解读：从同任务成败轨迹中提取证据，用源任务重放筛选技能补丁，再按拓扑只加载任务相关技能节点。">
-  <title>SkillCAT：证据驱动的技能进化、审计与调用｜论文精读</title>
-  <style>
-    :root{
-      --bg:#f2f0eb;--surface:#fffdfa;--surface-2:#f6f7f9;--ink:#172232;--muted:#657389;--line:#ddd9d0;
-      --blue:#315fae;--purple:#7653b7;--green:#28775d;--amber:#a7651c;--red:#b65143;
-      --blue-tint:#edf4fd;--purple-tint:#f3effb;--green-tint:#edf7f2;--amber-tint:#fff5e8;--red-tint:#fff0ed;
-      --shadow:0 12px 32px rgba(29,42,58,.065);
-      --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-    }
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button{font-family:var(--sans)}
-    body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}
-    a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
-    .progress{position:fixed;inset:0 0 auto;z-index:99;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--amber),var(--blue))}
-    .hero{color:#f7fbff;background:radial-gradient(circle at 84% 8%,rgba(113,190,162,.2),transparent 29%),radial-gradient(circle at 10% 100%,rgba(129,85,184,.2),transparent 35%),linear-gradient(125deg,#0d2145,#183b69 56%,#4f2a70)}
-    .hero-in{max-width:1420px;margin:auto;padding:43px 28px 33px}.eyebrow{color:#c6d4e8;font-size:12px;font-weight:800;letter-spacing:.12em}
-    h1{max-width:1120px;margin:12px 0 0;font-size:clamp(31px,4.2vw,54px);line-height:1.13;letter-spacing:-.035em}
-    .subtitle{max-width:1120px;margin:15px 0 0;color:#d5deec;font-size:16px;line-height:1.72}.paper-name{display:block;color:#f4f7fc;font-size:14px;font-weight:700}.scope{display:block;margin-top:5px;color:#c6d2e3}
-    .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:19px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}
-    .metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:26px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(5,18,42,.3)}
-    .metric small{display:block;color:#afbdd2;font-size:11px}.metric b{display:block;margin-top:4px;color:#fff;font-size:16px;line-height:1.35}.metric span{display:block;margin-top:4px;color:#b7c3d6;font-size:11px;line-height:1.42}
-    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}main,.chapter,.table-wrap{min-width:0}
-    .toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-left-color:var(--blue);color:var(--blue);background:var(--blue-tint);font-weight:750}
-    .rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}
-    .chapter{--accent:var(--blue);--tint:var(--blue-tint);margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--surface) 150px);box-shadow:var(--shadow)}
-    .chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--purple-tint)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--green-tint)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--amber-tint)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--blue-tint)}
-    h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}
-    .lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.38));font-size:17px;font-weight:650;line-height:1.78}
-    .chapter>p:not(.lead):not(.block-intro):not(.source-note),.prose p{max-width:800px;margin:0 0 14px;font-size:16px;line-height:1.92;text-indent:2em;text-align:justify}
-    .block-intro{max-width:800px;margin:20px 0 17px;color:#35465b;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:27px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
-    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}.card{padding:14px 15px;border:1px solid #cad9ee;border-radius:11px;background:var(--blue-tint)}.card:nth-child(4n+2){border-color:#d8ccef;background:var(--purple-tint)}.card:nth-child(4n+3){border-color:#c6e2d7;background:var(--green-tint)}.card:nth-child(4n){border-color:#ead5b4;background:var(--amber-tint)}.card h3{margin:0 0 6px;font-size:15px}.card p{margin:0;color:#47596f;font-size:14px;line-height:1.74}
-    .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:step}.step{position:relative;padding:16px 15px 15px 48px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.step:before{counter-increment:step;content:counter(step);position:absolute;left:14px;top:15px;display:grid;width:25px;height:25px;place-items:center;border-radius:50%;color:#fff;background:var(--accent);font-size:12px;font-weight:800}.step h3{margin:0 0 5px;font-size:15px}.step p{margin:0;color:#4d5d72;font-size:14px;line-height:1.72}
-    .formula{margin:15px 0;padding:14px 16px;border:1px solid #d7cbed;border-radius:11px;background:var(--purple-tint);overflow-x:auto}.formula code{font-family:"SFMono-Regular",Consolas,monospace;font-size:14px;white-space:nowrap}.formula p{margin:7px 0 0;color:#5d5671;font-size:13px;line-height:1.65}
-    .paper-figure{margin:26px 0 13px;border:1px solid var(--line);border-radius:15px;background:#fbfaf7;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ec;font-size:11px;font-weight:800}.paper-figure>a{display:flex;align-items:center;justify-content:center;padding:18px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:720px;margin:auto;object-fit:contain}.figure-portrait img{width:auto;max-width:720px;max-height:760px}.figure-compact img{width:auto;max-width:820px;max-height:none}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--blue-tint))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--blue);background:var(--blue-tint)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
-    .subfigure-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:18px;background:#fff}.subfigure{min-width:0;border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden}.subfigure:last-child{grid-column:1/-1}.subfigure h4{margin:0;padding:10px 12px;border-bottom:1px solid var(--line);color:#34465d;background:var(--surface-2);font-size:13px}.subfigure a{display:flex;align-items:center;justify-content:center;padding:10px;background:#fff}.subfigure img{width:100%;height:auto;max-width:570px;max-height:none}.subfigure:last-child img{max-width:650px}.subfigure p{margin:0;padding:9px 12px 11px;color:#59687c;font-size:12.5px;line-height:1.62}
-    .table-wrap{width:100%;max-width:100%;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--surface)}table{width:100%;min-width:720px;border-collapse:collapse;font-size:13.5px;line-height:1.6}caption{padding:13px 14px 9px;color:var(--ink);font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--blue-tint);white-space:nowrap}tbody tr:last-child td{border-bottom:0}tbody tr:nth-child(even) td{background:#fafbfd}.focus-row td{background:#edf7f2!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.72}.analysis{margin:14px 0 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--green-tint);font-size:14px;line-height:1.76}.warning{border-left-color:var(--amber);color:#6e4b18;background:var(--amber-tint)}
-    .boundary{display:grid;grid-template-columns:1fr 1fr;gap:12px}.boundary article{padding:14px 15px;border:1px solid #ead5b4;border-radius:11px;background:var(--amber-tint)}.boundary h3{margin:0 0 6px;font-size:15px}.boundary p{margin:0;color:#6b5739;font-size:14px;line-height:1.72}.callout{margin:18px 0 0;padding:14px 16px;border:1px dashed #d0ae76;border-radius:10px;color:#6d4c1a;background:var(--amber-tint);font-size:14px;line-height:1.76}
-    .back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
-    body.dark{--bg:#0d1420;--surface:#151e2c;--surface-2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--blue-tint:#1a2d47;--purple-tint:#292442;--green-tint:#19362f;--amber-tint:#382b1c;--red-tint:#3b2323;--shadow:none}
-    body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--surface) 150px)}body.dark .card p,body.dark .step p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .boundary p,body.dark .subfigure p{color:#bfcbda}body.dark .step,body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap,body.dark .subfigure-grid,body.dark .subfigure,body.dark .subfigure a{background:#172230}body.dark .figure-head,body.dark .subfigure h4{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(#151e2c,var(--blue-tint))}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .focus-row td{background:#19362f!important}body.dark .lead{background:linear-gradient(90deg,var(--tint),rgba(21,30,44,.4))}
-    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.chapter{padding:22px 19px 26px}.card-grid,.steps,.boundary,.subfigure-grid{grid-template-columns:1fr}.subfigure:last-child{grid-column:auto}.subfigure-grid{padding:9px}.chapter>p:not(.lead):not(.block-intro):not(.source-note),.prose p,.block-intro{max-width:none;font-size:15px;line-height:1.86}.paper-figure>a{padding:8px}.paper-figure img,.figure-portrait img,.figure-compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}.table-wrap table{min-width:680px}}
-    @media print{body{color:#111;background:#fff;font-size:11pt}.progress,.toc,.rail,.actions,.back{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.step,.boundary article,.subfigure{break-inside:avoid;background:#fff}.paper-figure figcaption,.card,.step,.boundary article,.subfigure,.subfigure h4,.subfigure p,th,.focus-row td{color:#111;background:#fff!important}}
-  
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="以同题对照提出技能假设，用源任务回放准入，再通过依赖感知路由部署；重点辨析因果候选与迁移证据。">
+<title>SkillCAT：证据驱动的技能进化、审计与调用</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
+
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
+
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
+
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
+
+
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
-<body id="top">
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
-  <header class="hero">
-    <div class="hero-in">
-      <div class="eyebrow">PAPER REVIEW · arXiv:2606.13317v2</div>
-      <h1>SkillCAT：证据驱动的技能进化、审计与调用｜论文精读</h1>
-      <p class="subtitle"><span class="paper-name">SkillCAT: Contrastive, Assessment-Augmented and Topology-Aware Skill Self-Evolution for LLM Agents</span><span class="scope">Kunfeng Chen、Qihuang Zhong、Juhua Liu、Bo Du · 从轨迹证据到可路由技能的完整闭环</span></p>
-      <div class="actions"><a class="action" href="https://arxiv.org/abs/2606.13317" target="_blank" rel="noreferrer">查看论文原文 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-      <div class="metrics"><div class="metric"><small>研究对象</small><b>技能自进化</b><span>不更新模型权重</span></div><div class="metric"><small>核心闭环</small><b>CCE → AAE → TTE</b><span>证据、审计、路由</span></div><div class="metric"><small>进化采样</small><b>5 条轨迹 / 任务</b><span>多随机种子</span></div><div class="metric"><small>测试范围</small><b>3 个基准</b><span>表格、QA、文档图像</span></div></div>
-    </div>
-  </header>
-  <div class="layout">
-    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
-      <li><a href="#s1">01 · 论文概览</a></li><li><a href="#s2">02 · 研究背景与问题定义</a></li><li><a href="#s3">03 · 方法与技术路线</a></li><li><a href="#s4">04 · 实验设计与结果分析</a></li><li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-    </ol></nav>
-    <main>
-      <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文概览</h2>
-        <p class="lead">SkillCAT 的关键判断是：技能自进化失败，往往不是缺少轨迹，而是没有回答三个先后相连的问题——哪段行为真正解释成败、补丁是否会伤害原任务、执行时究竟需要加载哪些知识。</p>
-        <p>技能文档把操作流程、工具经验与约束放在模型参数之外，理论上能让智能体从历史执行中持续学习。既有方法常把一条轨迹压成一个补丁，再批量合并到技能库；这比逐条在线改写更高效，却默认“轨迹摘要就是可靠经验”“合并后的规则不会退化”“更多上下文总是更有帮助”。论文指出，这三个默认都可能失效。</p>
-        <p>单条成功轨迹可能只是偶然走通，单条失败轨迹也未必暴露根因；未经验证的补丁会把噪声甚至反效果规则写入全局技能；而把完整技能库塞入上下文，会引入无关或互相冲突的说明。三类问题分别发生在证据获取、知识写入和知识使用阶段，因此不能靠一个更强的总结提示词一次解决。</p>
-        <p class="block-intro">下面的三组“故障—修复”是一条因果链，而不是三个松散模块：证据不可靠会污染补丁，污染补丁会让合并结果退化，过大的技能上下文又会掩盖已有好规则。SkillCAT 的三阶段设计正好在每个接口处增加一道选择机制。</p>
-        <div class="card-grid">
-          <article class="card"><h3>单轨迹偏差 → CCE</h3><p>对同一任务的成功与失败轨迹做对照，围绕动作分歧点提取局部证据，而不是总结整条轨迹。</p></article>
-          <article class="card"><h3>无验证合并 → AAE</h3><p>把补丁视为待检验假设，在源任务克隆上重放；只有修复失败或保持成功的补丁才进入合并。</p></article>
-          <article class="card"><h3>上下文过载 → TTE</h3><p>把进化后的技能编译成能力节点拓扑，测试时只选取与当前任务相关的节点正文。</p></article>
-        </div>
-        <figure class="paper-figure figure-portrait"><div class="figure-head"><span>论文原图 · Figure 1</span><span>问题诊断与设计动机</span></div><a href="assets/paper-figures/27-skillcat/fig_motivation-trimmed.png" target="_blank"><img src="assets/paper-figures/27-skillcat/fig_motivation-trimmed.png" alt="SkillCAT 对技能自进化三类问题的诊断，以及 CCE、AAE、TTE 三种对应解法" loading="lazy"></a><figcaption><strong>从顺序更新、并行蒸馏到选择性技能进化</strong><p>原图先对比顺序更新与 Trace2Skill 式并行蒸馏，再把单轨迹偏差、无验证合并和上下文过载分别映射到 SkillCAT 的三项机制。</p><p class="figure-reading"><b>阅读要点：</b>论文真正改变的是“写入权限”：轨迹不再直接成为全局规则，补丁必须经过局部重放；运行时也不再默认加载全部知识。</p><div class="figure-source"><span>来源：原论文 Figure 1</span><a href="https://arxiv.org/pdf/2606.13317" target="_blank" rel="noreferrer">查看 PDF ↗</a></div></figcaption></figure>
-      </section>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
+<body>
+<header class="hero"><div class="hero-in">
+<h1>SkillCAT：证据驱动的技能进化、审计与调用</h1>
+<p class="paper-name">SkillCAT: Contrastive, Assessment-Augmented and Topology-Aware Skill Self-Evolution for LLM Agents</p>
+<p class="paper-authors">作者：Kunfeng Chen、Qihuang Zhong、Juhua Liu、Bo Du</p>
 
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>研究背景与问题定义</h2>
-        <p class="lead">CCE 与 AAE 在离线阶段形成进化技能 S*；TTE 在在线阶段针对每个新任务，从 S* 组装一个更小的运行时技能 Sj。选择性贯穿了“看什么、写什么、用什么”。</p>
-        <p>形式化地，系统接收基础技能 S₀、进化任务集合 X 和测试任务集合 X*。每个进化任务被执行多次，并由官方评测器标为成功或失败。离线阶段输出进化技能 S*；在线阶段不直接把 S* 全量注入，而是为每个测试任务 x*j 路由并组装 Sj。目标同时包含两部分：提升未见任务的执行表现，并让注入上下文保持紧凑、相关。</p>
-        <p class="block-intro">一条完整轨迹可以按下面三步阅读。前两步解决技能质量，第三步解决技能暴露方式；如果只保留路由而没有可靠补丁，系统只是在更精准地检索噪声。</p>
-        <div class="steps">
-          <article class="step"><h3>CCE：定位成败分水岭</h3><p>同任务多种子运行；若同时存在成功与失败，从两集合各取一条配对，提取动作分歧、失败原因与可编辑经验。</p></article>
-          <article class="step"><h3>AAE：重放补丁再合并</h3><p>在临时技能中隔离候选补丁，用源任务克隆测试结果变化；按分数筛选后，由低分层到高分层做层级合并。</p></article>
-          <article class="step"><h3>TTE：按拓扑选择正文</h3><p>把 S* 拆为核心技能与能力节点，路由器只读节点摘要和依赖关系，再由组装器拼出当前任务的运行时技能。</p></article>
-        </div>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>SkillCAT 端到端流程</span></div><a href="assets/paper-figures/27-skillcat/fig_framework-trimmed.png" target="_blank"><img src="assets/paper-figures/27-skillcat/fig_framework-trimmed.png" alt="SkillCAT 从同任务成败对比、候选补丁评分合并到拓扑感知路由的六步流程" loading="lazy"></a><figcaption><strong>三阶段、六步骤的技能生命周期</strong><p>左侧 CCE 构造对比对并提取候选补丁；中间 AAE 根据源任务结果转移给补丁评分并按层合并；右侧 TTE 构建技能拓扑并只路由相关节点。</p><p class="figure-reading"><b>阅读要点：</b>离线阶段的最终产物仍是一份完整技能，但在线阶段只暴露任务相关子集。质量控制和上下文压缩因此被解耦。</p><div class="figure-source"><span>来源：原论文 Figure 2</span><a href="https://arxiv.org/pdf/2606.13317" target="_blank" rel="noreferrer">查看 PDF ↗</a></div></figcaption></figure>
-        <h3 class="subhead">三条关键公式分别约束什么</h3>
-        <p>CCE 用大模型提取器 E 比较同任务成功轨迹 τ+i 与失败轨迹 τ−i，输出候选经验 ri。这里的“因果”更接近受控条件下的行为差异归因：输入、工具与评测器相同，但它并不是统计意义上的因果识别。若一个任务只有成功或只有失败，系统退回单轨迹提取。</p>
-        <div class="formula"><code>rᵢ = E(τᵢ⁺, τᵢ⁻)</code><p>经验记录包含局部证据、失败原因和可写入技能的教训，再与 S₀ 一起生成候选补丁 pᵢ。</p></div>
-        <p>AAE 用二元结果转移给补丁赋分：失败变成功得 3 分，成功保持成功得 2 分，失败仍失败得 1 分，成功变失败得 0 分。阈值 θ=2，因此只有前两类补丁保留。随后先合并较低分层，再合并高分层，使修复失败的高分补丁在后续阶段拥有更高优先级。</p>
-        <div class="table-wrap"><table><caption>AAE 的补丁审计规则</caption><thead><tr><th>原始 → 重放</th><th>分数 aᵢ</th><th>处理</th><th>解释</th></tr></thead><tbody><tr class="focus-row"><td>失败 → 成功</td><td>3.0</td><td>保留</td><td>补丁修复了源任务</td></tr><tr><td>成功 → 成功</td><td>2.0</td><td>保留</td><td>补丁至少未破坏已知成功</td></tr><tr><td>失败 → 失败</td><td>1.0</td><td>剔除</td><td>没有解决原问题</td></tr><tr><td>成功 → 失败</td><td>0.0</td><td>剔除</td><td>引入可观测退化</td></tr></tbody></table></div>
-        <p class="source-note">来源：原论文 Eq. (2)–(3)。论文实现使用 θ=2.0。</p>
-        <p>TTE 把 S* 编译为核心技能 Sc、能力节点集合 V、节点正文 Bv 和包含摘要、关键词、标题与依赖边的拓扑 G。路由器 R 在节点预算 k 内选择 Vj，组装器 A 再把核心技能与所选节点正文拼成 Sj。实验默认 k=7；路由读取轻量拓扑摘要，只有组装阶段访问节点全文。</p>
-        <div class="formula"><code>Vⱼ = R(x*ⱼ, G, k), |Vⱼ| ≤ k　　Sⱼ = A(Sc, {Bᵥ | v ∈ Vⱼ})</code><p>路由发生在技能内部：论文不是从多个独立技能中选一个，而是把单一进化技能拆成可组合的能力节点。</p></div>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>方法与技术路线</h2>
-        <p class="lead">SkillCAT 的贡献可以压缩成一句话：把每个技能编辑当作需要证据支持、需要实验验证、需要按任务暴露的外部状态变更。</p>
-        <p>CCE 的价值在于减少归因歧义。同一任务、同一工具、同一评测标准下的成功与失败对，比两个不同任务的轨迹更容易定位动作分歧。它并不保证找到唯一根因，但把经验提取从“全文摘要”收缩为“围绕结果分岔点的局部诊断”，降低把无关动作写进规则的概率。</p>
-        <p>AAE 则把语言模型生成的补丁从结论降格为假设。源任务重放提供了最小可执行检验：补丁至少要修复已知失败，或不破坏已知成功。这个设计没有证明补丁在所有任务上都安全，却阻断了最直接的回归路径，也解释了为什么去掉 AAE 后性能甚至低于 Trace2Skill。</p>
-        <p>TTE 处理的是另一个层面：即使技能内容本身正确，全部加载也可能让模型在多条规则之间迷失。拓扑摘要让路由器同时看到节点语义与依赖，组装器只注入相关正文。它既可能节省上下文，也可能提高准确率；但如果底层技能未被 CCE/AAE 清洗，路由本身不能创造正确规则。</p>
-        <p class="block-intro">把三者放在一起，才看得出它们不是可随意替换的“技巧包”。前一阶段改变后一阶段的输入质量：CCE 让候选补丁更有依据，AAE 决定哪些知识可进入 S*，TTE 决定 S* 的哪一部分在当前任务中可见。</p>
-        <div class="card-grid">
-          <article class="card"><h3>证据门</h3><p>关注同任务轨迹的行为差异，而不是把结果标签当作整条轨迹都正确或都错误。</p></article>
-          <article class="card"><h3>写入门</h3><p>用任务结果转移控制持久技能更新，避免“生成即合并”。</p></article>
-          <article class="card"><h3>暴露门</h3><p>把技能库从固定长提示改成按任务组装的上下文。</p></article>
-          <article class="card"><h3>不变部分</h3><p>基础模型权重、ReAct 执行框架和官方任务评测器不因技能进化而更新。</p></article>
-        </div>
-        <div class="analysis"><strong>编辑性推断：</strong>SkillCAT 更像一套“技能变更治理”协议，而不是新的记忆载体。其可迁移价值在于：任何会持续写入外部提示、工作流或操作手册的智能体，都可以借鉴“对照证据—局部回放—按需装载”这条链路。</div>
-      </section>
-
-      <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验设计与结果分析</h2>
-        <p class="lead">论文在 SpreadsheetBench-Verified、WikiTableQuestions 和 DocVQA 上评估同模型使用、跨模型迁移、OOD 泛化、组件消融与效率权衡；所有报告结果取 3 个随机种子平均。</p>
-        <p>SpreadsheetBench-Verified 共 400 个真实 Excel 论坛任务，200 个用于进化、200 个用于留出测试，只有输出单元格全部匹配才算正确。WikiTQ 用官方答案指称匹配评估准确率，承担 OOD 表格问答测试。DocVQA 使用官方验证集 5,349 对问答图像，前 2,700 对进化、后 2,649 对测试，指标为 ANLS 与 ANLS≥0.5 的准确率。</p>
-        <p>技能作者与同模型技能用户包括 Qwen3.5-35B-A3B、Qwen3.5-122B-A10B；跨模型用户为 Gemma-4-31B-it 与 GPT-5.4-mini。初始技能分为 Anthropic 官方 xlsx 技能（Human-Written）和对应模型生成技能（LLM-Gen），对比 Trace2Skill、EvoSkill 与 SkillOpt。所有智能体运行在带文件系统和表格工具的 ReAct 风格框架中。</p>
-        <p class="block-intro">主表很大，下面保留最能回答“是否持续优于已有进化方法”的整体均值。数值是 SpreadsheetBench 与 WikiTQ、以及两位 Qwen 技能作者的汇总；括号中的提升应读作相对对应初始技能的<strong>绝对百分点</strong>变化。</p>
-        <div class="table-wrap"><table><caption>同模型技能使用的总体结果（选自原论文 Table 1）</caption><thead><tr><th>技能用户</th><th>初始技能</th><th>Trace2Skill</th><th>EvoSkill</th><th>SkillOpt</th><th>SkillCAT</th></tr></thead><tbody><tr><td>Qwen3.5-35B-A3B</td><td>Human-Written 9.35</td><td>31.85</td><td>42.21</td><td>39.29</td><td class="positive">59.04（+49.69）</td></tr><tr class="focus-row"><td>Qwen3.5-35B-A3B</td><td>LLM-Gen 20.16</td><td>31.75</td><td>51.32</td><td>42.83</td><td>54.23（+34.07）</td></tr><tr><td>Qwen3.5-122B-A10B</td><td>Human-Written 61.51</td><td>70.36</td><td>65.85</td><td>69.09</td><td class="positive">72.95（+11.44）</td></tr><tr class="focus-row"><td>Qwen3.5-122B-A10B</td><td>LLM-Gen 24.95</td><td>40.57</td><td>71.51</td><td>72.43</td><td>74.64（+49.69）</td></tr></tbody></table></div>
-        <p class="source-note">来源：原论文 Table 1，选取 Overall 列。指标越高越好；不同初始化之间不可直接当作同条件比较。</p>
-        <p>SkillCAT 在四个同模型组合上都取得最高总体均值。最大领先出现在 35B 技能用户、Human-Written 初始化：59.04 对第二名 EvoSkill 的 42.21，高 16.83 点。不过在强初始化与大模型组合的单项任务上并非处处第一：当 122B 同时作为作者和用户时，Trace2Skill 在 SpreadsheetBench 比 SkillCAT 高 0.66 点，而 SkillCAT 在 WikiTQ 只比最强对手高 0.32 点；总体优势来自跨作者与跨任务的聚合。</p>
-        <h3 class="subhead">跨模型与多模态迁移</h3>
-        <p>把 Qwen 作者进化出的 Human-Written 技能直接交给未见过的模型时，Gemma 的总体均值从 58.27 提升到 71.02，GPT-5.4-mini 从 41.39 提升到 48.57。但收益并不均匀：Gemma 在 WikiTQ 上本就有 77.99 的 No-Skill 成绩，两种 SkillCAT 变体相对 Human-Written 分别是 +0.97 与 −1.62 点，说明跨模型技能在接收者已经很强的任务上可能无益甚至略有退化。</p>
-        <figure class="paper-figure figure-compact"><div class="figure-head"><span>论文原图 · Figure 3</span><span>DocVQA 多模态迁移</span></div><a href="assets/paper-figures/27-skillcat/fig_docvqa_transfer-trimmed.png" target="_blank"><img src="assets/paper-figures/27-skillcat/fig_docvqa_transfer-trimmed.png" alt="SkillCAT、Trace2Skill 和无技能设置在两种 Qwen 模型上的 DocVQA ANLS 与准确率对比" loading="lazy"></a><figcaption><strong>验证补丁有助于提升精确命中，但不是每项指标都更高</strong><p>35B 用户上，SkillCAT 的 ANLS/Accuracy 为 0.9159/93.30，高于 Trace2Skill 的 0.8740/92.00；122B 用户上，SkillCAT 的 Accuracy 为 79.00，高于 78.00，但 ANLS 0.7200 略低于 0.7258。</p><p class="figure-reading"><b>谨慎解读：</b>这张图支持多模态可迁移性与准确率优势，却不能概括成所有模型、所有指标均严格领先。</p><div class="figure-source"><span>来源：原论文 Figure 3</span><a href="https://arxiv.org/pdf/2606.13317" target="_blank" rel="noreferrer">查看 PDF ↗</a></div></figcaption></figure>
-        <h3 class="subhead">消融：为什么三阶段缺一不可</h3>
-        <p class="block-intro">组件消融固定在 Qwen3.5-35B-A3B、Human-Written 初始化与 SpreadsheetBench 上，并以 Trace2Skill 的 29.67 为参照。它检验的是模块互补性，不应外推为所有模型与任务中的固定贡献比例。</p>
-        <div class="table-wrap"><table><caption>SkillCAT 组件消融（原论文 Table 2）</caption><thead><tr><th>条件</th><th>CCE</th><th>AAE</th><th>TTE</th><th>Accuracy ↑</th></tr></thead><tbody><tr><td>Trace2Skill</td><td>—</td><td>—</td><td>—</td><td>29.67</td></tr><tr class="focus-row"><td>SkillCAT Full</td><td>✓</td><td>✓</td><td>✓</td><td>55.00（+25.33）</td></tr><tr><td>去掉 CCE</td><td>—</td><td>✓</td><td>✓</td><td>32.50（+2.83）</td></tr><tr><td>去掉 AAE</td><td>✓</td><td>—</td><td>✓</td><td class="negative">26.00（−3.67）</td></tr><tr><td>去掉 TTE</td><td>✓</td><td>✓</td><td>—</td><td>46.50（+16.83）</td></tr><tr><td>仅 CCE</td><td>✓</td><td>—</td><td>—</td><td>39.00（+9.33）</td></tr><tr><td>仅 AAE</td><td>—</td><td>✓</td><td>—</td><td>34.00（+4.33）</td></tr><tr><td>仅 TTE</td><td>—</td><td>—</td><td>✓</td><td class="negative">27.50（−2.17）</td></tr></tbody></table></div>
-        <p>最强信号不是“完整系统最好”，而是去掉 AAE 后跌到 26.00，甚至低于 Trace2Skill；这与论文的核心主张一致：更好的证据如果不经过回放审计，仍可能生成有害规则。只保留 TTE 也下降到 27.50，说明路由无法弥补底层技能质量。CCE+AAE 在无 TTE 时已有 46.50，TTE 再把它推到 55.00，体现“先清洗内容，再选择上下文”的顺序。</p>
-        <h3 class="subhead">采样、补丁分桶与路由预算</h3>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 4（分图放大）</span><span>三阶段敏感性与效率分析</span></div><div class="subfigure-grid">
-          <article class="subfigure"><h4>(a) CCE：轨迹数量、准确率与延迟</h4><a href="assets/paper-figures/27-skillcat/fig_more_analysis-a-cce.png" target="_blank"><img src="assets/paper-figures/27-skillcat/fig_more_analysis-a-cce.png" alt="CCE 使用不同轨迹数量时的准确率与推理延迟曲线" loading="lazy"></a><p>5 条轨迹达到 55.0；继续增至 7/9 条后，准确率下降而延迟继续增加。</p></article>
-          <article class="subfigure"><h4>(b) AAE：不同结果转移的补丁质量</h4><a href="assets/paper-figures/27-skillcat/fig_more_analysis-b-aae.png" target="_blank"><img src="assets/paper-figures/27-skillcat/fig_more_analysis-b-aae.png" alt="AAE 四类源任务结果转移补丁对应的下游准确率" loading="lazy"></a><p>F→S、S→S、F→F、S→F 四组准确率依次为 51.0、41.0、32.0、23.5。</p></article>
-          <article class="subfigure"><h4>(c) TTE：路由预算、准确率与上下文缩减</h4><a href="assets/paper-figures/27-skillcat/fig_more_analysis-c-tte.png" target="_blank"><img src="assets/paper-figures/27-skillcat/fig_more_analysis-c-tte.png" alt="嵌入路由和图路由在不同 Top-k 下的准确率及上下文缩减率" loading="lazy"></a><p>论文默认图路由 Top-k=7：准确率 55.0，上下文缩减 41.6%；两种路由在多数预算下高于全技能基线。</p></article>
-        </div><figcaption><strong>更多轨迹并非总是更好，补丁奖励与下游表现相关，路由可同时压缩上下文</strong><p>CCE 从 1 条轨迹的 32.5 提升到 5 条的 55.0，但 7/9 条降至 46.0/41.5；对应推理时间由 23 分钟增至 157、214、282 分钟。AAE 的四档结果验证了高回放分数与更好下游表现之间的对应关系；TTE 则展示了准确率与上下文体积的联合权衡。</p><p class="figure-reading"><b>阅读要点：</b>五条轨迹只是该实验中的经验最优点，不是越多越强；AAE 的单调趋势为 θ=2 提供了实证依据。路由效率来自少装载节点，不代表离线进化本身更便宜。</p><div class="figure-source"><span>来源：原论文 Figure 4；仅按原图标注切分，不改变图中数值</span><a href="assets/paper-figures/27-skillcat/fig_more_analysis-trimmed.png" target="_blank">查看完整原图 ↗</a></div></figcaption></figure>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
-        <p class="lead">论文有力证明了选择性技能进化在三个基准中的实用价值，但尚未证明补丁具有严格因果正确性，也没有覆盖开放世界长期部署中的持续漂移、成本与安全问题。</p>
-<h3 class="subhead epistemic-heading">论文贡献</h3>
-        <p>首先，CCE 的“因果”建立在同任务条件控制与大模型对行为分歧的解释上。它比单轨迹摘要更接近根因，却仍可能把相关差异误判为原因；每个同时包含成败结果的任务只随机抽一对轨迹，纯成功或纯失败任务又退回单轨迹流程。因而更准确的表述是“对比式因果线索提取”，而不是形式化因果识别。</p>
-        <p>其次，AAE 的源任务重放是一种局部安全检查：它能发现补丁是否立刻破坏关联任务，却不能保证跨任务、跨工具版本或长期组合后无副作用。阈值只依赖二元成败转移，没有利用置信度、重复重放分布或回归测试集；高分补丁的层级合并也仍由语言模型完成，合并冲突并未被形式验证。</p>
-        <p>第三，实验覆盖三类任务与四个技能用户，主要仍集中在表格操作、表格问答和文档问答。跨模型实验只复用 Human-Written 初始化下由 Qwen 作者进化的技能；论文报告三随机种子均值，但未给置信区间或显著性检验。Figure 4 明确展示五轨迹已需 157 分钟推理时间，完整进化、重放和路由的总 token/算力成本则没有统一汇总。</p>
-        <p class="block-intro">这些限制并不否定结果，而是帮助确定可迁移边界。把 SkillCAT 用到代码代理、浏览器代理或企业流程时，最值得复用的是三道治理门；最需要重新设计的是评测器、回归任务集和成本预算。</p>
-        
-<h3 class="subhead epistemic-heading">证据边界与局限</h3>
-<div class="boundary">
-          <article><h3>可直接迁移的原则</h3><p>同任务对照优先于单轨迹总结；外部知识写入前先做可执行回放；大技能文档在推理时按依赖与相关性裁剪。</p></article>
-          <article><h3>需要补充的工程保障</h3><p>多次重放与统计置信度、跨任务回归套件、版本化技能图、补丁回滚、路由失败兜底和端到端成本监控。</p></article>
-          <article><h3>最值得复现的三项</h3><p>先复核 Table 2 的 AAE 消融，再复核 Figure 4 的五轨迹峰值，最后检查 Top-k=7 在不同技能规模下是否仍最优。</p></article>
-          <article><h3>不要过度外推</h3><p>49.69 是特定汇总设置相对初始技能的绝对百分点增益；它不等于所有任务都提升 49.69%，也不是相对百分比。</p></article>
-        </div>
-        <div class="callout"><strong>一句话结论：</strong>SkillCAT 的真正价值，不是提出另一个“从轨迹写技能”的生成器，而是让技能更新具备证据、验证和最小暴露三项约束；这使外部技能更像可审计的软件变更，而不是不断膨胀的提示词。</div>
-        <p class="source-note">来源与版本：Kunfeng Chen 等，arXiv:2606.13317v2，2026-07-29。本文依据论文 PDF 与公开 TeX 源码整理，保留原论文图表与数值口径；未进行独立代码复现。论文未提供单独的 Limitations 章节，本节边界分析依据方法假设、实验设置和未报告项作编辑性归纳。</p>
-        <a class="back" href="#top">↑ 返回页首</a>
-      </section>
-    </main>
-  </div>
-  <script>
-    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
-    addEventListener('scroll',()=>{const h=document.documentElement,den=h.scrollHeight-h.clientHeight;bar.style.width=`${den?Math.min(100,100*h.scrollTop/den):0}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
-    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
-  </script>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/abs/2606.13317" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">从失败日志中抽取技能时，模型很容易把“恰好出现在成功轨迹里的动作”写成通用规则；积累更多规则又会让部署上下文变长，正确经验也可能在错误任务中干扰执行。SkillCAT 同时处理三个相连的问题：经验从哪里来、补丁凭什么进入技能，以及任务执行时究竟读取哪一部分。</p><p class="prose">论文先在同一任务的多次成功和失败之间找行为分歧，再用源任务副本回放筛选补丁，最后把演化技能编译为带依赖的可路由结构。它把技能进化从直接“反思后合并”变成<strong>对照证据 → 假设验证 → 选择性部署</strong>。其中所谓 causal extraction 是基于对照轨迹的因果候选，并非完成严格因果识别。</p><div class="table-wrap"><table data-source=""><caption>三个阶段分别控制不同风险</caption><thead><tr><th>风险</th><th>技能越写越多为何无效</th><th>新增决策</th></tr></thead><tbody><tr><td>归因错误</td><td>任务不同或执行偶然性会被误当经验。</td><td>同题成功 / 失败对照定位最早分歧。</td></tr><tr><td>坏补丁扩散</td><td>合理解释并不意味着执行有效。</td><td>隔离补丁，回放源任务，按结果转移准入。</td></tr><tr><td>部署噪声</td><td>完整长技能让无关规则竞争注意力。</td><td>任务路由后再补齐依赖，加载原始节点正文。</td></tr></tbody></table></div><p class="prose">模型参数不变，持久更新的是外部技能。离线验证成本与在线上下文节约发生在两个阶段，不能只报告后者就把整个学习过程称为免费。</p></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">CCE 和 AAE 在技能学习阶段运行，TTE 将已验证内容编译并用于测试任务。模型负责归因、编辑和初始路由，确定性运行时负责阈值、节点合法性和依赖展开。</p><figure class="method-overview" data-source="primary-method"><figcaption>自绘总览｜离线补丁筛选连接在线依赖感知路由</figcaption><div class="state-band"><b>离线证据</b><span>同一演化任务运行多个随机种子，官方评价器给出成功 / 失败</span></div><div class="flow-box"><h4>CCE · 对照提取</h4><p>有成败两类 → 各采一条，定位最早动作分歧并提出经验；无对照时按设置回退单轨提取或跳过。</p></div><div class="flow-connector">↓ 经验 → 临时补丁，逐个隔离回放</div><div class="flow-box"><h4>AAE · 源任务验证</h4><p>失败→成功得 3；成功→成功得 2；其余 1 / 0；阈值 ≥2，分层合并时高分后写。</p></div><div class="flow-connector">↓ 最终技能按 Markdown 层级编译</div><div class="process-row three"><div class="flow-box"><h4>TTE · 任务路由</h4><p>LLM 读紧凑元数据选择最多 k 个主节点；不重写技能正文。</p></div><div class="flow-arrow" aria-hidden="true">→<span></span></div><div class="flow-box"><h4>运行时依赖闭包</h4><p>校验节点 ID，补召回 / 意图锚点、基础节点和依赖；拼接核心 + 原始节点内容。</p></div></div><div class="feedback-band">↶ 在线只改变本任务加载内容；最终选中节点数可超过 k，外部模型权重保持固定。</div></figure><section class="method-section"><h3>CCE：同题对照减少混淆，但第一处分歧只是候选起点</h3><p class="prose">同一任务多种子执行后，若既有成功也有失败，分别随机选一条作对。输入、工具与评价器一致，避免把任务难度差当成行为差。抽取器定位两条动作序列最先分开的位置，并围绕局部证据形成失败解释和可编辑经验。</p><p class="prose">最早不同动作不必是决定结果的动作，后续状态、随机性和多处差异仍可能共同起作用。CCE 的价值是缩小反思范围、提出较可验证的假设，而不是凭两条轨迹证明某条规则必要或充分。没有严格对照时，是否允许单轨回退会改变证据强度，论文明确保留了这个选择。</p></section><section class="method-section"><h3>AAE：把补丁当作需要接受检验的假设</h3><p class="prose">每个补丁先放入临时技能，回放产生它的源任务副本。评分按基线到回放的二元结果直接排序：修复失败得 3，保住成功得 2，继续失败得 1，破坏成功得 0；阈值 2 排除没有修复或造成回归的规则。对 CCE 成败对产生的补丁，已知成功轨迹提供保守基线，因此回放至少要保持该成功。</p><p class="prose">通过筛选后，低分层先合并，高分层后合并，让更强证据在冲突时具有后写优先权。局部回放防止明显坏补丁进入全局技能，但无法自动保证多个合格补丁组合无冲突，也不能由同源任务成功推出新任务可迁移。</p></section><section class="method-section"><h3>TTE：选择文本，不生成另一份摘要技能</h3><p class="prose">离线编译器把一级内容作为始终加载的核心，二级章节作为可路由节点，保存原始正文与标题、关键词、摘要、依赖。在线 LLM 只读拓扑摘要，根据任务选最多 k 个主节点，运行时再做确定性校验、补锚点和依赖展开。</p><p class="prose">k 限制的是初始主选节点，不是最终闭包大小。组装时拼接原文节点而非重新生成说明，能避免路由步骤改写已经验证过的规则。由此，上下文减少来自选择性加载；有效性还取决于元数据和依赖是否完整，否则精简会遗漏必要前提。</p></section></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="evidence-section"><h3>高质量技能是否同时需要对照、筛选与调用控制</h3><p class="evidence-setting">Qwen3.5-35B-A3B，同模型 Skill Deepening；Vrf 为 200 条 held-out SpreadsheetBench-Verified 准确率。</p><div class="table-wrap"><table data-source="Tables 1–2"><caption></caption><thead><tr><th>设置</th><th>Vrf</th><th>与完整方法的差</th></tr></thead><tbody><tr><td>SkillCAT</td><td>55.50%</td><td>—</td></tr><tr><td>去掉 CCE</td><td>32.50%</td><td>−23.00 pp</td></tr><tr><td>去掉 AAE</td><td>26.00%</td><td>−29.50 pp</td></tr><tr><td>去掉 TTE</td><td>46.50%</td><td>−9.00 pp</td></tr></tbody></table></div><p class="prose">去掉验证比去掉路由更严重，且 26.00% 低于 Trace2Skill +Combined 的 29.67%，说明更积极提取经验也可能增加有害补丁。路由则在内容已较好时继续提高效果，支持“学出好技能”和“本任务加载好内容”是两个不同问题。</p><p class="prose">完整方法比人写技能的 9.67% 高，但这一特定弱起点不代表人工技能普遍无效。更强 122B 作者在 Vrf 上反而略低于 Trace2Skill（69.50% 对 69.83%），因此不能说所有模型、所有指标都胜出。</p></section><section class="evidence-section"><h3>节约在线上下文是否需要额外离线证据</h3><p class="evidence-setting">同 35B 设置；采样时间只计 CCE 阶段，41.6% 是技能上下文减少。</p><div class="table-wrap"><table data-source="Figures 4–6; Table 1"><caption></caption><thead><tr><th>比较</th><th>观察</th><th>结论</th></tr></thead><tbody><tr><td>种子从 1 增至 5</td><td>Vrf 32.50% → 55.50%</td><td>更多成败对有价值。</td></tr><tr><td>继续增至 9</td><td>Vrf 降至 41.50%；采样达 4h41m49s</td><td>增加轨迹不保证泛化。</td></tr><tr><td>完整加载 → LLM 图路由 top-k=7</td><td>46.50% → 55.50%；上下文 −41.6%</td><td>选择相关规则同时改善效率与准确率。</td></tr></tbody></table></div><p class="prose">最关键的成本边界是离线与在线分离：收集多种子、逐补丁回放和合并都要付费，部署才节省上下文。论文另将补丁按回放转移分桶、等量测试，得分排序与新任务效果单调对应，为过滤规则提供了更直接支持。</p><p class="prose">跨模型迁移多数有效但并不统一，例如 122B 技能给 Gemma 带来更强 Vrf，同时 WikiTQ 低于人写基线。知识质量、使用者能力和任务分布共同决定实际收益。</p></section></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>核心贡献：为经验进入技能建立证据链</h3><p class="prose">SkillCAT 的贡献不是把技能库组织得更复杂，而是将证据、准入和部署三个权限分开。对照定位提出假设，回放检验能否保住或修复源行为，路由控制哪些规则进入当前上下文。模块消融和回放分桶都说明这条证据链有实际作用。</p></section><section class="method-section"><h3>局部验证还没有解决组合与迁移的可靠性</h3><p class="prose">每条规则在源任务成立，不保证几条规则共同成立；按高分后合并也没有执行全局无冲突证明。另一个关键边界是“最早分歧”的归因：后续补丁回放可以筛掉一部分错误，却可能保留只对源任务有用的偶然条件。</p><p class="prose">可以在源任务通过的补丁中，专门构造条件变化与补丁组合测试，比较回放分数是否仍预测 held-out 收益。若单补丁有效而组合失效频繁，就需要把准入单位从条目提升到交互组合；若只有换条件才失效，则需要把适用前提写入节点路由。</p></section><p class="prose">综合看，论文将技能自进化变成了更可审计的程序改进过程，并给出显著但有异质性的实证收益。它值得学习的是如何不让“解释得合理”直接获得执行权，而不是把对照提取称为已经验证的普遍因果发现。</p></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>

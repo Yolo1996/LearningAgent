@@ -1,355 +1,103 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="AgentOPSD 中文深度解读：它不替换 GRPO，而是把轨迹级优势与训练期自蒸馏证据结合，重塑为历史条件下的回合级信用。">
-  <title>AgentOPSD：基于递归信念更新的回合级信用重塑｜论文精读</title>
-  <style>
-    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
-    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(108,151,213,.28),transparent 29%),radial-gradient(circle at 8% 100%,rgba(57,132,93,.2),transparent 30%),linear-gradient(125deg,#10223c,#173b51 56%,#40335f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1150px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
-    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}
-    .chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:820px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:820px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
-    .cards,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--at)}.shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.shift article:nth-child(2){border-color:#c9deb3;background:var(--gt)}.shift article:nth-child(3){border-color:#d7caec;background:var(--pt)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--paper);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}.thesis-line{margin:18px 0;padding:17px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center;font-size:18px;font-weight:780;line-height:1.55}.thesis-line span{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}
-    .formula{margin:17px 0;padding:16px 18px;border:1px solid #d7caec;border-radius:12px;background:var(--pt);overflow-x:auto}.formula .eq{white-space:pre-wrap;text-align:center;font-size:16px;font-weight:700;line-height:1.75}.formula p{margin:8px 0 0;color:#55426f;font-size:13px;line-height:1.7}.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:88px;padding:12px 8px;place-items:center;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:750;line-height:1.45}.flow div:nth-child(2),.flow div:nth-child(4){border-color:#d7caec;background:var(--pt)}.flow div:nth-child(3){border-color:#c9deb3;background:var(--gt)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.analysis,.warning,.verdict{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.verdict{border-color:var(--purple);color:#55426f;background:var(--pt)}
-    .paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:850px;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
-    .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
-    body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
-    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.flow{grid-template-columns:1fr}.shift article+article:before,.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article{break-inside:avoid;background:#fff}}
-  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="把训练期技能条件下的教师—学生差异转为递归回合证据，以有界正乘子重分配结果级优势；区分信念代理与因果信用。">
+<title>AgentOPSD：基于递归信念更新的回合级信用重塑</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
-    /* 2026-09 standardized research-report layout; original palette is retained. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
-    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
-    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
-    .metric:nth-child(n+5){display:none}
-    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
-    .rail{display:none!important}
-    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
-    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
-    .chapter+.chapter{border-top:1px solid var(--line)}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
-    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
-    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
-    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
-    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
-    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
-    .key-points>li strong{color:var(--ink)}
-    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
-    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
-    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
-    .analysis,.warning{box-shadow:none}
-    @media(max-width:820px){
-      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .layout{display:block;padding:14px 11px 54px}
-      main{border-radius:11px}
-      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
-      h1{font-size:clamp(27px,8.2vw,34px)}
-      h2{font-size:21px}
-      .section-intro,.lead{font-size:15.5px}
-    }
-    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
 
-  
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
 
-    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
-    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
-    h2{margin-bottom:16px;padding-bottom:12px}
-    .subhead{margin:21px 0 8px}
-    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
-    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
-    .key-points{margin-bottom:14px}
-    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
-    .key-points>li::before{top:21px}
-    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
-    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
-    .paper-figure>a{padding:9px}
-    .paper-figure figcaption{padding:14px 18px 15px}
-    .table-wrap{margin:14px 0 8px}
-    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
-    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
-    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
-    .chapter>*:last-child{margin-bottom:0}
-    @media(max-width:820px){
-      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
-      .subhead{margin-top:18px}
-      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
-      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
-      .paper-figure{margin:14px 0 9px}
-      .paper-figure>a{padding:5px}
-    }
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
 
-    /* Collection typography contract: one Chinese-first face and stable body scale. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    body{font-weight:400}
-    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
-    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
 
-  
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
 
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
-<body id="top">
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
-  <header class="hero"><div class="hero-in">
-    <div class="eyebrow">PAPER REVIEW · arXiv:2608.05987v1</div>
-    <h1>AgentOPSD：基于递归信念更新的回合级信用重塑｜论文精读</h1>
-    <p class="subtitle"><span class="paper-name">AgentOPSD: Recursive Self-Distillation for Agentic Reinforcement Learning</span>Zi-Han Wang、Zhengxi Lu、Zhiyuan Yao、Jinyang Wu、Jie Wu、Zhengzhou Cai、Yueqing Sun、Ziang Ye、Linji Hao、Qi Gu、Xunliang Cai、Yongliang Shen、Yujiu Yang · 清华大学 / 浙江大学 / 美团 · 2026-08-06</p>
-    <div class="actions"><a class="action" href="https://arxiv.org/abs/2608.05987v1" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="assets/39-agentopsd/paper.pdf" target="_blank">本地 PDF ↗</a><a class="action" href="https://github.com/ZethWang/AgentOPSD" target="_blank" rel="noreferrer">官方代码 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-    <div class="metrics"><div class="metric"><small>不是新 RL 骨架</small><b>GRPO Reweighting</b><span>最终仍由 GRPO 完成策略更新</span></div><div class="metric"><small>核心移动</small><b>Local Gap → Belief Revision</b><span>从局部差异转为历史条件信用</span></div><div class="metric"><small>训练代价</small><b>1× Teacher Forward</b><span>无额外 rollout、无独立 critic</span></div><div class="metric"><small>评测范围</small><b>3 环境 · 2 规模</b><span>ALFWorld / Search-QA / WebShop</span></div></div>
-  </div></header>
-
-  <div class="layout">
-    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
-      <li><a href="#s1">01 · 论文概览</a></li><li><a href="#s2">02 · 研究背景与问题定义</a></li><li><a href="#s3">03 · 方法与技术路线</a></li><li><a href="#s4">04 · 实验设计与结果分析</a></li><li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-    </ol></nav>
-
-    <main>
-            <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文概览</h2>
-
-<p class="section-intro">AgentOPSD 研究如何把一条轨迹的最终奖励，更合理地分配到中间各轮交互。它在训练时利用额外的技能提示，判断每一轮对成功的支持是增强还是减弱，从而缓解长轨迹中“所有步骤得到同样评价”的问题。</p>
-
-        <h3 class="subhead">核心结论</h3>
-        <ul class="key-points">
-          <li><strong>研究对象：</strong>信用分配边界从整条轨迹推进到发生环境状态转移的回合，同时保留终局验证器对更新方向的决定权。</li>
-          <li><strong>核心方法：</strong>系统先比较普通策略与技能辅助策略对同一动作的支持差异，再结合此前各轮信息计算本轮的边际作用，最后小幅调整该轮的训练权重。</li>
-          <li><strong>主要结论：</strong>方法在多环境和模型规模上稳定优于普通 GRPO，长程任务收益更明显；但概率差能否代表成功证据仍依赖额外假设。</li>
-        </ul>
-      </section>
-
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>研究背景与问题定义</h2>
-
-<h3 class="subhead">问题背景与相邻方法</h3>
-<p class="section-intro">AgentOPSD 没有重新设计强化学习算法，而是改进 GRPO 的奖励分配方式。普通 GRPO 往往让一整条轨迹中的所有 Token 共享同一个优势值；AgentOPSD 则进一步判断每一轮交互对最终结果有多大帮助，再调整该轮的训练权重。</p>
-        <p>在 ALFWorld、WebShop 或搜索问答里，Agent 要根据环境反馈连续行动。成功轨迹中可能混入冗余操作，失败轨迹也可能包含正确的局部判断。若把最终的成功或失败均匀广播到整条轨迹，训练会把“打开关键容器”和“重复查看房间”当作同等重要；轨迹越长，这种信用稀释越严重。</p>
-        <p>已有自蒸馏方法提供了更密集的教师—学生概率差：同一个模型一支只看标准历史，另一支额外看到训练期的任务技能，再比较它们对学生实际动作的概率。问题在于，token 级或单回合的局部差异仍不是序列信用。同样大小的差异，在结果尚不确定时可能改变局势，在成功已几乎确定时却只是重复证据。</p>
-        <div class="thesis-line">论文的概念核心：一个回合的重要性，不是它单独产生了多大概率差，而是它让“最终会成功”的累积支持改变了多少。<span>研究对象从局部蒸馏信号，移动到历史条件下的边际信念修正。</span></div>
-        <p class="block-intro">从理解粒度看，这篇论文连接了三层信息：GRPO 给出整条轨迹的可靠方向，OPSD 提供 token 级局部证据，AgentOPSD 再把这些证据聚合到环境真正发生状态转移的回合。三层回答的是不同问题，不能把细粒度自动等同于更正确的信用。</p>
-        <div class="shift">
-          <article><small>TRAJECTORY LEVEL</small><h3>GRPO · A<sub>seq</sub></h3><p>回答“整件事做得好不好”；方向可靠，但轨迹内部没有区分度。</p></article>
-          <article><small>TOKEN LEVEL</small><h3>OPSD · δ<sub>k,t</sub></h3><p>回答“这个 token 是否更像技能指导下的行为”；密集，却过细且局部。</p></article>
-          <article><small>TURN LEVEL</small><h3>AgentOPSD · ΔB<sub>k</sub></h3><p>回答“这个完整 action 在已有历史下改变了多少成功支持”。</p></article>
-        </div>
-        <p class="warning"><b>不要把上面误读成三套算法顺次训练：</b>实际是两路信号汇合——GRPO 产生轨迹优势，特权自教师产生 token evidence；后者经 turn 聚合与递归 belief 变成权重，再去重塑前者，最终仍执行 GRPO update。</p>
-        <div class="formula"><div class="eq">终局 Reward → GRPO → Aseq ─────────────────────┐
-特权技能 + 学生动作 → δₖ,ₜ → eₖ → Bₖ → ΔBₖ ─┤→ turn-wise reshape → GRPO Update
-                                                   └─ 全局方向不变，回合权重不同</div><p>GRPO 决定整条轨迹是奖励还是惩罚；AgentOPSD 决定这份奖励或惩罚在不同回合之间如何分配强弱。</p></div>
-        <p class="block-intro">把品牌名拿掉，这是一种“用训练期特权信息构造序列证据，再用终局验证器约束方向”的信用塑形方法。下面四层贡献必须分开看，否则容易把一个有效的工程机制误读为已经校准的因果信用估计器。</p>        <ul class="key-points">
-          <li><strong>概念贡献：</strong> 明确区分局部概率差与序列信用，并把回合信用定义为累积成功支持的边际修正。</li>
-          <li><strong>方法贡献：</strong> 在 log-odds 空间递归累积回合证据，以有界正乘子重塑 GRPO 优势，不改变终局更新方向。</li>
-          <li><strong>基础设施依赖：</strong> 训练时需要可检索 SkillBank 和同模型的特权教师分支；推理时不再需要技能。</li>
-          <li><strong>经验贡献：</strong> 在 3 个交互环境、Qwen2.5 3B/7B 上优于 GRPO，并用单环境消融支持组件贡献。</li>
-        </ul>
-        <p class="block-intro">与相邻方法的真正分界，不在于“是否用了自蒸馏”，而在于信号来源、信用粒度和是否条件于历史。尤其值得注意的是，最邻近的 StepOPSD 已经做到回合聚合；AgentOPSD 新增的是递归状态，而不是第一次提出回合级信号。</p>
-        <div class="table-wrap"><table>
-          <caption>最邻近方法：差别发生在“信号如何变成信用”</caption>
-          <thead><tr><th>方法</th><th>信息来源</th><th>信用粒度</th><th>是否依赖历史</th><th>代价 / 关键差别</th></tr></thead>
-          <tbody>
-            <tr><td>GRPO</td><td>终局奖励</td><td>整条轨迹统一</td><td>否</td><td>无需 critic，但无法区分回合</td></tr>
-            <tr><td>RLSD</td><td>教师—学生概率差 + 终局奖励</td><td>token 局部缩放</td><td>否</td><td>密集但仍是局部信号</td></tr>
-            <tr><td>StepOPSD</td><td>教师—学生概率差</td><td>回合</td><td>否</td><td>与环境边界对齐，但每回合独立评分</td></tr>
-            <tr class="focus-row"><td>AgentOPSD</td><td>特权技能差异 + 终局验证器</td><td>回合</td><td>是</td><td>递归 belief revision；一次额外教师前向</td></tr>
-            <tr><td>GiGPO（未实测对比）</td><td>跨轨迹重复 anchor state 的环境奖励</td><td>step</td><td>间接</td><td>信号源不同；是论文未纳入主表的重要反事实</td></tr>
-          </tbody>
-        </table></div>
-        <p class="source-note">来源：论文 Introduction、Related Work、Appendix “Baseline Details”。“GiGPO 未实测对比”的判断来自主结果表缺少该方法，属于编辑性比较。</p>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>方法与技术路线</h2>
-
-<h3 class="subhead">回合证据与递归信念</h3>
-<p class="section-intro">方法先把一个回合的 token 概率差相加，得到动作级证据；再把证据递归写入一个有界状态。关键不是状态名叫 belief，而是它让同一份新证据的作用取决于此前已经积累了多少支持。 以下按总体流程、关键机制与实现约束说明技术路线。</p>
-        <p>对第 k 个回合，学生分支只看到当前交互历史，教师分支还看到从 SkillRL 的 SkillBank 检索出的训练期技能。两支共享参数，并对学生已经生成的同一动作评分。把每个 token 的对数概率差求和，便得到回合证据 eₖ：它衡量该动作在“技能条件分布”下是否比在普通策略下更典型。</p>
-        <div class="formula"><div class="eq">δₖ,ₜ = log πθ(yₖ,ₜ | sₖ, c⁺, yₖ,&lt;ₜ) − log πθ(yₖ,ₜ | sₖ, yₖ,&lt;ₜ)
-eₖ = Σₜ δₖ,ₜ = log [πθ(aₖ | sₖ, c⁺) / πθ(aₖ | sₖ)]</div><p>c⁺ 是训练期检索技能。正的 eₖ 只说明技能条件使已生成动作更可能；它不是该动作对结果的反事实因果效应。</p></div>
-        <p>论文用贝叶斯规则解释这个比值：理想情况下，应该比较动作在“最终成功”与“最终失败”条件下的似然；现实中没有这两个分布，于是用技能条件分支近似成功行为、用普通策略近似背景分布。这个替换让不可计算的 Bayes factor 变成一次可计算的自教师对比，但也把技能质量引入了识别假设。</p>
-        <p>有了 eₖ 后，AgentOPSD 不直接拿它做信用，而是从同一任务的 GRPO 组成功率 B₀ 出发，在 log-odds 空间累积折扣证据。状态对极端区域不敏感、在 0.5 附近最敏感：当此前证据已经把成功支持推到接近 0 或 1，同样的局部差异造成的边际修正会更小。</p>
-        <div class="formula"><div class="eq">B₀ = clip(S/G, 10⁻⁴, 1−10⁻⁴)
-cₖ = γcₖ₋₁ + eₖ   ·   Bₖ = σ(logit(B₀) + cₖ)
-ΔBₖ = Bₖ − Bₖ₋₁</div><p>论文主设置 γ=0.95。Bₖ 被作者明确描述为“相对支持”而非校准后的成功概率；真正用于信用的是相邻状态之差 ΔBₖ。</p></div>
-        <p class="block-intro">一个具体例子能看出 eₖ 与 ΔBₖ 的差别。下面数值只是机制示意，不是论文实验记录：关键发现与重复确认都可能“看起来正确”，但前者在不确定阶段真正改变了局势，后者到来时成功支持已经接近饱和。</p>
-        <div class="table-wrap"><table>
-          <caption>解释性示例：局部质量不等于历史条件下的序列重要性</caption>
-          <thead><tr><th>回合</th><th>动作含义</th><th>局部证据 eₖ</th><th>支持状态变化</th><th>边际修正 ΔBₖ</th></tr></thead>
-          <tbody>
-            <tr><td>Turn 1</td><td>普通搜索</td><td>+0.1</td><td>0.20 → 0.23</td><td>+0.03</td></tr>
-            <tr class="focus-row"><td>Turn 2</td><td>找到关键线索</td><td>+2.0</td><td>0.23 → 0.70</td><td>+0.47</td></tr>
-            <tr><td>Turn 3</td><td>再次确认</td><td>+1.8</td><td>0.70 → 0.87</td><td>+0.17</td></tr>
-            <tr><td>Turn 4</td><td>错误操作</td><td>−1.0</td><td>0.87 → 0.72</td><td>−0.15</td></tr>
-          </tbody>
-        </table></div>
-        <p class="analysis"><b>最值得带走的区别：</b>e₂ 与 e₃ 都很高，说明两个动作都像“正确行为”；但 ΔB₂ 远大于 ΔB₃，说明关键线索首次出现时贡献更大。论文真正新增的不是 turn 内求和，而是把“当前行为看起来有多好”改写成“当前行为在已有历史上改变了多少局势”。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>AgentOPSD framework</span></div><a href="assets/paper-figures/39-agentopsd/framework.png" target="_blank"><img src="assets/paper-figures/39-agentopsd/framework.png" alt="AgentOPSD 框架：训练期技能条件自教师产生 token 概率差，按回合聚合后递归更新 B0 到 BK，并与 GRPO 轨迹级优势结合"></a><figcaption><strong>从 token gap 到 turn credit：真正新增的是中间的递归状态</strong><p>左侧是多轮 Agent 与环境交互；中间把每回合 token 差异聚合成 eₖ，再递归得到 Bₖ 与 ΔBₖ；右侧对照 GRPO 把同一序列优势广播给所有 token。</p><p class="figure-reading"><b>阅读要点：</b>图中“OPSD Adv.”容易让人以为新增了独立蒸馏目标，实际训练目标没有额外 distillation loss；自教师信号只用于重塑原有 GRPO 优势的大小。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/abs/2608.05987v1" target="_blank" rel="noreferrer">原文 ↗</a></div></figcaption></figure>
-
-        <h3 class="subhead">正向有界的信用重塑</h3>
-<p class="block-intro">AgentOPSD 不是替换 GRPO，而是对 GRPO 做 turn-level credit reshaping。它最保守也最重要的设计，是不让自教师翻转终局验证器的方向：belief revision 被压进严格为正的乘子，因此只能改变各回合更新的强弱。</p>
-        <p>先用序列优势的符号对 ΔBₖ 定向：成功轨迹里上升的支持得到正信用，失败轨迹里下降的支持才与终局结果一致。随后在每条轨迹内部标准化信用，用区间 [1−b, 1+b] 内的乘子调节原优势。主设置 b=0.2、λ=0.5，因此每回合优势相对 GRPO 的幅度变化被限制在 ±10%，符号不会翻转。</p>
-        <div class="formula"><div class="eq">qₖ = sign(Aseq) · ΔBₖ
-wₖ = clip(1 + b · zscore(qₖ), 1−b, 1+b)
-Ãₖ = Aseq · [(1−λ) + λwₖ]</div><p>有界性：|Ãₖ−Aseq| ≤ λb|Aseq|；当 λ=0 时严格退化为 GRPO。论文证明的是有界、保号和可退化，不是无偏性或因果正确性。</p></div>
-        <p class="block-intro">这意味着成功轨迹里即使夹着明显错误，AgentOPSD 通常也只是让它“少得奖励”，不会让它变成负优势。以下用主设置允许的 ±10% 幅度做一个数值示意，帮助区分“重权重”与“完整信用翻转”。</p>
-        <div class="table-wrap"><table>
-          <caption>解释性示例：成功轨迹中的错误动作仍保持正向更新</caption>
-          <thead><tr><th>回合</th><th>行为</th><th>GRPO A<sub>seq</sub></th><th>AgentOPSD 重塑后</th><th>含义</th></tr></thead>
-          <tbody>
-            <tr><td>T1</td><td>正确准备</td><td>+0.80</td><td>+0.82</td><td>略增强</td></tr>
-            <tr><td>T2</td><td>关键发现</td><td>+0.80</td><td>+0.88</td><td>强增强</td></tr>
-            <tr><td>T3</td><td>明显错误</td><td>+0.80</td><td class="negative">+0.72</td><td>削弱，但不翻成负值</td></tr>
-            <tr><td>T4</td><td>修复错误</td><td>+0.80</td><td>+0.88</td><td>强增强</td></tr>
-            <tr><td>T5</td><td>完成任务</td><td>+0.80</td><td>+0.80</td><td>接近平均</td></tr>
-          </tbody>
-        </table></div>
-        <p class="warning"><b>准确命名：</b>它是 turn-level credit reshaping，而不是完整的 causal / counterfactual credit assignment。保号让训练更稳定、保留验证器权威，同时也限制了它惩罚成功轨迹内部错误动作的能力。</p>
-        <p class="block-intro">从实现角度看，流程仍是标准 group-relative policy update，只增加一次特权教师重评分与逐回合的轻量状态计算。各环节对应不同失败模式：聚合解决 token 与环境边界错位，递归解决局部信号忽略历史，定向解决“变化大但方向错”，先验则提供任务难度锚点。</p>
-        <div class="flow"><div>同任务采样 G=8 条轨迹<br>验证器给终局奖励</div><div>教师额外看到检索技能<br>重评学生动作</div><div>按回合聚合并递归<br>得到 ΔBₖ</div><div>有界重塑 Aseq<br>执行 GRPO 更新</div></div>
-        <p class="block-intro">这四个组件在 ALFWorld / Qwen2.5-7B 的单点消融中都贡献了性能，但幅度并不相同。尤其是去掉先验锚点和信用方向造成的损失最大，说明结果不仅依赖“历史递归”，还高度依赖终局信号如何进入塑形。</p>
-        <div class="table-wrap"><table>
-          <caption>组件消融：ALFWorld，Qwen2.5-7B，成功率（%）</caption>
-          <thead><tr><th>设置</th><th>改变了什么</th><th>成功率 ↑</th><th>相对完整方法</th></tr></thead>
-          <tbody>
-            <tr class="focus-row"><td>AgentOPSD 完整版</td><td>回合级、有界重塑、λ=0.5</td><td>89.1</td><td>—</td></tr>
-            <tr><td>token 级累积</td><td>不在环境回合边界聚合</td><td>85.9</td><td class="negative">−3.2</td></tr>
-            <tr><td>原始局部 gap</td><td>用 eₖ 替代 ΔBₖ</td><td>82.8</td><td class="negative">−6.3</td></tr>
-            <tr><td>只保留修正幅度</td><td>丢弃 outcome-aligned 符号</td><td>80.5</td><td class="negative">−8.6</td></tr>
-            <tr><td>移除 B₀ 锚点</td><td>不以组成功率初始化</td><td>78.9</td><td class="negative">−10.2</td></tr>
-          </tbody>
-        </table></div>
-        <p class="analysis"><b>证据能支持什么：</b>这些单因素替换支持各组件对最终效果有贡献，并表明“原始局部 gap”不如递归修正。它们尚不能单独证明 sigmoid belief 的贝叶斯解释就是增益来源，因为论文没有把它与更简单的累计 gap、指数滑动平均或非概率化门控做完全对齐的对照。</p>
-        <p class="source-note">来源：论文 Table 2 与 Section 4.3。差值为按表中数值计算的绝对百分点。</p>
-      </section>
-
-      <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验设计与结果分析</h2>
-
-<h3 class="subhead">主结果、长程效应与敏感性</h3>
-<p class="section-intro">在 3B 与 7B、三个环境的八个聚合指标上，AgentOPSD 全部优于普通 GRPO；若改与每列最强的其他方法比较，领先幅度在 7B 上明显缩小，WebShop 的精确成功率还落后 3.1 点。最准确的结论是稳定有效，而非全面支配。 以下先说明评测设置，再结合主结果、消融与边界判断证据强度。</p>
-        <p>评测覆盖文本具身任务 ALFWorld、七个数据集组成的 Search-QA，以及 128 个固定验证任务的 WebShop。所有后训练方法使用相同 backbone、数据与 150-step 训练预算；AgentOPSD 的技能只在训练时进入教师分支，推理不使用外部技能。Search-QA 中 NQ 与 HotpotQA 是域内数据，其余五个数据集留出。</p>
-        <p>下面同时列出 GRPO 与“该指标上最强的非 AgentOPSD 方法”，避免只用较弱基线放大结论。3B 下 AgentOPSD 在四项指标上领先或并列最强；7B 下，它在 ALFWorld、Search-QA 和 WebShop Score 只比最强替代方案高 0.2–0.8 点，在 WebShop Acc 则不及 SDAR。</p>
-        <div class="table-wrap"><table>
-          <caption>八个聚合比较：同一模型规模与评测设置（%）</caption>
-          <thead><tr><th>模型</th><th>环境 / 指标</th><th>GRPO</th><th>最强其他方法</th><th>AgentOPSD</th><th>谨慎解读</th></tr></thead>
-          <tbody>
-            <tr><td>3B</td><td>ALFWorld Success</td><td>75.0</td><td>SDAR 84.4</td><td class="positive">84.4</td><td>并列最优；较 GRPO +9.4</td></tr>
-            <tr><td>3B</td><td>Search-QA Accuracy</td><td>36.4</td><td>GRPO+OPSD 44.6</td><td class="positive">46.7</td><td>较最强其他方法 +2.1</td></tr>
-            <tr><td>3B</td><td>WebShop Score</td><td>79.8</td><td>SDAR 85.0</td><td class="positive">90.4</td><td>较最强其他方法 +5.4</td></tr>
-            <tr><td>3B</td><td>WebShop Acc</td><td>63.3</td><td>SDAR 68.0</td><td class="positive">69.5</td><td>较最强其他方法 +1.5</td></tr>
-            <tr><td>7B</td><td>ALFWorld Success</td><td>81.2</td><td>StepOPSD 88.4</td><td class="positive">89.1</td><td>较最强其他方法 +0.7</td></tr>
-            <tr><td>7B</td><td>Search-QA Accuracy</td><td>42.0</td><td>RLSD / SDAR 49.0</td><td class="positive">49.2</td><td>较最强其他方法 +0.2</td></tr>
-            <tr><td>7B</td><td>WebShop Score</td><td>80.9</td><td>SDAR 89.4</td><td class="positive">90.2</td><td>较最强其他方法 +0.8</td></tr>
-            <tr><td>7B</td><td>WebShop Acc</td><td>72.6</td><td>SDAR 82.8</td><td class="negative">79.7</td><td>低于最强其他方法 3.1</td></tr>
-          </tbody>
-        </table></div>
-        <p class="source-note">来源：论文 Table 1。最强其他方法包含表中所有非 AgentOPSD 行，包括带推理期技能的 Skill-GRPO*；本表对应列的最强者实际均为不带星号的方法。差值均为绝对百分点。</p>
-        <p>论文还给出一个更贴近动机的分析：在 ALFWorld 六类子任务上，用成功 episode 的平均回合数表征任务 horizon，再回归“每多一回合损失多少成功率”。AgentOPSD 的斜率为 −0.54 点/回合，GRPO 为 −2.91，RLSD 为 −3.59。这与“轨迹越长，统一信用越糟”的假设一致。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 1</span><span>Training dynamics &amp; horizon robustness</span></div><a href="assets/paper-figures/39-agentopsd/dynamics-and-horizon.png" target="_blank"><img src="assets/paper-figures/39-agentopsd/dynamics-and-horizon.png" alt="AgentOPSD 与 GRPO 在 ALFWorld 7B 上的验证成功率、任务长度敏感度和策略熵对比"></a><figcaption><strong>长轨迹优势与训练动态：支持动机，但不是因果识别</strong><p>左图显示验证成功率随训练上升；中图比较不同方法的任务长度斜率，AgentOPSD 最平；右图展示策略熵动态。</p><p class="figure-reading"><b>谨慎解读：</b>horizon 回归只有六个 ALFWorld 子任务，长度又按成功 episode 测量，任务类型与长度同时变化。因此它是有方向性的描述证据，不能单独证明递归信用因果上消除了长程退化。</p><div class="figure-source"><span>来源：论文 Figure 1；限制判断为编辑性推断</span><a href="https://arxiv.org/abs/2608.05987v1" target="_blank" rel="noreferrer">原文 ↗</a></div></figcaption></figure>
-        <p>超参数分析也与这个故事相符：塑形权重 λ 从 0.5 降低时，三个配置大多退化；证据衰减 γ 与 PPO 上界裁剪则相对不敏感。四回合上限的 Search-QA 中，各条曲线差距更小，提示方法主要在足够长、能够积累历史的轨迹中发挥作用。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 3</span><span>Hyperparameter sensitivity</span></div><a href="assets/paper-figures/39-agentopsd/sensitivity.png" target="_blank"><img src="assets/paper-figures/39-agentopsd/sensitivity.png" alt="AgentOPSD 对塑形权重 lambda、证据衰减 gamma 和策略裁剪上界的敏感性曲线"></a><figcaption><strong>λ 控制是否真正使用回合信用，γ 与裁剪上界更像稳健性参数</strong><p>三行依次为 ALFWorld 7B、Search-QA 3B 与 ALFWorld 3B；红线是主设置。长时程任务对 λ 的反应更清晰。</p><p class="figure-reading"><b>阅读要点：</b>阴影是滚动曲线的局部 ±1 标准差，不应当当作多随机种子置信区间。主结果表也没有报告 run-to-run 方差，因此 0.2–0.8 点的小幅领先需要复现实验才能判断稳定性。</p><div class="figure-source"><span>来源：论文 Figure 3 与 Section 4.4</span><a href="https://arxiv.org/abs/2608.05987v1" target="_blank" rel="noreferrer">原文 ↗</a></div></figcaption></figure>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
-<h3 class="subhead epistemic-heading">论文贡献</h3>
-
-<p class="section-intro">AgentOPSD 的工程结论比它的概率语义更稳固：用递归、保号、有界的回合重塑能改善训练；但把这种重塑解释成 Bayesian success belief，需要技能教师近似成功条件分布等额外假设。论文的关键下一步不是再加一个模块，而是验证这个代理何时可信。 以下区分概念贡献、方法价值、主要局限与后续验证方向。</p>
-        <p>去品牌后的本质是：在只有终局验证器的长程任务中，把“信用分配边界”从整条轨迹推进到回合；利用训练期特权上下文引起的动作似然变化作为证据，产出一个不改变全局方向的局部权重。它用一次教师前向和技能库依赖，换取更细的时间归因。</p>
-        
-
-<h3 class="subhead epistemic-heading">证据边界与局限</h3>
-<p>这个方法没有真正观测成功条件动作分布。附录给出两个关键近似：A1 假设技能条件分支接近成功条件行为；A2 假设成功率低时，普通策略的边际分布主要由失败行为构成。A1 单独成立时，eₖ 更接近点互信息式证据，能保持符号与排序；只有在更强的稀有成功极限下，才接近理想 Bayes factor。论文也明确不把 Bₖ 当作校准概率。</p>
-        <p class="block-intro">下面四项边界分别触及测量、因果、系统成本和外部有效性。它们不否定结果，但决定了论文可以从“有效的信用塑形”外推到多强的机制解释。</p>        <ul class="key-points">
-          <li><strong>教师代理有效性：</strong>共享技能信息下优于多种自蒸馏基线，但尚未按检索质量、错误技能或空技能分层；技能条件分支是否代表成功条件行为仍待校准。</li>
-          <li><strong>后见证据非因果：</strong>局部 gap 与递归 revision 的消融支持该设计有效，却不能回答替换某一步后后续状态如何变化；仍需同状态 continuation rollout 检验真实边际贡献。</li>
-          <li><strong>成本转移：</strong>方法无需额外 rollout 或可学习 critic，但技能库构建、检索错误和一次教师前向仍在生命周期成本内，不能仅以 critic-free 概括经济性。</li>
-          <li><strong>长程外推：</strong>现有训练固定为 150 步，最大交互回合为 ALFWorld 50、WebShop 15、Search-QA 4；尚未覆盖数百步和持续状态漂移，需要多随机种子与 horizon 梯度验证。</li>
-        </ul>
-        
-
-<h3 class="subhead epistemic-heading">独立研究启发</h3>
-<p class="warning"><b>最强可信反事实：</b>在相同 backbone、数据、技能和额外前向预算下，用一个简单的折扣累计 gap / EMA 门控，或用 GiGPO 式环境奖励信用，是否能达到同样效果？当前消融证明“递归版本优于原始局部 gap”，却尚未隔离“贝叶斯形式”相对一般历史平滑的独特价值。</p>
-        <p>因此，论文最耐久的贡献不是公式里出现了 Bayesian belief，而是提出了一条实用的设计原则：在稀疏终局奖励下，密集代理信号必须先对齐环境决策边界，再根据此前历史判断其边际新信息，最后让可信的终局验证器保留全局方向。即使未来换掉技能库、sigmoid 状态或 GRPO，这三个约束仍值得保留。</p>
-        <p class="block-intro">“局部质量不等于历史条件下的边际贡献”也不只适用于 RL 信用分配。只要系统需要从长轨迹中挑选、压缩或沉淀信息，同样应该问：新内容本身看起来有多好，和它在已有状态上新增了多少信息，是不是被混成了一个分数。</p>        <ul class="key-points">
-          <li><strong>Memory Selection：</strong> 不只保存高质量片段，还要衡量它相对现有记忆新增了多少可用信息。</li>
-          <li><strong>Experience Selection：</strong> 不只挑成功轨迹，还要定位真正改变策略判断的关键转折。</li>
-          <li><strong>Context Compression：</strong> 不只保留“看起来重要”的句子，还要避免重复证据占满上下文。</li>
-          <li><strong>Skill Extraction：</strong> 不只抽取正确动作，还要识别对完成任务具有边际作用的行为模式。</li>
-        </ul>
-        <p class="verdict"><b>一句话结论：</b>AgentOPSD 不重新发明 RL，而是在 GRPO 内用自蒸馏证据把轨迹级优势重塑为回合级权重；它有说服力地说明“局部正确性不等于序列重要性”，但尚未提供可翻转符号的反事实信用，也没有证明其 belief 是校准概率。最有价值的下一实验，是用真实 continuation 反事实检验 ΔBₖ 是否真的定位改变结果的回合。</p>
-        <p class="source-note">主要来源：arXiv:2608.05987v1（2026-08-06），包括正文、附录、主结果表、组件消融与超参数图。本文未独立复现实验；“最强反事实”和结构性边界为基于论文证据的编辑性分析。</p>
-        <a class="back" href="#top">↑ 返回顶部</a>
-      </section>
-    </main>
-  </div>
-  <script>
-    const bar=document.getElementById('progress'),theme=document.getElementById('theme'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')];
-    function update(){const h=document.documentElement.scrollHeight-innerHeight;bar.style.width=(h?scrollY/h*100:0)+'%';let id=sections[0].id;for(const s of sections){if(s.getBoundingClientRect().top<innerHeight*.36)id=s.id}links.forEach(a=>a.classList.toggle('active',a.hash==='#'+id))}
-    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
-    theme.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('paper-theme',document.body.classList.contains('dark')?'dark':'light')});
-    if(localStorage.getItem('paper-theme')==='dark')document.body.classList.add('dark');
-  </script>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
+<body>
+<header class="hero"><div class="hero-in">
+<h1>AgentOPSD：基于递归信念更新的回合级信用重塑</h1>
+<p class="paper-name">AgentOPSD: Recursive Self-Distillation for Agentic Reinforcement Learning</p>
+<p class="paper-authors">作者：Zi-Han Wang、Zhengxi Lu、Zhiyuan Yao、Jinyang Wu、Jie Wu、Zhengzhou Cai、Yueqing Sun、Ziang Ye、Linji Hao、Qi Gu、Xunliang Cai、Yongliang Shen、Yujiu Yang</p>
+<p class="paper-affiliation">作者单位：清华大学 / 浙江大学 / 美团</p>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/abs/2608.05987v1" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">长程代理通常只在整个任务结束时得到成功或失败奖励。把同一个优势值分配给所有动作，会同时奖励成功轨迹中的冗余操作，也会惩罚失败轨迹里曾经有用的局部判断。逐 token 自蒸馏能够提供更密集信号，但环境是在整回合动作结束后才响应，局部词语偏好与真正有意义的决策粒度并不相同。</p><div class="table-wrap"><table data-source=""><caption>稀疏结果监督需要补上的两层结构</caption><thead><tr><th>难点</th><th>朴素细化的不足</th><th>论文处理</th></tr></thead><tbody><tr><td>一个动作由许多 token 构成</td><td>逐 token 差异容易与完整动作功能错位</td><td>先聚合为回合级证据</td></tr><tr><td>局部动作价值依赖此前进展</td><td>同样的局部差异在不同历史下意义不同</td><td>从组成功率出发，递归积累历史证据</td></tr><tr><td>辅助教师可能不可靠</td><td>直接替换结果奖励会改变全局学习方向</td><td>只用正且有界的倍率重塑结果级优势</td></tr></tbody></table></div><p class="prose">AgentOPSD 的创新不是另训一个价值网络，而是将训练期技能增强的同模型分支作为自教师，比较它与普通学生对同一个已生成动作的概率。这个差异被解释为成功相关证据，递归更新一个成功信念代理，再以信念变化分配回合信用。部署仍使用普通学生，不要求继续提供训练技能。</p><p class="prose">一次家务动作或检索决策的价值，经常来自它是否把后续工作带到可解状态；仅模仿成功文本又可能把全部风格细节当必要。本文试图保留结果可验证性，同时借助较便宜的模型内对照细化信用。其理论语言提供组织信号的直觉，实际有效性仍由训练后的任务行为检验。</p></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">结果验证器决定整条轨迹该增强还是抑制，自蒸馏证据决定相对强调哪些回合。两个监督来源职责不同，后者不能推翻前者。</p><figure class="method-overview" data-source="primary-method"><figcaption>自绘总览｜一个 rollout、两种评分上下文、递归信用</figcaption><div class="state-band"><b>学生在线采样</b><span>普通历史 sₖ → 动作 aₖ → 环境观察；轨迹终点获得二值结果 R</span></div><div class="split-grid"><div class="flow-box"><h4>学生评分</h4><p>在原历史下，对已经生成的动作 token 计算 log π</p></div><div class="flow-box"><h4>自教师评分 · 训练期</h4><p>同一参数模型额外读取检索技能 c⁺，对同一动作评分；不另生成轨迹</p></div></div><div class="flow-connector">↓ 教师−学生差异，聚合为每回合 eₖ</div><div class="flow-box"><h4>递归证据累积</h4><p>以组成功率 B₀ 为锚；衰减旧证据后加入新 eₖ；sigmoid 得到 Bₖ，计算 ΔBₖ</p></div><div class="flow-connector">↓ 先以终局优势符号对齐，再在轨迹内标准化并裁剪</div><div class="state-band"><b>有界信用重塑</b><span>保持正乘子 → 调整 GRPO 优势在回合间的强度 → 更新学生参数</span></div><div class="feedback-band">↶ 新学生再次采样；无额外反事实 rollout，也无另训 critic</div></figure><section class="method-section"><h3>技能条件自教师：比较同一动作，避免混入不同采样结果</h3><p class="prose">学生先在环境中生成动作。随后让共享参数的两条分支在 teacher forcing 下分别评分：教师多看一份训练期检索技能，学生只看原历史。每个 token 的对数概率差聚合为该回合证据，因此计算的是技能使这段行为更像成功行为的程度，并不是比较两条独立轨迹的终局回报。概率差被停止梯度处理，作为信用信号进入后续优化。</p></section><section class="method-section"><h3>递归信念：让同样的新证据在不同历史下产生不同影响</h3><p class="prose">组内经验成功率经裁剪形成 B₀；证据状态按 cₖ=γcₖ₋₁+eₖ 更新，成功信念为 Bₖ=σ(logit(B₀)+cₖ)。衰减作用于积累证据而保留初始锚点，避免长期无证据时任意漂移。真正用于回合信用的是 ΔBₖ=Bₖ−Bₖ₋₁，因此在接近确定成功的状态下，同样正证据带来的概率增量会变小。</p><p class="prose">这里的贝叶斯解释依赖一个近似：技能条件分支更接近成功关联行为，普通分支提供背景分布。它没有直接获得真实成功/失败条件动作分布，Bₖ 也不是经独立校准验证的环境状态估计。这个限定关系到能否把“信念变化”称为真实因果贡献。</p></section><section class="method-section"><h3>有界重塑：细化强度，保留结果信号方向</h3><p class="prose">先将信念变化按终局优势方向对齐为 qₖ=sign(A_seq)ΔBₖ，再在轨迹内标准化并产生受限正倍率；该回合的所有 token 共享这一倍率，并与原结果级优势结合。正倍率的关键作用是：成功轨迹中不受教师偏好的回合可以少奖励，却不会因此变成负奖励；失败轨迹也不会因为某一回合的教师差异而整体改为正向。裁剪限制辅助信号的支配程度，原始 PPO/GRPO 的更新约束和参考模型控制仍保留。</p></section><section class="method-section"><h3>从信念增量到最终损失：方向对齐是关键步骤</h3><div class="table-wrap"><table data-source=""><caption>回合信用的运算顺序</caption><thead><tr><th>量</th><th>具体计算</th><th>避免的问题</th></tr></thead><tbody><tr><td>ΔBₖ</td><td>Bₖ−Bₖ₋₁</td><td>区别新增支持与已经饱和的重复支持</td></tr><tr><td>qₖ</td><td>sign(A_seq)×ΔBₖ</td><td>让成功和失败轨迹的局部信用方向对齐终局</td></tr><tr><td>wₖ</td><td>clip(1+b zₖ, 1−b, 1+b)</td><td>限制标准化局部信号的放大或压低</td></tr><tr><td>Ãₖ</td><td>A_seq×[(1−λ)+λwₖ]</td><td>控制重塑强度，始终保持优势符号</td></tr></tbody></table></div><p class="prose">失败轨迹的 A_seq 为负，信念下降反而与终局失败一致，经 sign(A_seq) 对齐后得到较高 qₖ，应加强对这类回合的负更新；不能只按正 ΔB 奖励全部轨迹。训练没有再额外叠加一个独立蒸馏损失，停止梯度的教师差异只通过重塑后的优势作用于策略。</p><p class="prose">若 λ=0，退回原 GRPO；如果所有回合信用相同，标准化不能创造有意义的相对排序。若一组 rollout 全对或全错，组相对优势本来就为零，裁剪 B₀ 只是防止 logit 无穷，并不会凭教师信号凭空制造结果监督。</p></section></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="method-section"><h3>最重要的结果是收益与回归同时存在</h3><div class="table-wrap"><table data-source="Table 1"><caption>匹配模型规模的选定结果（%）</caption><thead><tr><th>模型 / 环境</th><th>GRPO</th><th>最强其他方法</th><th>AgentOPSD</th></tr></thead><tbody><tr><td>3B / Search-QA Accuracy</td><td>36.4</td><td>44.6</td><td>46.7</td></tr><tr><td>3B / WebShop Score</td><td>79.8</td><td>85.0</td><td>90.4</td></tr><tr><td>7B / ALFWorld Success</td><td>81.2</td><td>88.4</td><td>89.1</td></tr><tr><td>7B / WebShop 完全成功率</td><td>72.6</td><td>82.8</td><td>79.7</td></tr></tbody></table></div><p class="prose">3B 上的若干提升较明显，但 7B 多个聚合指标与最强对照差距很小，WebShop 完全成功率还低 3.1 个百分点。WebShop Score 衡量部分约束满足，完全成功率要求全部满足，两者不能互换；较高部分分数并不保证最好的端到端完成率。</p></section><section class="method-section"><h3>递归状态的哪部分有实质作用？</h3><div class="table-wrap"><table data-source="Ablation"><caption>Qwen2.5-7B / ALFWorld 成功率</caption><thead><tr><th>设置</th><th>成功率 %</th></tr></thead><tbody><tr><td>完整方法</td><td>89.1</td></tr><tr><td>token 级累积</td><td>85.9</td></tr><tr><td>用原始局部 gap 替代 ΔB</td><td>82.8</td></tr><tr><td>移除 B₀ 锚点</td><td>78.9</td></tr></tbody></table></div><p class="prose">这组控制比主榜单更贴近机制：粒度、历史变换及锚点都影响结果，尤其移除锚点的退化最大。但它证明的是这些实现选择在该环境下有用，不是直接证明 Bₖ 等于真实成功概率。方法省去了额外采样和独立 critic，却仍需对两种上下文评分及检索技能；训练计算不能视为与纯 GRPO 完全相同。</p></section><p class="prose">统一超参数用于各环境与规模，降低逐任务调参带来的解释自由度。相同骨干、环境接口与训练预算的比较最接近算法干预，但概率双评分、检索和技能构建仍是方法前提。没有额外 rollout 说明交互采样没有成倍增加，不等于所有训练 FLOPs 都与原方法相同。</p></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>核心贡献：方法贡献：结果正确性与局部教学信号分工</h3><p class="prose">值得保留的设计原则是让可验证终局结果管理更新方向，让有偏但密集的辅助信号管理相对强度。这比直接相信每条教师建议更稳健，也解释了为什么有界正倍率是方法核心，而非普通数值技巧。回合级组织则使自蒸馏与环境交互边界对齐。</p></section><section class="method-section"><h3>关键未决问题：技能偏好是否等于成功信用？</h3><p class="prose">技能分支可能偏好符合模板、常见或易表达的动作，而不一定偏好真正改变结局的动作。归一化和裁剪限制了错误信用的破坏，但不能让代理信号自动成为因果证据。7B WebShop 的完全成功率回归提示：收益可能依赖技能覆盖及目标细节，不能假定更精细信用在所有环境都占优。</p><p class="prose">一个有区分力的检验，是在可恢复环境中选取高、低 ΔB 回合，从相同状态替换动作并采样后续，检验其真实回报变化是否与信念增量相关；再对调技能或使用不匹配技能，观察信用排序与收益是否同步改变。若仅保持语言风格就能获得高信用，就应把机制理解为有用的教学偏置，而非成功概率的可靠递归估计。</p></section><p class="prose">另一个可检验条件是动作长度：eₖ 以 token 差异求和，较长动作可能累积更大幅度；回合内又将同一信用广播给全部 token。轨迹内归一化与裁剪控制数值范围，却不自动解除长度和语法风格的影响。可对等价长短动作比较信用排序，判断方法是在识别有效决策，还是部分利用表达形式。</p><p class="prose">现有证据支持一种无需独立 critic 的信用重塑方法；最有力的结论是训练信号组织方式有价值，真实因果信用与跨任务技能依赖仍需进一步区分。</p></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>

@@ -1,756 +1,103 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="SoL-Pi 中文深度解读：Auto-Research 如何把 Agent Harness 本身作为研究对象，通过 Broad→Deep 搜索与 535 个可验证环境，从轨迹中发现可迁移系统机制，并进行 Performance—Token—Cost Pareto 优化。">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="从自动研究到四机制运行，解释成本门槛、证据核验和可恢复观察，并保留完整栈得分下降的事实。">
+<title>SoL-Pi：Agent Harness 的递归自动研究与效率优化</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
-  <title>SoL-Pi：Agent Harness 的递归自动研究与效率优化｜论文精读</title>
-  <style type="text/css">
-  :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#4f8516;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#f0f7e7;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}.hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(118,185,0,.25),transparent 29%),radial-gradient(circle at 8% 100%,rgba(93,133,221,.18),transparent 30%),linear-gradient(125deg,#10223c,#173a5b 56%,#3e315f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1150px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}.layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}.chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:810px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:810px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}.cards,.steps,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.step,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2),.step:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3),.step:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n),.step:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.step h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.step p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:18px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.figure-wide img{width:100%;max-height:none}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}.table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:760px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.perf-row td{background:var(--pt)!important}.positive{color:var(--green);font-weight:750}.negative{color:var(--red);font-weight:750}.analysis,.warning{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.boundary article{border-color:#ead5b4;background:var(--at)}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#25351c;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .step p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}@media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.steps,.boundary{grid-template-columns:1fr}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.step,.boundary article{break-inside:avoid;background:#fff}}
-    .comparison-table{min-width:980px}
-  
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
 
-    /* 2026-09 standardized research-report layout; original palette is retained. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
-    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
-    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
-    .metric:nth-child(n+5){display:none}
-    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
-    .rail{display:none!important}
-    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
-    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
-    .chapter+.chapter{border-top:1px solid var(--line)}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
-    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
-    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
-    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
-    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
-    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
-    .key-points>li strong{color:var(--ink)}
-    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
-    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
-    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
-    .analysis,.warning{box-shadow:none}
-    @media(max-width:820px){
-      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .layout{display:block;padding:14px 11px 54px}
-      main{border-radius:11px}
-      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
-      h1{font-size:clamp(27px,8.2vw,34px)}
-      h2{font-size:21px}
-      .section-intro,.lead{font-size:15.5px}
-    }
-    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
 
-  
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
 
-    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
-    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
-    h2{margin-bottom:16px;padding-bottom:12px}
-    .subhead{margin:21px 0 8px}
-    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
-    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
-    .key-points{margin-bottom:14px}
-    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
-    .key-points>li::before{top:21px}
-    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
-    .process-sequence{counter-reset:step;margin:13px 0 16px;padding:0;list-style:none}
-    .process-sequence>li{counter-increment:step;position:relative;margin-left:14px;padding:7px 10px 11px 38px;border-left:2px solid var(--line);line-height:1.72}
-    .process-sequence>li::before{content:counter(step);position:absolute;left:-14px;top:7px;display:grid;width:26px;height:26px;place-items:center;border:2px solid var(--paper);border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800}
-    .process-sequence>li>strong{display:block;margin-bottom:1px;color:var(--ink)}
-    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
-    .paper-figure>a{padding:9px}
-    .paper-figure figcaption{padding:14px 18px 15px}
-    .table-wrap{margin:14px 0 8px}
-    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
-    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
-    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
-    .chapter>*:last-child{margin-bottom:0}
-    @media(max-width:820px){
-      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
-      .subhead{margin-top:18px}
-      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
-      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
-      .paper-figure{margin:14px 0 9px}
-      .paper-figure>a{padding:5px}
-    }
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
 
-    /* Collection typography contract: one Chinese-first face and stable body scale. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    body{font-weight:400}
-    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
-    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
 
-  
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
-
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
-
-<body id="top">
-  <div class="progress" aria-hidden="true">
-    <span id="progress"></span>
-  </div>
-
-  <header class="hero">
-    <div class="hero-in">
-      <div class="eyebrow">
-        PAPER REVIEW · arXiv:2609.20519v1
-      </div>
-
-      <h1>SoL-Pi：Agent Harness 的递归自动研究与效率优化｜论文精读</h1>
-
-      <p class="subtitle"><span class="paper-name">SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</span>Haozhe Liu、Tian Ye、Sensen Gao 等 14 位作者 · NVIDIA、NTU、MIT · 2026-09-17</p>
-
-      <div class="actions">
-        <a class="action" href="https://arxiv.org/abs/2609.20519" target="_blank" rel="noreferrer">查看论文原文 ↗</a><a class="action" href="https://github.com/NVlabs/SoL-Pi" target="_blank" rel="noreferrer">代码仓库 ↗</a><a class="action" href="https://nvlabs.github.io/SoL-Pi/" target="_blank" rel="noreferrer">项目主页 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button>
-      </div>
-
-      <div class="metrics"><div class="metric">
-          <small>候选方向</small><b>152 → 4</b><span>自动研究筛选漏斗</span>
-        </div><div class="metric">
-          <small>搜索环境</small><b>535</b><span>495 仓库任务 + 40 合成任务</span>
-        </div><div class="metric">
-          <small>搜索规模</small><b>3000+ 次运行</b><span>6 万+ Agent—环境交互</span>
-        </div><div class="metric">
-          <small>核心评测</small><b>51 个任务</b><span>EdgeBench 公开集合</span>
-        </div></div>
-    </div>
-  </header>
-
-  <div class="layout">
-    <nav class="toc" aria-label="章节导航">
-      <p class="side-title">阅读导航</p>
-
-      <ol>
-        <li><a href="#s1">01 · 论文概览</a></li>
-
-        <li><a href="#s2">02 · 研究背景与问题定义</a></li>
-
-        <li><a href="#s3">03 · 方法与技术路线</a></li>
-
-        <li><a href="#s4">04 · 实验设计与结果分析</a></li>
-
-        <li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-      </ol>
-    </nav>
-
-    <main>
-            <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文概览</h2>
-
-<p class="section-intro">SoL-Pi 让自动研究系统直接改进 Agent 的运行框架。系统先分析 535 个环境中的执行记录，找出反复出现的浪费，再把这些发现改成可复用的工具和运行规则。论文同时比较任务表现、Token 用量和费用，而不是只追求最高分。</p>
-
-        <h3 class="subhead">核心结论</h3>
-        <ul class="key-points">
-          <li><strong>研究对象：</strong>优化范围从任务代码和提示词扩展到整个运行框架，包括工具、上下文管理、结果处理和执行循环。</li>
-          <li><strong>核心方法：</strong>先广泛提出改进方向，再深入实现和验证。候选方案冻结后，还要在未参与搜索的任务和模型上接受测试。</li>
-          <li><strong>主要结论：</strong>四项机制一起使用时，Token 和费用明显下降，但任务得分略有损失。因此部署时要在能力与成本之间选择合适的折中点。</li>
-        </ul>
-      </section>
-
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>研究背景与问题定义</h2>
-
-<h3 class="subhead">问题背景与相邻方法</h3>
-<p class="section-intro">以往的自动研究主要修改代码、模型、算法或超参数。SoL-Pi 进一步允许系统修改 Agent 的运行框架，例如工具如何组合、上下文何时压缩、长日志如何处理。论文真正研究的是：这些系统层改动能否跨任务复用。</p>
-
-        <ul class="key-points">
-          <li><strong>研究对象：</strong>传统自动研究修改代码、模型或配置；SoL-Pi 还允许修改 Agent 周围的工具和运行规则。</li>
-          <li><strong>研究问题：</strong>系统能否从大量轨迹中识别重复低效，将其转成可执行假设，并经实现、评审与多环境验证后沉淀为可迁移机制。</li>
-          <li><strong>与相邻方法的差别：</strong>上下文压缩只解决历史过长，人工工程依赖专家排查，单一任务上的演化又容易过拟合。SoL-Pi 希望找到能跨环境复用的系统功能。</li>
-        </ul>
-
-        <div class="analysis">
-          <strong>从“记住经验”到“改造系统”：</strong>传统方法常把执行记录整理成记忆或技能，让 Agent 下次记得怎么做。SoL-Pi 则根据执行记录新增系统功能。例如，系统发现“修改文件后立即测试”反复出现，于是把两步合并成一次工具调用。
-        </div>
-
-        <p class="block-intro">下表只比较各方法“改什么”，不比较总体强弱。SoL-Pi 与 Meta-Harness、AHE 最接近；它的区别是同时使用大量环境，并把 Token 成本和能力下限纳入筛选条件。</p>
-
-        <div class="table-wrap">
-          <table class="comparison-table">
-            <caption>Auto-Research 的搜索对象如何从任务产物扩展到 Agent System</caption>
-            <thead>
-              <tr><th>研究路线</th><th>被优化的对象</th><th>反馈主要来自</th><th>最终沉淀</th><th>与 SoL-Pi 的关系</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>常规 Auto-Research</td><td>代码、模型、算法、超参数</td><td>任务得分、Loss、验证器</td><td>更好的目标程序或模型配置</td><td>SoL-Pi 把同一研究循环转向执行 Agent 的外围系统</td></tr>
-              <tr><td><a href="https://arxiv.org/abs/2510.00615" target="_blank" rel="noreferrer">ACON</a> / <a href="https://arxiv.org/abs/2510.11967" target="_blank" rel="noreferrer">Context-Folding</a> / <a href="https://arxiv.org/abs/2510.24699" target="_blank" rel="noreferrer">AgentFold</a></td><td>历史与 Observation 的压缩、折叠和主动管理</td><td>失败分析、监督学习或强化学习</td><td>更小且更保真的活动上下文</td><td>属于单一 Harness 维度；SoL-Pi 的搜索空间还覆盖 action、tool、delegation 与 execution loop</td></tr>
-              <tr><td><a href="https://arxiv.org/abs/2603.03329" target="_blank" rel="noreferrer">AutoHarness</a> / <a href="https://arxiv.org/abs/2607.15524" target="_blank" rel="noreferrer">RHI</a></td><td>环境定制代码防护或任务特定 Prompt Loop</td><td>少轮环境反馈或版本成对比较</td><td>定制 Harness / Prompt 规范</td><td>同样自动改 Harness，但更强调环境或任务内适应</td></tr>
-              <tr><td><a href="https://arxiv.org/abs/2603.28052" target="_blank" rel="noreferrer">Meta-Harness</a> / <a href="https://arxiv.org/abs/2604.25850" target="_blank" rel="noreferrer">AHE</a></td><td>Harness 代码、组件、工具、中间件与记忆</td><td>历史候选、分数、轨迹与分层可观测证据</td><td>端到端优化且可迁移的 Harness</td><td>最接近；SoL-Pi 进一步突出多环境规模、Token 经济性与冻结后的单向验证</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="source-note">来源：SoL-Pi Introduction / Related Work 及各相邻工作的原论文。不同工作的任务与指标不可直接做数值比较。</p>
-
-        <p>因此，四项具体机制只是论文用来验证主张的实例。更重要的结论是：自动研究不只能生成补丁或技能，还能根据大量执行记录改造 Agent 的运行系统。</p>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>方法与技术路线</h2>
-
-<h3 class="subhead">递归自动研究流程</h3>
-<p class="section-intro">SoL-Pi 把研究分成“广泛探索”和“深入验证”两层。前者寻找值得研究的方向，后者围绕每个方向反复实现、测试和修订，直到候选被淘汰或冻结。</p>
-
-        <ul class="key-points">
-          <li><strong>诊断执行记录：</strong>先定位重复动作、上下文膨胀、大型输出和日志噪声，并说明每种浪费发生在哪个环节。</li>
-          <li><strong>广泛探索：</strong>围绕六类系统边界生成 152 个方向，先扩大覆盖面，再选出值得深入验证的假设。</li>
-          <li><strong>深入验证：</strong>每个方向独立完成实现、实验、分析和修订，并由不同角色检查结果，减少自我确认偏差。</li>
-          <li><strong>递归边界：</strong>论文验证了多轮改进流程，但尚未证明“改进后的系统能以更快速度继续改进自身”。</li>
-        </ul>
-
-        <p class="block-intro">关键不是让研究 Agent 无限尝试，而是让每个方向都能独立运行、及时停止并接受审查。广泛探索阶段判断哪里值得研究，深入验证阶段确认方案能否稳定生效。下面六步构成同一条连续流程。</p>
-        <ol class="process-sequence" aria-label="SoL-Pi 深度研究流程">
-          <li><strong>Observe｜观察轨迹</strong>收集基线 Harness 的执行轨迹，定位重复动作、上下文压力、大型观测和薄弱诊断信号。</li>
-          <li><strong>Propose｜提出假设</strong>把观察转成可证伪的 Harness Hypothesis，明确修改位置、预期收益与能力风险。</li>
-          <li><strong>Implement &amp; Review｜实现与审查</strong>实现候选并由独立 Reviewer 检查；未达到完成条件的版本返回修订。</li>
-          <li><strong>Rollout &amp; Analyze｜运行与分析</strong>在固定环境中执行，由多个 Analyzer 检查轨迹，再把证据汇总为下一轮修改依据。</li>
-          <li><strong>Capability Gate｜能力门槛</strong>所有能力指标必须落在事先声明的容差内，防止把少做任务误认成效率。</li>
-          <li><strong>Efficiency Gate｜效率门槛</strong>至少一项成本或 Token 指标改善，并在合格候选中保留非支配点。</li>
-        </ol>
-
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 1</span><span>Broad → Deep 自动研究漏斗</span></div>
-          <a href="assets/paper-figures/30-sol-pi/teaser.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/teaser.png" alt="SoL-Pi 从研究环境、执行轨迹、候选想法到四个保留机制的自动研究流程，以及 EdgeBench 示例结果" loading="lazy"></a>
-          <figcaption>
-            <strong>从轨迹观察到冻结 Harness：研究循环本身就是论文的核心方法</strong>
-            <p>左侧环境产生多样轨迹，中间 Research AI 提出候选并通过 Performance 与 Cost 门槛，右侧保留机制合并为 SoL-Pi；冻结后才进入 EdgeBench。</p>
-            <p class="figure-reading"><b>阅读要点：</b>“Scaling” 同时包含搜索广度与谱系深度。论文报告 152 个方向、3000+ 次运行和 6 万+ 次 Agent—环境交互，但没有建立投入规模与收益之间的 Scaling Law。</p>
-            <div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a></div>
-          </figcaption>
-        </figure>
-
-        <div class="analysis"><strong>标题中的 Recursive：</strong>已经被实验展示的是“轨迹内执行循环 + 机制开发循环 + 多谱系搜索循环”；把 SoL-Pi 用作下一轮研究 Harness、形成效率递归复利，则是作者提出的长期愿景，而非本文已经测得的结论。</div>
-
-        <h3 class="subhead">可验证环境与泛化控制</h3>
-<p class="block-intro">SoL-Pi 的关键基础设施不是某个 Prompt，而是 535 个多样、可执行、可自动验证的研究环境。作者的核心假设是：只有跨越足够多环境仍反复出现的交互模式，才更可能成为可迁移 Harness 机制。</p>
-
-        <ul class="key-points">
-          <li><strong>过拟合风险：</strong>少量公开任务容易把题集结构、验证器偏好或固定工作流写入 Harness，使分数上涨却不能形成跨仓库规律。</li>
-          <li><strong>仓库派生环境：</strong>495 个 issue–PR 环境保留修复前代码与离线依赖，并用补丁前失败、补丁后通过的测试提供真实可执行证据。</li>
-          <li><strong>验证器驱动环境：</strong>40 个任务只规定成功条件而不限定参考补丁，用来覆盖开放式多解问题；机制冻结后再进入 EdgeBench。</li>
-        </ul>
-
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 3</span><span>535 个搜索环境与 Held-out EdgeBench 的隔离</span></div>
-          <a href="assets/paper-figures/30-sol-pi/environments.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/environments.png" alt="495 个仓库派生环境和 40 个验证器驱动环境汇入 535 个搜索环境，机制冻结后再进入 EdgeBench" loading="lazy"></a>
-          <figcaption>
-            <strong>环境多样性不是数据规模装饰，而是 Harness Generalization 的前提假设</strong>
-            <p>左侧两类环境只为机制搜索提供反馈；机制源码、配置与接受规则冻结后，才进入右侧 EdgeBench。Held-out 结果不返回搜索循环。</p>
-            <p class="figure-reading"><b>阅读要点：</b>逻辑链是 Environment Diversity → recurring interaction pattern → reusable mechanism。论文展示了这条路线可行，但没有控制环境数量与多样性、绘制泛化收益曲线，因此它仍是方法假设而非已经建立的 Scaling Law。</p>
-            <div class="figure-source"><span>来源：论文 Figure 3；原图文字在阅读栏宽度下仍可辨识</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a></div>
-          </figcaption>
-        </figure>
-
-        <p>这套环境设计同时解决三件事：Issue 与修复前仓库提供自然任务语义，fail-before / pass-after 测试提供可执行证据；Verifier-driven 环境只规定成功条件，不要求复制唯一参考轨迹；候选谱系彼此隔离，失败实现与临时编排不会污染其他方向。</p>
-        <p>机制冻结后才进入 EdgeBench，结果只用于接受或拒绝候选，不触发针对性修补。真实轨迹、多解验证和搜索—评测隔离共同降低了把局部题集偏好固化进 Harness 的风险。</p>
-
-        <p>评测口径仍需谨慎：EdgeBench 公开 51 个任务，其中 11 个用于冻结候选的一次性接受，余下 40 个用于最终泛化评估；论文主表报告 51 个任务的总体结果。因此，11 个任务和 40 个任务的证据角色并不完全相同。论文也没有与简单 Test-time Scaling 做严格等反馈、等推理预算对照。</p>
-
-        <div class="analysis"><strong>这一部分为何比“四个 Trick”更重要：</strong>机制列表会过时，但“用大量可验证环境寻找跨轨迹重复模式”的研究范式可以继续发现新机制。SoL-Pi 的长期价值取决于环境分布能否持续扩展，而不仅取决于当前四个实现。</div>
-      </section>
-
-      <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验设计与结果分析</h2>
-
-<h3 class="subhead">机制组合与 Pareto 结果</h3>
-<p class="section-intro">四个最终机制最值得学习的不是具体阈值，而是它们如何把轨迹观察变成运行系统的结构变化：压缩交互拓扑、对 Context 做成本决策、把 Observation 外置成可寻址对象，以及只委派阅读而不委派推理。 以下先说明评测设置，再结合主结果、消融与边界判断证据强度。</p>
-
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 4</span><span>四类 Harness Mechanism 的触发点与回退边界</span></div>
-          <a href="assets/paper-figures/30-sol-pi/mechanisms.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/mechanisms.png" alt="Action Fusion、Online Context Compact、ObservationPack 与 Evidence-Preserving Reducer 的四联机制图" loading="lazy"></a>
-          <figcaption>
-            <strong>四个机制分别改写 Action、Context、Observation 与 Delegated Reading</strong>
-            <p>绿色表示机制路径与预期节省，红色表示额外成本或验证失败。共同设计原则是：信息可以延迟、外置或压缩，但必须保留可取回、可验证或退回原文的路径。</p>
-            <p class="figure-reading"><b>阅读要点：</b>SoL-Pi 不是“统一摘要一切”。它先区分开销发生在哪个系统边界，再为每类开销设计不同的触发条件和失败回退。</p>
-            <div class="figure-source"><span>来源：论文 Figure 4；四个原始面板完整保留</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a></div>
-          </figcaption>
-        </figure>
-
-        <p class="block-intro">从系统角度看，四个 Mechanism 分别改变不同的信息流。Action Fusion 减少模型回合；Online Compact 决定何时值得重写 Context；ObservationPack 改变大输出的存储位置；Reducer 改变谁负责从日志中找证据。</p>        <ul class="key-points">
-          <li><strong>① Action Fusion · 压缩交互拓扑：</strong> 基线常执行 edit → 模型读取结果 → 决定 run test；新工具把修改与确定性的后续命令合并，典型流程从 3 次 API 调用降到 2 次。需要先检查修改结果时仍保持分离。</li>
-          <li><strong>② Online Context Compact · 成本收益决策：</strong> 在计划步骤完成的语义边界估计剩余请求、增长速率与缓存重写成本；只有 Future Saving &gt; Rewrite Cost，或接近窗口上限时才压缩。</li>
-          <li><strong>③ ObservationPack · 外部记忆 + Pointer：</strong> 超过 10 KiB 的输出先归档，前两次请求发送全文；从第三次起改为稳定句柄、原始大小和 1 KB 头尾摘录，需要时再精确分页取回。</li>
-          <li><strong>④ Evidence-Preserving Reducer · 委派阅读：</strong> 低价模型从至少 4 KiB 的构建 / 测试日志中提取证据；确定性验证 schema、hash、exit status 与 exact quote。验证失败、疑似凭据或未缩短时退回原文。</li>
-        </ul>
-
-        <p>Reducer 先处理工具结果，ObservationPack 再决定投影到主模型 Context 的形式；后者识别已经验证的 Receipt 并跳过再次打包。文件读取和搜索结果不进入 Reducer，辅助模型只负责选证据，主 Agent 仍负责诊断和决策——也就是 <strong>delegate reading, not reasoning</strong>。</p>
-
-        <h3 class="subhead">机制组合的 Pareto 工作点</h3>
-
-        <p class="block-intro">论文同时报告两种工作点：SoL-Pi [Efficiency] 是固定四机制完整栈；SoL-Pi [Performance] 则在每个后端上选择平均分最高的单机制配置。前者追求最低绝对成本，后者追求最高任务分数，不能混成一个“最好版本”。</p>
-
-        <p>在 EdgeBench 的 GPT-5.6 Sol 结果中，完整栈相对 Pi 将总 Token 流量从 2.1538B 降到 1.0990B，下降 49.0%；API 成本从 1339 美元降到 894 美元，下降 33.2%；平均分从 44.833 降到 42.003，即保留 93.7%。ObservationPack 单独使用时平均分升至 47.208，同时 Token 流量低 6.1%，是该后端的性能配置。</p>
-
-        <p>在未参与搜索的 Opus 5 后端，完整栈不经再搜索直接迁移：相对 Pi 的 Token 流量下降 44.7%，成本下降 33.5%，平均分保留 94.3%。不过最高分来自 Action Fusion（50.482），而最佳成本/分数比来自 ObservationPack（0.4899 美元/score）。这说明“完整栈成本最低”不等于“完整栈在所有归一化指标上最优”。</p>
-
-        <div class="table-wrap">
-          <table>
-            <caption>
-              EdgeBench：基线、完整效率栈与最高分单机制配置
-            </caption>
-
-            <thead>
-              <tr>
-                <th>后端 / 配置</th>
-
-                <th>总 Token 流量 (B) ↓</th>
-
-                <th>API 成本 ($) ↓</th>
-
-                <th>平均分 ↑</th>
-
-                <th>成本 / score ($) ↓</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td>GPT-5.6 Sol · Pi</td>
-
-                <td>2.1538</td>
-
-                <td>1,339</td>
-
-                <td>44.833</td>
-
-                <td>0.5855</td>
-              </tr>
-
-              <tr class="focus-row">
-                <td>GPT-5.6 Sol · SoL-Pi [Efficiency]</td>
-
-                <td>1.0990</td>
-
-                <td>894</td>
-
-                <td>42.003</td>
-
-                <td>0.4174</td>
-              </tr>
-
-              <tr class="perf-row">
-                <td>GPT-5.6 Sol · +ObservationPack [Performance]</td>
-
-                <td>2.0224</td>
-
-                <td>1,271</td>
-
-                <td>47.208</td>
-
-                <td>0.5280</td>
-              </tr>
-
-              <tr>
-                <td>Opus 5 · Pi</td>
-
-                <td>2.3697</td>
-
-                <td>1,741</td>
-
-                <td>44.756</td>
-
-                <td>0.7625</td>
-              </tr>
-
-              <tr class="focus-row">
-                <td>Opus 5 · SoL-Pi [Efficiency]</td>
-
-                <td>1.3101</td>
-
-                <td>1,158</td>
-
-                <td>42.224</td>
-
-                <td>0.5376</td>
-              </tr>
-
-              <tr class="perf-row">
-                <td>Opus 5 · +Action Fusion [Performance]</td>
-
-                <td>2.1016</td>
-
-                <td>1,605</td>
-
-                <td>50.482</td>
-
-                <td>0.6235</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="source-note">来源：论文 Table 2。↑ 越高越好，↓ 越低越好；价格按论文所用的 2026-08-17 API 价格计算。</p>
-
-        <div class="analysis">
-          <strong>怎么读：</strong>完整栈在两种后端都把 API 成本压低约三分之一，但付出了约 2.6–2.8 个平均分的点估计代价。论文没有为这些均分报告置信区间或显著性检验，因此“性能相当”应理解为作者预设容差下的工程判断，而非统计等价证明。
-        </div>
-
-        <p class="block-intro">单组件消融把“哪个机制更有效”拆成三类答案：最低绝对成本、最高平均分、以及最低单位得分成本。结果随后端变化明显，支持迁移的同时也显示了搜索后端依赖。</p>
-
-        <div class="table-wrap">
-          <table>
-            <caption>
-              四个组件的 add-one 消融：平均分 / 成本 / 成本效率
-            </caption>
-
-            <thead>
-              <tr>
-                <th>配置</th>
-
-                <th>Sol 分数 ↑</th>
-
-                <th>Sol 成本 ($) ↓</th>
-
-                <th>Sol $/score ↓</th>
-
-                <th>Opus 分数 ↑</th>
-
-                <th>Opus 成本 ($) ↓</th>
-
-                <th>Opus $/score ↓</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td>Pi Baseline</td>
-
-                <td>44.833</td>
-
-                <td>1,339</td>
-
-                <td>0.5855</td>
-
-                <td>44.756</td>
-
-                <td>1,741</td>
-
-                <td>0.7625</td>
-              </tr>
-
-              <tr>
-                <td>+ Action Fusion</td>
-
-                <td>46.664</td>
-
-                <td>1,235</td>
-
-                <td>0.5190</td>
-
-                <td class="positive">50.482</td>
-
-                <td>1,605</td>
-
-                <td>0.6235</td>
-              </tr>
-
-              <tr>
-                <td>+ Online Context Compact</td>
-
-                <td>41.993</td>
-
-                <td>935</td>
-
-                <td>0.4365</td>
-
-                <td>49.155</td>
-
-                <td>1,537</td>
-
-                <td>0.6130</td>
-              </tr>
-
-              <tr>
-                <td>+ Evidence-Preserving Reducer</td>
-
-                <td>44.630</td>
-
-                <td>1,200</td>
-
-                <td>0.5274</td>
-
-                <td>43.405</td>
-
-                <td>1,456</td>
-
-                <td>0.6578</td>
-              </tr>
-
-              <tr>
-                <td>+ ObservationPack</td>
-
-                <td class="positive">47.208</td>
-
-                <td>1,271</td>
-
-                <td>0.5280</td>
-
-                <td>47.047</td>
-
-                <td>1,176</td>
-
-                <td class="positive">0.4899</td>
-              </tr>
-
-              <tr class="focus-row">
-                <td>完整四机制栈</td>
-
-                <td>42.003</td>
-
-                <td class="positive">894</td>
-
-                <td class="positive">0.4174</td>
-
-                <td>42.224</td>
-
-                <td class="positive">1,158</td>
-
-                <td>0.5376</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="source-note">来源：论文 Table 4。每个组件行都是在 Pi 上单独增加一个机制；完整栈不是逐行累加实验。</p>
-
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head">
-            <span>论文原图 · Figure 6</span><span>机制触发率、强度与触发任务上的效率增益</span>
-          </div><a href="assets/paper-figures/30-sol-pi/activation.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/activation.png" alt="四个机制在 GPT-5.6 Sol 和 Opus 5 上的任务触发率、触发强度及 Token 效率增益柱状图" loading="lazy"></a>
-
-          <figcaption>
-            <strong>Opus 5 上多数机制触发更少，但触发后的收益未消失</strong>
-
-            <p>Online Context Compact 的任务触发率从 Sol 的 92.2% 降至 Opus 的 33.3%；Action Fusion 的平均触发强度从 70.58 降至 13.54。相反，ObservationPack 在 Opus 触发任务上的效率增益达到 35.8%。</p>
-
-            <p class="figure-reading"><b>谨慎解读：</b>效率增益是在各配置自己的“触发任务子集”上计算，不同柱子不是完全相同的任务集合，适合描述机制行为，不能直接当作严格因果交互效应。</p>
-
-            <div class="figure-source">
-              <span>来源：论文 Figure 6</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a>
-            </div>
-          </figcaption>
-        </figure>
-
-        <h3 class="subhead">跨基准的效率与能力权衡</h3>
-
-        <p>Terminal-Bench 4 的 63 个 CPU 任务上，Codex 与 Pi 都解出 18 个，SoL-Pi 只解出 15 个；与此同时，SoL-Pi 相对 Pi 的总模型成本低 26.3%，每个解出任务成本低 11.6%。这不是“同等能力纯降本”，而是明确的解题率—成本交换。IMO 2026 的 6 道 Lean 4 验证题中，SoL-Pi 与 Pi 都通过 3 道，SoL-Pi 总成本更低；Codex 通过 5 道，但总成本最高。</p>
-
-        <div class="table-wrap">
-          <table>
-            <caption>
-              Terminal-Bench 4 与 IMO 2026 的外部评测
-            </caption>
-
-            <thead>
-              <tr>
-                <th>Harness</th>
-
-                <th>TB4 解出 / 63 ↑</th>
-
-                <th>TB4 总成本 ($) ↓</th>
-
-                <th>TB4 每题成本 ($) ↓</th>
-
-                <th>IMO 通过 / 6 ↑</th>
-
-                <th>IMO 总成本 ($) ↓</th>
-
-                <th>IMO 每题成本 ($) ↓</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td>Codex</td>
-
-                <td>18</td>
-
-                <td>272.35</td>
-
-                <td>15.13</td>
-
-                <td class="positive">5</td>
-
-                <td>114.47</td>
-
-                <td>22.89</td>
-              </tr>
-
-              <tr>
-                <td>Pi</td>
-
-                <td>18</td>
-
-                <td>286.45</td>
-
-                <td>15.91</td>
-
-                <td>3</td>
-
-                <td>75.95</td>
-
-                <td>25.32</td>
-              </tr>
-
-              <tr class="focus-row">
-                <td>SoL-Pi</td>
-
-                <td class="negative">15</td>
-
-                <td class="positive">211.12</td>
-
-                <td class="positive">14.07</td>
-
-                <td>3</td>
-
-                <td class="positive">62.69</td>
-
-                <td class="positive">20.90</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="source-note">来源：论文 Table 3。TB4 排除依赖 GPU 的任务；IMO 均使用 GPT-5.6 Sol (xhigh)，单题上限 150 分钟。</p>
-
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head">
-            <span>论文原图 · Figure 5</span><span>20 工作者集群的两小时内核优化</span>
-          </div><a href="assets/paper-figures/30-sol-pi/swarm.png" target="_blank"><img src="assets/paper-figures/30-sol-pi/swarm.png" alt="五组共二十个工作 Agent 的协作架构，以及 SoL-Pi 集群、单 Agent、Pi 集群的周期数和成本比较" loading="lazy"></a>
-
-          <figcaption>
-            <strong>更省的工作者 Harness 让同一两小时预算覆盖更多有效探索</strong>
-
-            <p>SoL-Pi 集群达到 1,127 cycles，优于单 Agent 的 1,333 和 Pi 集群的 1,366（越低越好）；成本为 60.11 美元，低于 Pi 集群的 82.12，但高于单 Agent 的 39.20。</p>
-
-            <p class="figure-reading"><b>谨慎解读：</b>每种配置只运行一次两小时实验，没有多次重复或不确定性估计。它展示了一个有希望的系统案例，不能据此推断稳定的集群平均收益。</p>
-
-            <div class="figure-source">
-              <span>来源：论文 Figure 5；三个最终候选均通过官方正确性检查</span><a href="https://arxiv.org/pdf/2609.20519" target="_blank" rel="noreferrer">查看 PDF ↗</a>
-            </div>
-          </figcaption>
-        </figure>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
-<h3 class="subhead epistemic-heading">论文贡献</h3>
-
-<p class="section-intro">论文最重要的实验结论不是“机制越多越好”。四项机制一起使用时成本最低，但某些单项机制反而取得更高分。方法的价值在于展示能力、Token 和费用之间的真实取舍。</p>
-
-        <p>在 GPT-5.6 Sol 上，完整四机制栈相对 Pi 将 Token 流量降低 49.0%、成本降低 33.2%，但平均分从 44.833 降到 42.003；ObservationPack 单独使用则把平均分提高到 47.208，同时 Token 流量低 6.1%。在 Opus 5 上，Action Fusion 得到最高平均分 50.482，而 ObservationPack 得到最佳成本 / 得分 0.4899 美元。机制数量因此不是单调收益变量。</p>
-
-        <p>因此，未来不应寻找一个适合所有场景的“最佳运行框架”，而应保留多种折中方案：能力相同时选成本更低的，预算固定时选得分更高的。论文已经用能力门槛和效率门槛体现这一思路，但作者选出的完整配置只代表一种偏重效率的选择。</p>
-
-        <p class="block-intro">把全文再压缩一层，可以得到四个可迁移的判断。它们分别回答研究对象、泛化来源、改进产物和部署选择。</p>        <ul class="key-points">
-          <li><strong>运行系统也能被研究：</strong>模型和运行框架共同决定 Agent 的行为，因此工具、上下文和执行规则都可以成为优化对象。</li>
-          <li><strong>环境越多，越容易发现共性：</strong>从大量不同环境中寻找反复出现的问题，比在少量公开题目上反复调参更可能得到可迁移机制。</li>
-          <li><strong>执行记录可以改变系统：</strong>轨迹不只能整理成记忆或技能，还能转化为新的工具、上下文规则和结果处理方式。</li>
-          <li><strong>部署需要明确取舍：</strong>任务表现、Token 和费用必须一起比较，不能默认把所有机制全部开启。</li>
-        </ul>
-
-        <div class="analysis"><strong>记忆主线：</strong>把运行系统作为研究对象；从多环境记录中找共性；把共性变成系统功能；按能力与成本选择部署方案。</div>
-
-        <h3 class="subhead epistemic-heading">证据边界与局限</h3>
-
-        <ul class="key-points">
-          <li><strong>模型依赖：</strong>机制只由 GPT-5.6 Sol 轨迹开发，在 Opus 5 上触发率和强度下降；现有证据仅支持一个额外后端的初步迁移。</li>
-          <li><strong>搜索成本：</strong>535 个环境、3000+ 次运行和 6 万+ 次交互投入可观，但论文未给出固定预算下的广度—深度对照或净回收期。</li>
-          <li><strong>统计不确定性：</strong>EdgeBench 缺少多随机种子方差，集群配置只运行一次，成本还依赖特定日期价格；点估计不足以证明统计等价。</li>
-        </ul>
-
-        <p class="block-intro">如果要把论文转成自己的 Harness 工程计划，最值得迁移的不是四个具体阈值，而是“可逆、可验证、可归因”的设计原则。优先测量浪费，再引入最小机制，并为压缩失败与信息需求保留明确退路。</p>
-
-        
-
-<div class="boundary">
-          <article>
-            <h3>已被实验支持</h3>
-
-            <p>在论文设置中，完整栈在 Sol 与 Opus 上均显著降低记录到的 Token 流量和 API 成本；单机制还能在特定后端提升平均分或单位得分效率。</p>
-          </article>
-
-          <article>
-            <h3>尚未被证明</h3>
-
-            <p>跨更多模型与真实生产工作流的稳定收益、搜索规模定律、长期净成本回收，以及用 SoL-Pi 继续搜索是否会产生递归复利。</p>
-          </article>
-        </div>
-
-        <div class="warning">
-          <strong>复现抓手：</strong>先复现 Pi 基线与四个 add-one 配置，再测试完整栈；保持任务、模型、推理强度、时间预算、价格日期一致。特别检查缓存读取下降是否伴随缓存写入上升，以及低成本是否来自未完成工作或机制未触发。
-        </div>
-
-        <p class="source-note">主要来源：Haozhe Liu 等，<em>SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</em>，arXiv:2609.20519v1，提交于 2026-09-17。本文依据论文 PDF、作者公开源码与项目页整理，未独立运行代码或复现实验；派生百分比均按论文表格点估计计算。</p><a class="back" href="#top">↑ 返回顶部</a>
-      </section>
-    </main>
-  </div><script type="text/javascript">
-const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');addEventListener('scroll',()=>{const h=document.documentElement,d=h.scrollHeight-h.clientHeight;bar.style.width=`${d?Math.min(100,100*h.scrollTop/d):0}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
-  </script>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
+<body>
+<header class="hero"><div class="hero-in">
+<h1>SoL-Pi：Agent Harness 的递归自动研究与效率优化</h1>
+<p class="paper-name">SoL-Pi: Recursively Scaling Auto-Research Loops for Efficient Agent Harness</p>
+<p class="paper-authors">作者：Haozhe Liu、Tian Ye、Sensen Gao 等 14 位作者</p>
+<p class="paper-affiliation">作者单位：作者单位：NVIDIA / NTU / MIT</p>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/abs/2609.20519" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">长程编码代理的成本不只来自回答多写了几句。一次编辑后再等模型决定运行测试，会多一次来回；大日志即使只用一次，也会在后续请求里反复传输；上下文压缩太早会破坏缓存，太晚又持续携带冗余。局部减少文本并不保证整条任务更便宜，因为丢失证据可能引发重读、错误诊断和补救。</p><p class="prose">SoL-Pi 将 harness 的这些工作方式作为自动研究对象。研究代理读取执行轨迹、提出改动、在开发环境里验证能力与效率，再将四个保留机制整合为 Pi 扩展。它的主要创新是<strong>把有能力约束的系统机制发现规模化</strong>；最终的 token 节约是这一研究过程产出的工作点，不是全文唯一研究对象。</p><div class="table-wrap"><table data-source=""><caption>开销发生在不同边界，不能靠一种摘要解决</caption><thead><tr><th>开销边界</th><th>需要保留什么</th><th>保留机制</th></tr></thead><tbody><tr><td>编辑到执行之间</td><td>必须先看结果才能决定的动作仍分开。</td><td>Action Fusion 合并可预先指定的后续命令。</td></tr><tr><td>计划与累计上下文之间</td><td>未来节省需覆盖缓存重写成本。</td><td>Online Context Compact 用收益门槛触发。</td></tr><tr><td>大观察跨请求反复出现</td><td>精确原文能被重新取回。</td><td>ObservationPack 归档、短期全量、后续句柄化。</td></tr><tr><td>主模型读取测试日志</td><td>错误证据、退出状态与原文一致。</td><td>Evidence-Preserving Reducer 提取后确定性核验。</td></tr></tbody></table></div><p class="prose">这些机制作用点不同、还可能相互影响，所以论文把整体集成也纳入研究和评估。不能仅以某个模块的局部省 token 比例推断最终系统净收益。</p></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">方法包含两层：外层自动研究产生并筛选机制，内层冻结后的四个机制改变代理运行。最终评估结果不回流到开放机制搜索，51 个公开 EdgeBench 任务又分为单向接受与最终迁移子集。</p><figure class="method-overview" data-source="primary-method"><figcaption>自绘总览｜外层搜索冻结机制，内层按动作与信息流位置干预</figcaption><div class="state-band"><b>外层 Auto-Research</b><span>开发轨迹 → 多方向候选 → 独立审查与能力 / 效率门槛 → 集成调参 → 冻结</span></div><div class="flow-box"><h4>模型计划与文件操作</h4><p>Action Fusion：能预先确定的 edit + follow-up command 合成一次工具请求。</p></div><div class="flow-connector">↓ 环境返回观察后，分类型处理</div><div class="split-grid"><div class="flow-box"><h4>构建 / 测试日志</h4><p>Reducer 保存原文 → 小模型提取 receipt → 程序核对来源、退出码和精确引用；失败回原文。</p></div><div class="flow-box"><h4>其他大工具结果</h4><p>ObservationPack >10 KiB 归档；前两次请求全量，第三次起改句柄与摘要，支持按页原文召回。</p></div></div><div class="flow-connector">↓ 进入主模型上下文，继续原生推理与工具选择</div><div class="state-band"><b>计划完成边界</b><span>Online Context Compact 估算剩余请求、输入节约和缓存重写；过门槛或近容量时调用 Pi 原生压缩</span></div><div class="feedback-band">↶ 研究期用开发结果修订候选；冻结后未见任务只执行机制，保持能力退化容忍度与成本口径预先固定。</div></figure><section class="method-section"><h3>自动研究：搜索的是可复用干预，不是逐题答案</h3><p class="prose">外层从上下文、进度、工具、委派、提示策略等不同方向提出机制假设，并在仓库型与可执行验证型环境中反复实现、试验、审查。候选要超出单个有利案例，并通过能力约束；独立机制保留后还需要集成，解决相互作用。</p><p class="prose">论文在 EdgeBench 公开 51 题中用 11 题作冻结候选的单向接受，余 40 题用于最终泛化。这里“留出”并不表示所有 51 题都从未参与任何接受决策；应区分开发搜索、接受和最终迁移三层。自动研究的成本也不属于最终每任务执行账单。</p></section><section class="method-section"><h3>Action Fusion 与缓存感知压缩：先判断能否减少一次工作</h3><p class="prose">Fusion 给写文件等变更工具增加可选后续命令，将变更和已可决定的测试一同执行，一次观察返回两者结果。如果下一步依赖检查变更输出，就不能预先融合。它省的是中间模型往返，而不是把有依赖的动作随意并发。</p><p class="prose">压缩在计划子步完成时估计剩余请求：参考已完成子步的请求数与未完成步骤，并用当前窗口增长限制外推。只有预期输入节约覆盖缓存重写开销才触发，后续还考虑未收回的重写成本并提高裕量；近窗口上限则是另一触发条件。门槛估算没有独立定价摘要调用，属于后续解释成本效果时的边界。</p></section><section class="method-section"><h3>ObservationPack：让旧观察可寻址，而非彻底删掉</h3><p class="prose">超过 10 KiB 的工具结果先原样归档，并在接下来两次提供商请求中保留全量，给即时推理读取机会。第三次起替换为稳定句柄、原大小和完整首尾行摘录；需要时可以取回精确页面。小结果不处理。</p><p class="prose">两次全量和后续按需召回区分了“现在有用”与“以后可能需要”。它依赖主模型能识别何时该重读；如果关键证据位于中段而模型没有召回，大幅减小输入也可能牺牲成功率。这是可恢复信息路径，不是已经保证语义无损。</p></section><section class="method-section"><h3>Reducer：低成本提取不获得诊断权</h3><p class="prose">指定构建和测试命令产生至少 4 KiB 日志时，先存精确原文，小模型提出紧凑凭据。确定性核验检查模式、源哈希、退出状态、原文精确引句和长度；不通过、疑似凭据或没有缩减时回退原日志。文件读取和搜索结果跳过此模块。</p><p class="prose">Reducer 先于 ObservationPack，后者识别已验证凭据并跳过，避免二次摘要破坏核验结果。小模型只负责挑证据，主代理仍负责解释错误和选择动作；程序能检查引用确实存在，却不能保证被选片段覆盖所有诊断所需信息。</p></section><details class="original-figure"><summary>论文原始结构图 · 点击对照</summary><figure class="main-figure"><a href="assets/paper-figures/30-sol-pi/teaser.png" target="_blank" rel="noopener"><img loading="lazy" src="assets/paper-figures/30-sol-pi/teaser.png" alt="论文原始结构图"></a><figcaption>论文研究流程及 EdgeBench 示例结果；机制运行由上方自绘图展开 · 点击图片查看原始尺寸</figcaption></figure></details></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="evidence-section"><h3>节约成本的完整栈是否完全保住得分</h3><p class="evidence-setting">EdgeBench 51 个公开任务，GPT-5.6 Sol；token traffic 为记录到的输入、缓存读写和输出总流量，不是纯输出量；美元为论文固定日期价格。</p><div class="table-wrap"><table data-source="Tables 1–2"><caption></caption><thead><tr><th>配置</th><th>总流量 B</th><th>API 成本 $</th><th>平均分</th></tr></thead><tbody><tr><td>Pi</td><td>2.1538</td><td>1,339</td><td>44.833</td></tr><tr><td>SoL-Pi Efficiency，四机制完整栈</td><td>1.0990</td><td>894</td><td>42.003</td></tr><tr><td>SoL-Pi Performance，单机制 ObservationPack</td><td>2.0224</td><td>1,271</td><td>47.208</td></tr></tbody></table></div><p class="prose">完整栈流量降低 49.0%、账单降低 33.2%，同时得分保留约 93.7%，因此它是性能—成本折中，不能说完全等性能免费加速。Performance 点则提高得分且小幅省钱，但它是按后端另选的单机制工作点，不代表完整栈同时拥有两种收益。</p><p class="prose">转到未重新搜索的 Opus 5，完整栈流量下降 44.7%、成本下降 33.5%、得分保留 94.3%。这支持跨后端可迁移的初步证据，但相同的轻微性能损失也继续存在。</p></section><section class="method-section"><h3>机制证据应与系统工作点一起解读</h3><p class="prose">四个模块分别改变请求数、缓存重写、旧输出重复传输和委派阅读，所以 token traffic 下降与货币成本下降不成比例是合理现象；缓存读写价格与辅助模型费用会改变账单。论文还在终端、形式化数学和代理协作等设置检验，提供用途广度，不能替代每个机制条件触发时的可靠性分析。</p><p class="prose">最重要的未统一账本是搜索与部署：大规模自动研究为冻结机制支付的总开发成本，和一次部署执行节省并非同一口径。是否值得，要看复用任务量以及性能损失容忍度，而不能只看一次执行的节约比例。</p></section></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>核心贡献：系统优化必须保住证据路径和退回路径</h3><p class="prose">SoL-Pi 展示了 harness 自动研究如何产出有清晰作用点的可复用机制。较耐久的思想是：合并动作先判断依赖，压缩先算缓存账，卸载观察保留寻址，委派阅读保留可核验原文。它们把能力约束具体放到了执行边界，而不是最后用一个总分补救任意删减。</p></section><section class="method-section"><h3>可恢复与可核验都弱于语义充分</h3><p class="prose">句柄能取回原文，但前提是模型意识到需要；精确引用能证明句子存在，却不能证明遗漏的内容不影响诊断。完整栈有约 6% 相对得分损失，可能正来自这些信息选择边界，也可能是任务随机差异或多个机制交互。现有汇总不单独识别原因。</p><p class="prose">更有区分力的评估应固定任务和随机性，在失败轨迹中逐一恢复原始观察、禁用摘要或延迟句柄化，测量哪种恢复能救回答案。若恢复中段信息有效，瓶颈是召回触发；若单机制都成功而组合失败，重点应转向模块交互。</p></section><p class="prose">综合判断，论文支持自动研究能够发现跨设置有用的效率机制，并给出真实价格口径下的收益；它不支持无损压缩或无限自改进。最值得学习的是把优化假设变成有依赖判断、核验、回退和留出测试的系统变更。</p></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>

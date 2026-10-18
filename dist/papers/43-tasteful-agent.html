@@ -1,213 +1,103 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="《The Tasteful Agent》中文深度解读：如何把长程任务中的中途方向选择变成可自动标注的决策分叉，测量模型在结果出现前的判断力，并分析蒸馏与端到端增益的证据边界。">
-  <title>Tasteful Agents：长程智能体决策品味的测量与训练｜论文精读</title>
-  <style>
-    :root{--bg:#f4f1ec;--surface:#fffefa;--surface-2:#f7f8fa;--ink:#192330;--muted:#647387;--line:#dcdad3;--blue:#3269ae;--purple:#7652a9;--green:#337d64;--amber:#a46a22;--red:#a74d4d;--bt:#edf4fb;--pt:#f4f0fb;--gt:#edf7f2;--at:#fff5e8;--shadow:0 12px 30px rgba(30,43,55,.06);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px;font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.9;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
-    .progress{position:fixed;inset:0 0 auto;z-index:20;height:3px}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green))}
-    .hero{color:#f6faff;background:radial-gradient(circle at 82% 11%,rgba(87,185,151,.2),transparent 29%),radial-gradient(circle at 12% 92%,rgba(118,82,169,.21),transparent 32%),linear-gradient(125deg,#12253d,#173b5c 60%,#3f396f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e3;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:11px 0 0;font-size:clamp(31px,4.1vw,53px);line-height:1.15;letter-spacing:-.03em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d8e1ec;font-size:15px;line-height:1.7}.paper-name{display:block;color:#fff;font-weight:760}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.23);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:11px;background:rgba(5,16,37,.3)}.metric small,.metric span{display:block;color:#b9c7d7;font-size:11px;line-height:1.45}.metric b{display:block;margin:4px 0;color:#fff;font-size:17px;line-height:1.35}
-    .layout{display:grid;grid-template-columns:215px minmax(0,960px) 195px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}main,.chapter,.table-wrap{min-width:0}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-left-color:var(--blue);color:var(--blue);background:var(--bt);font-weight:750}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.68}.rail-card ul{margin:0;padding-left:17px}
-    .chapter{--accent:var(--blue);--tint:var(--bt);margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--surface) 155px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.33}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.36));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.bridge):not(.source-note):not(.callout):not(.verdict){max-width:810px;margin:0 0 14px;font-size:16px;line-height:1.92;text-indent:2em;text-align:justify}.bridge{max-width:810px;margin:20px 0 16px;color:#43546a;font-size:15.5px;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:25px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
-    .thesis{margin:18px 0;padding:17px 19px;border:1px solid #d6cbe8;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));font-size:18px;font-weight:770;line-height:1.62;text-align:center}.thesis span{display:block;margin-top:6px;color:var(--muted);font-size:12.5px;font-weight:520}.card-grid,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cbdbea;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d8cdeb;background:var(--pt)}.card:nth-child(4n+3){border-color:#c8e0d6;background:var(--gt)}.card:nth-child(4n){border-color:#ead7b9;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4b5c70;font-size:14px;line-height:1.72}.boundary article{border-color:#ead7b9;background:var(--at)}
-    .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow div{position:relative;display:grid;min-height:88px;padding:11px 8px;place-items:center;border:1px solid #cbdbea;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:735;line-height:1.48}.flow div:nth-child(2){border-color:#d8cdeb;background:var(--pt)}.flow div:nth-child(3){border-color:#c8e0d6;background:var(--gt)}.flow div:nth-child(4){border-color:#ead7b9;background:var(--at)}.flow div:not(:last-child):after{content:"→";position:absolute;right:-12px;z-index:2;color:var(--muted);font-size:16px}.formula{margin:17px 0;padding:16px 18px;border:1px solid #d8cdeb;border-radius:12px;background:var(--pt);overflow-x:auto}.formula .eq{white-space:pre-wrap;text-align:center;font-size:15.5px;font-weight:720;line-height:1.8}.formula p{margin:8px 0 0;color:#584971;font-size:13px;line-height:1.72}
-    .paper-figure{margin:26px 0 12px;border:1px solid var(--line);border-radius:15px;background:#faf9f7;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ec;font-size:11px;font-weight:800}.paper-figure>a{display:flex;align-items:center;justify-content:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:780px;margin:auto;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.76}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--blue);background:var(--bt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11px}.figure-compact>a{padding:20px}.figure-compact img{max-width:870px}.figure-portrait img{width:auto;max-width:690px}
-    .table-wrap{width:100%;max-width:100%;min-width:0;margin:17px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px}.table-wrap table{width:100%;min-width:720px;border-collapse:collapse;background:var(--surface);font-size:13.5px;line-height:1.62}caption{padding:12px 13px;color:var(--ink);background:#fafbfd;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#334d69;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:#eef5ff!important;font-weight:700}.danger{color:var(--red);font-weight:780}.safe{color:var(--green);font-weight:770}.source-note{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.72}.callout,.verdict{margin:16px 0;padding:14px 16px;border-left:4px solid var(--amber);border-radius:0 10px 10px 0;color:#6d4e25;background:var(--at);font-size:14px;line-height:1.78}.verdict{border-left-color:var(--purple);color:#55446a;background:var(--pt)}.back{display:inline-block;margin-top:18px;font-size:13px;font-weight:760}
-    body.dark{--bg:#0e1520;--surface:#151e2c;--surface-2:#1a2535;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#19362f;--at:#382c1d;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--surface) 155px)}body.dark .lead{background:linear-gradient(90deg,var(--tint),var(--surface))}body.dark .card p,body.dark .boundary p,body.dark .bridge,body.dark .paper-figure figcaption p{color:#bfcbda}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head,body.dark caption{color:#d7e2ef;background:#1b2635}body.dark .paper-figure figcaption{background:linear-gradient(var(--surface),var(--bt))}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark th{color:#d5e5f5}body.dark .focus-row td{color:var(--ink);background:#20334e!important}body.dark .callout{color:#f2d8af}body.dark .verdict,body.dark .formula p{color:#e0d1f2}body.dark .danger{color:#eeaaa6}body.dark .safe{color:#9ad0b6}
-    @media(max-width:1210px){.layout{grid-template-columns:205px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.chapter{padding:22px 19px 26px}.card-grid,.boundary,.flow{grid-template-columns:1fr}.flow div:not(:last-child):after{content:"↓";left:calc(50% - 12px);right:auto;top:-18px}.chapter>p:not(.lead):not(.bridge):not(.source-note):not(.callout):not(.verdict),.bridge{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.figure-portrait img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}.table-wrap table{min-width:690px}}@media print{body{color:#111;background:#fff;font-size:11pt}.progress,.toc,.rail,.actions,.back{display:none!important}.hero{color:#111;background:#fff;border-bottom:2px solid #111}.subtitle,.metric small,.metric span{color:#333}.metric,.chapter{color:#111;background:#fff;border-color:#aaa;box-shadow:none}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.flow div{break-inside:avoid;background:#fff}.paper-figure figcaption,.card,.boundary article,.formula,th,.focus-row td{color:#111;background:#fff!important}}
-  
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="将长程轨迹中的可判别分叉构造成品味测量，并以有后见信息的教师蒸馏判断；严格区分给定分叉建议与自主发现决策点。">
+<title>Tasteful Agents：长程智能体决策品味的测量与训练</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
+
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
+
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
+
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
+
+
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
-<body id="top">
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
-  <header class="hero"><div class="hero-in">
-    <div class="eyebrow">PAPER REVIEW · arXiv:2609.25804v2</div>
-    <h1>Tasteful Agents：长程智能体决策品味的测量与训练｜论文精读</h1>
-    <p class="subtitle"><span class="paper-name">The Tasteful Agent: Measuring and Improving Taste in Long-Horizon Tasks</span>Wenbo Pan、Zhichao Liu、Shujie Liu、Jingying Zeng、Chin-Yew Lin、Xianfeng Tang、Yan Lu、Qi He、Xiaohua Jia · City University of Hong Kong / Microsoft · arXiv v2，2026-09-23</p>
-    <div class="actions"><a class="action" href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">论文原文 ↗</a><a class="action" href="assets/43-tasteful-agent/paper.pdf" target="_blank">本地 PDF ↗</a><a class="action" href="https://github.com/wbopan/tastebench" target="_blank" rel="noreferrer">代码 ↗</a><a class="action" href="https://huggingface.co/datasets/wenbopan/taste-bench" target="_blank" rel="noreferrer">数据集 ↗</a><button class="theme" id="theme" type="button">◐ 切换主题</button></div>
-    <div class="metrics"><div class="metric"><small>研究对象</small><b>中途方向判断</b><span>结果尚未出现时选择更优分支</span></div><div class="metric"><small>Benchmark</small><b>502 个分叉</b><span>工程 390 · 研究 112</span></div><div class="metric"><small>评测规模</small><b>14 个模型</b><span>候选顺序正反各测一次</span></div><div class="metric"><small>最佳一致准确率</small><b>59.7%</b><span>GPT-5.6 Sol；随机基线 25%</span></div></div>
-  </div></header>
-
-  <div class="layout">
-    <nav class="toc" aria-label="章节导航"><p class="side-title">阅读导航</p><ol>
-      <li><a href="#s1">01 · 论文概览</a></li>
-      <li><a href="#s2">02 · 研究背景与问题定义</a></li>
-      <li><a href="#s3">03 · 方法与技术路线</a></li>
-      <li><a href="#s4">04 · 实验设计与结果分析</a></li>
-      <li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-    </ol></nav>
-
-    <main>
-      <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文概览</h2>
-        <p class="lead">长程任务的终局成功率把至少三件事混在一起：方向判断、后续执行质量和环境随机性。论文把其中第一项单独抽出，称为 Agent 的“品味”——在结果尚不可见时，能否选择未来更可能带来好结果的方向。</p>
-        <p>软件 Agent 可能在两个实现方案之间选择，研究 Agent 可能决定继续某个假设还是转向。错误方向在当下往往并不荒谬，代价要经过测试、扩展实现或多轮实验才暴露。只看最终任务是否通过，会告诉我们“整条轨迹成败”，却不能判断中途哪次选择真正拖累了结果，也不能区分好判断被差执行浪费、坏判断被后续补救掩盖的情形。</p>
-        <p>论文的概念转移是：过去把整条任务轨迹当作评测单位，本文把“分叉时刻”当作评测单位。给模型原任务、分叉前轨迹和两个候选方向，但隐藏分叉后的工作；由真实后续结果决定哪个候选受到支持。这样，问题从“你能否完成整个任务”变成“在同样历史下，你会押注哪条未来”。</p>
-        <div class="thesis">核心命题：长程判断力可以通过“隐藏未来、利用事后证据标注过去”来测量。<span>真正的新对象不是某个 Agent 模块，而是结果出现前的方向选择；Benchmark、过滤器与蒸馏方法都服务于这一对象。</span></div>
-        <p class="block-intro bridge">理解这篇论文，最重要的是把研究对象、指标和长期愿景分开。下表显示它与相邻评测的区别：不是简单增加更长任务，而是把延迟显现的决策质量变成一个可重复、可训练的二选一判断问题。</p>
-        <div class="table-wrap"><table>
-          <caption>本文与邻近研究的分界</caption>
-          <thead><tr><th>研究线</th><th>被评对象</th><th>标签从哪里来</th><th>本文的新增量</th></tr></thead>
-          <tbody>
-            <tr><td>端到端 Agent Benchmark</td><td>整条任务是否成功</td><td>测试、评分器或环境回报</td><td>不能分离中途判断与执行</td></tr>
-            <tr><td>方案 / 研究想法比较</td><td>脱离执行轨迹的两个提案</td><td>专家偏好或事后性能</td><td>本文保留了当时的任务状态与历史</td></tr>
-            <tr><td>过程监督 / Step Reward</td><td>单步是否正确或有用</td><td>人工标签、rollout 回报</td><td>本文关注影响在较远未来才显现的方向判断</td></tr>
-            <tr class="focus-row"><td>Taste-Bench</td><td>真实轨迹里的决策分叉</td><td>平行分支或绕路恢复的后续结果</td><td>隐藏未来后评测，并可把事后判断蒸馏回模型</td></tr>
-          </tbody>
-        </table></div>
-        <p class="source-note">来源：论文 Introduction、Measuring Taste via Long-Horizon Judgment 与 Related Work。比较轴是解释性归纳。</p>
-        <figure class="paper-figure figure-compact"><div class="figure-head"><span>论文原图 · Figure 1</span><span>A decision fork from a machine-learning trajectory</span></div><a href="assets/paper-figures/43-tasteful-agent/decision_fork_example.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/decision_fork_example.png" alt="机器学习训练轨迹中的决策分叉：训练超时后可选择缩小模型继续更多步数，或维持模型规模只训练较少步数；很多步之后最终损失显示前者更优"></a><figcaption><strong>分叉时两条路都合理，优劣要很多步以后才显现</strong><p>示例中，模型训练超时后需要在“缩小模型、训练更久”和“保留规模、减少步数”之间选择。评测模型只能看到分叉前信息，不能看到后续损失 6.56 与 7.66。</p><p class="figure-reading"><b>阅读要点：</b>图说明了任务单位，但不自动证明后续差异完全由这次选择导致；后续执行仍可能改变结果，这正是 Benchmark 构造必须严筛的原因。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
-      </section>
-
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>研究背景与问题定义</h2>
-        <p class="lead">Taste-Bench 的基础设施贡献在于把非结构化长轨迹压缩成可验证问题：同一前缀、两个真实可行方向、一个由后续结果支持的标签。作者用平行轨迹和绕路轨迹覆盖两类错误，再用“可从措辞猜中”和“事后仍无法定论”两道过滤器控制标签质量。</p>
-        <p>平行轨迹构造把同一任务的多次独立尝试对齐：它们在相近历史处转向不同方案，随后一个成功、一个失败。分叉前等价部分成为前缀，两条实际行动被中性改写为候选。它能捕捉 Agent 从未意识到的坏方向，但仍面临后续执行差异这一混杂因素。</p>
-        <p>绕路轨迹构造则在单次运行中寻找“先走错—观察失败—换路—完成任务”的序列，把被放弃方向和恢复方向放到更早的分叉处比较。它拥有轨迹内部的纠错证据，但容易把只有看到失败后才知道的答案倒灌到候选描述，因此生成器必须引用承诺、失败、转向与成功的原始步骤，并检查前缀没有泄漏未来。</p>
-        <div class="formula"><div class="eq">y = arg maxᵢ U(Eᵢ)　　x = (q, hₜ, c₁, c₂)</div><p>q 是任务，hₜ 是分叉前历史，c₁/c₂ 是候选方向，Eᵢ 是分支后续证据，U 把证据映射为结果。模型只接收 x；标签 y 由隐藏的后续证据产生。</p></div>
-        <p class="block-intro bridge">构造流水线不是“让模型随便编两个选项”。它先从真实运行里找分叉，再依次排除两类无效题：只看候选措辞就能猜中的题不测长程判断；即使看完整记录也无法确定标签的题则缺乏可判定性。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 2</span><span>Construction and filtering of Taste-Bench</span></div><a href="assets/paper-figures/43-tasteful-agent/tastebench_construction.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/tastebench_construction.png" alt="Taste-Bench 构造流程：从平行轨迹和绕路轨迹挖掘分叉，生成任务、前缀和候选，再过滤可仅凭候选猜出的简单题与完整记录仍无法判定的题"></a><figcaption><strong>数据量被主动牺牲，以换取“必须读历史且事后可判”的问题</strong><p>生成器提出候选分叉，四个独立 Judge 先只看候选过滤“太容易”，再看完整轨迹过滤“不可判”。最终只保留同时通过两道门的项目。</p><p class="figure-reading"><b>阅读要点：</b>这种严格筛选增强内部有效性，但也改变了题目分布：保留下来的不是自然分叉的无偏样本，而是特意挑出的“至少让一个 Judge 犯错、且所有 Judge 事后同意标签”的难例。</p><div class="figure-source"><span>来源：论文 Figure 2 与 Appendix A.4</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
-        <p>原始池包含 2,677 条 SWE-bench Pro 工程 rollout（517 个任务）和 1,132 条 AI 研发运行（47 个 RE-Bench / HCAST 任务）。生成器共挖出 4,657 个候选分叉，1,809 个通过生成规则，729 个通过“非平凡”过滤，最后 502 个进入发布集，保留率 10.8%。其中工程 390 题、研究 112 题；平行构造 172 题、绕路构造 330 题。</p>
-        <p>为减轻二选一位置偏差，每题按一个固定顺序和完全反转顺序各问一次，只有两次都选对才记为正确。因此论文主指标下随机猜测的期望是 25%，总偏好第一个或第二个位置的模型得 0%。这是一种严格的“一致判断”指标，并不等同于普通二选一单次准确率；论文同时报告两次展示的平均准确率以补充解释。</p>
-        <p class="block-intro bridge">标签有效性由自动过滤与小规模人审共同支撑，但两者回答的是不同问题：自动过滤确保机器 Judge 在完整记录下意见一致，人审则检查结果公开后人类是否认可所标方向。</p>
-        <div class="table-wrap"><table>
-          <caption>Benchmark 证据账本</caption>
-          <thead><tr><th>环节</th><th>规模 / 结果</th><th>支持的主张</th><th>仍未排除</th></tr></thead>
-          <tbody>
-            <tr><td>候选 → 发布</td><td>4,657 → 502（10.8%）</td><td>流水线有较强质量门槛</td><td>筛选选择偏差与 Judge 共识偏差</td></tr>
-            <tr><td>人类事后复核</td><td>170 / 172 明确判断支持标签（98.8%）</td><td>对有明确偏好的复核，标签与人类高度一致</td><td>仅 100 个抽样题；先看到了后续结果</td></tr>
-            <tr><td>两位复核者一致性</td><td>73 / 74；κ = 0.973</td><td>结果公开后的方向判断稳定</td><td>不能证明分叉当时应具有同等可预测性</td></tr>
-            <tr><td>四象限覆盖</td><td>工程 / 研究 × 平行 / 绕路</td><td>不依赖单一构造和单一任务类型</td><td>仍集中于软件与 AI 研发</td></tr>
-          </tbody>
-        </table></div>
-        <p class="source-note">来源：论文 Section 3、Appendix A 与 Appendix E。人审 100 题包含 70 个发布题及 30 个被过滤题；172 是两位复核者保留的明确 A/B 判断总数。</p>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>方法与技术路线</h2>
-        <p class="lead">14 个模型的结果支持 Taste-Bench 测到一种尚未饱和、又不完全等同于端到端编码能力的信号。最强结果为 59.7%，而当关键证据必须等到更多后续工作才出现时，模型平均准确率降到 21.0%，接近严格指标下的 25% 随机水平。</p>
-        <p>GPT-5.6 Sol 以 59.7% 的“两个顺序都答对”平均准确率居首，GPT-5.5 为 59.5%，Claude Opus 5 为 55.5%。结果并非只反映是否会写代码：Taste-Bench 与共享 Harness 下 SWE-bench Verified 得分的相关系数为 0.63，只解释约 39% 的模型间方差；在最接近的软件工程子集上相关更低，仅 0.37。样本只有 11 个可比模型且置信区间较宽，因此更稳妥的结论是“部分重叠”，而非已经识别出完全独立能力。</p>
-        <p>最有解释力的分解是“决定性证据离分叉有多远”。作者把分叉分为前缀内已有明确证据、可由前缀推断、下一步观察即可确定、需要更完整后续工作四档。14 模型均值依次为 62.3%、42.9%、31.5%、21.0%。这说明 Benchmark 的难点不是候选文本本身，而是需要模拟尚未展开的后续执行。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 4</span><span>Time horizon and reasoning budget</span></div><a href="assets/paper-figures/43-tasteful-agent/horizon_effort.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/horizon_effort.png" alt="左图显示 14 个模型的决策准确率随决定性证据时距从前缀内到需要更多工作而下降，右图显示 GPT-5.6 Sol 和 Luna 在三种推理预算下曲线大幅重叠"></a><figcaption><strong>时距效应明显，单纯增加推理预算没有填平差距</strong><p>左图深色线是 14 模型均值；右图比较 GPT-5.6 Sol 与 Luna 的三档推理强度。Sol 从最低到最高预算变化 −0.2 个百分点，Luna 为 +2.2 个百分点，Bootstrap 区间均跨 0。</p><p class="figure-reading"><b>谨慎解读：</b>“增加预算无效”只在这两个模型、固定提示、固定 Token 上限和推理强度设置中成立。它更像是在排除“没想够久”这一简单解释，不能推出所有形式的测试时搜索、执行探针或多样化 rollout 都无效。</p><div class="figure-source"><span>来源：论文 Figure 4、Appendix D.2–D.3</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
-        <p class="block-intro bridge">把主结果放在同一张表里，可以看出不同数字支撑不同层次的论断：排名证明当前模型未饱和，时距分解支持“延迟证据”解释，预算消融只排除一种计算不足，相关分析则说明该指标不是端到端能力的简单复刻。</p>
-        <div class="table-wrap"><table>
-          <caption>关键实验与其证明边界</caption>
-          <thead><tr><th>结果</th><th>数值</th><th>能支持什么</th><th>不能单独证明什么</th></tr></thead>
-          <tbody>
-            <tr><td>最佳模型</td><td>GPT-5.6 Sol：59.7%</td><td>Benchmark 对前沿模型仍有区分度</td><td>低分全部来自“品味”而非格式、上下文与领域知识</td></tr>
-            <tr><td>分叉类型</td><td>两域中 Detour 都比 Parallel 难</td><td>预见自己将来纠错的方向更难判断</td><td>两构造难度完全可比</td></tr>
-            <tr><td>时距</td><td>62.3 → 21.0%</td><td>关键证据越晚出现，模型越难</td><td>时距是唯一因果因素</td></tr>
-            <tr><td>推理预算</td><td>Sol −0.2pt；Luna +2.2pt</td><td>同一接口下更多内部推理未显著提升</td><td>执行候选、外部工具搜索或多样化采样也无效</td></tr>
-            <tr><td>与 SWE-bench Verified</td><td>r = 0.63；工程子集 r = 0.37</td><td>测量与端到端能力只有部分重叠</td><td>已建立稳定的心理测量学独立构念</td></tr>
-          </tbody>
-        </table></div>
-        <p class="source-note">来源：论文 Section 4、Figure 3–5、Appendix D。论文报告平均相关的 95% 区间为 [+0.04,+0.89]，工程子集为 [−0.30,+0.79]。</p>
-      </section>
-
-      <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验设计与结果分析</h2>
-        <p class="lead">每个分叉只有一个二元标签，直接监督很容易记答案。论文让同一个 Qwen3.6-27B 在两种上下文中扮演教师和学生：教师额外看到受支持候选的示范，学生只看到正常问题；再用教师的完整推理序列做前向 KL 蒸馏，并用任务不重叠的折验证迁移。</p>
-        <p>训练只使用 390 个工程问题，按源任务拆成两个互不重叠的 195 题折。教师上下文明确告诉模型这次分叉中哪条路成功、哪条失败，然后生成推理；学生上下文看不到这段示范。训练用 LoRA 更新约 79.7M 参数，对教师生成的推理 Token 和最终选择计算前向 KL，随后再用学生自己的自由推理轨迹校准答案位置。</p>
-        <p>这个设计把优化边界从“当前上下文里利用事后提示”移到“模型权重里内化跨任务判断模式”。但它仍依赖高质量事后标签，并且教师与学生是同一基础模型，实验更接近特权信息的上下文蒸馏，而非把一个更强模型的知识传给小模型。</p>
-        <figure class="paper-figure"><div class="figure-head"><span>论文原图 · Figure 6</span><span>Distillation and advice injection</span></div><a href="assets/paper-figures/43-tasteful-agent/distillation_advisor.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/distillation_advisor.png" alt="左侧显示看过受支持候选的教师把推理蒸馏给只看问题的学生，右侧显示学生在每个分叉生成判断并以建议形式注入固定执行器上下文"></a><figcaption><strong>训练学生做分叉判断，部署时由另一个固定执行器落实建议</strong><p>学生不直接完成 SWE-bench Pro，而是在已挖出的分叉上选择方向；其判断被写成“已知陷阱 / 建议路线”注入执行器。这样可以把判断改进与执行能力尽量分离。</p><p class="figure-reading"><b>阅读要点：</b>执行器接收的是同一具体任务先前运行中挖出的分叉笔记，因此这是“同任务多次尝试后的经验复用”，不是从零面对一个从未运行过的新任务。</p><div class="figure-source"><span>来源：论文 Figure 6 与 Appendix F–G</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
-        <p>在任务不重叠的工程分叉上，学生严格一致准确率从基础模型的 30.0% 升到 47.9%，增加 17.9 个百分点；两顺序平均准确率从 42.7% 升到 62.4%。训练折单顺序准确率则从 48.6% 跳到 92.9%，显示记忆空间确实很大，也说明任务隔离评测不可省略。</p>
-        <p>端到端实验选择 41 个留出 SWE-bench Pro 任务，共 98 个此前已挖出的分叉。固定 Qwen3.6-27B 执行器在无建议时成功率 14.6%，输入学生建议后为 33.7%；若每个分叉都给正确建议，上界为 39.0%。学生在 98 个分叉中选对 77 个，因此它兑现了正确建议上界的大部分。</p>
-        <figure class="paper-figure figure-compact"><div class="figure-head"><span>论文原图 · Figure 7</span><span>Transfer and end-to-end results</span></div><a href="assets/paper-figures/43-tasteful-agent/distillation_results.png" target="_blank"><img src="assets/paper-figures/43-tasteful-agent/distillation_results.png" alt="左图显示蒸馏学生在留出分叉上的准确率由 30.0 提升至 47.9，右图显示 SWE-bench Pro 成功率由无建议 14.6 提升到学生建议 33.7，正确建议上界为 39.0"></a><figcaption><strong>判断准确率提升能转化为任务成功率，但转化发生在“已有同任务历史”的工作流中</strong><p>左侧验证判断迁移到训练未见任务，右侧验证这些判断作为建议能帮助固定执行器。正确建议条件是一个有用上界，说明分叉质量与方向选择确实对这些任务结果具有实际杠杆。</p><p class="figure-reading"><b>谨慎解读：</b>41 个任务来自能够挖出至少一个分叉的任务集合，且建议总结了这些任务的既往运行。结果证明经验复用与判断训练的组合有效，不等价于学生学会了无需历史轨迹即可泛化的通用品味。</p><div class="figure-source"><span>来源：论文 Figure 7、Section 5.2–5.3</span><a href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption></figure>
-        <p class="block-intro bridge">把训练与部署放到完整生命周期里看，成本和适用条件更清楚：先要多次运行任务产生分叉，再做生成、过滤和蒸馏，最后才能在后续运行里复用建议。论文证明的是这种循环的效用，不是零成本、首轮任务上的普遍提升。</p>
-        <div class="flow"><div>历史 Rollout<br>产生分歧与失败</div><div>挖分叉 + 多 Judge 过滤<br>得到事后标签</div><div>特权教师 → 学生<br>蒸馏判断模式</div><div>同任务后续运行<br>把判断写成建议</div></div>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
-        <p class="lead">最可迁移的贡献，是把长程 Agent 的中途方向选择从不可见的“经验感”变成可收集、可评测、可优化的对象。最需要克制的地方，则是把已实现结果外推为通用“品味”：当前标签仍来自特定轨迹的事后成败，而不是对同一决策进行充分控制后的期望价值。</p>
-<h3 class="subhead epistemic-heading">论文贡献</h3>
-        <p class="block-intro bridge">按知识层级看，论文的贡献并不等重。概念层决定未来研究如何提问；Benchmark 与过滤流水线让问题可操作；蒸馏和建议注入说明该信号可以转化为收益；具体数值则只在当前任务、模型和多次尝试工作流内成立。</p>
-        <div class="card-grid">
-          <article class="card"><h3>概念贡献</h3><p>把“结果出现前选对方向”定义为长程判断，并从终局成功率中分离出来。即使未来不用“taste”这个名字，这个评测单位仍有价值。</p></article>
-          <article class="card"><h3>研究基础设施</h3><p>平行 / 绕路两种轨迹挖掘、非平凡与可判定过滤、双顺序评测，共同把事后轨迹转成 502 个可审计问题。</p></article>
-          <article class="card"><h3>机制贡献</h3><p>用特权结果上下文生成推理，再向无结果学生做 KL 蒸馏；部署时让学生提供方向建议、固定执行器负责执行。</p></article>
-          <article class="card"><h3>经验发现</h3><p>前沿模型仍不稳定；证据时距越长越难；单纯增加推理强度未改善；训练后的判断能提升留出任务成功率。</p></article>
-        </div>
-        <h3 class="subhead">三个会改变结论强度的结构性边界</h3>
-        
-<h3 class="subhead epistemic-heading">证据边界与局限</h3>
-<div class="boundary">
-          <article><h3>1. 事后赢家不必然等于高期望值决策</h3><p><b>证据性质：</b>编辑性推断。两条分支除分叉判断外还包含不同后续执行与随机性；严格过滤提高可判定性，却不能完整建立因果反事实。<br><b>决定性检验：</b>在同一分叉对每个候选做多次受控 continuation，估计结果分布而非单次赢家。</p></article>
-          <article><h3>2. “未见任务迁移”仍依赖该任务的既往运行</h3><p><b>证据性质：</b>论文设置直接可见。学生没在训练中见过 41 个任务，但输入给执行器的建议来自这些任务的先前轨迹。<br><b>决定性检验：</b>只提供别的任务蒸馏出的通用判断策略，在完全没有本任务历史的首轮运行上测试。</p></article>
-          <article><h3>3. 发布集是质量筛选后的困难条件分布</h3><p><b>证据性质：</b>由筛选规则导出。至少一个 Judge 必须在无历史时答错，所有 Judge 又必须在完整记录下同意标签；502 题只占候选 10.8%。<br><b>决定性检验：</b>在自然抽样分叉上分层报告可判定率、准确率与校准，而不是只评发布集。</p></article>
-          <article><h3>4. 生命周期成本尚未进入收益比较</h3><p><b>证据性质：</b>系统边界分析。多次 rollout、生成器、四 Judge、蒸馏 GPU 与任务特定笔记都发生在部署收益之前。<br><b>决定性检验：</b>对齐总 Token、GPU、墙钟时间和尝试次数，与“直接多跑几次并选最好结果”等强反事实比较。</p></article>
-        </div>
-        <p class="callout"><strong>最强反事实：</strong>如果在相同总预算下，简单保存同任务失败模式、增加可执行探针，或让基础 Agent 多做候选 rollout 再选择，就能匹配学生建议的端到端收益，那么蒸馏“品味”的独立价值会变窄；反之，若蒸馏学生在完全新任务、无任务特定笔记时仍提高选择质量，论文的长期愿景会得到显著加强。</p>
-        <p>因此，这篇论文最重要的启发不是“给 Agent 一个玄学的品味分数”，而是把判断放在长期执行闭环里单独建模：提出方向、等待证据、回填信用、再训练未来选择。它把监督信号从即时正确性推进到延迟后果，也把瓶颈从“有没有长轨迹”移动到“能否从轨迹中识别近似因果、可迁移的决策分叉”。</p>
-        <p class="verdict"><strong>一句话判断：</strong>Taste-Bench 是一个强而克制的研究起点：它已经证明事后轨迹可用于测量和训练中途判断，但尚未证明单次轨迹赢家等于一般意义上的最佳决策，也未证明这套判断能脱离同任务历史直接泛化。</p>
-        <p class="source-note">主要来源：arXiv:2609.25804v2（2026-09-23），包括主文、附录构造统计、完整模型结果、时距与推理预算分析、人类复核、蒸馏配置和端到端任务明细。本文未独立复现实验；“最强反事实”、生命周期成本与因果边界为基于论文证据的编辑性判断。</p>
-        <a class="back" href="index.html">← 返回论文目录</a>
-      </section>
-    </main>
-  </div>
-  <script>
-    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=[...document.querySelectorAll('.chapter')],theme=document.getElementById('theme');
-    addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=`${Math.min(100,100*h.scrollTop/(h.scrollHeight-h.clientHeight))}%`;let active=sections[0]?.id;for(const section of sections){if(section.getBoundingClientRect().top<180)active=section.id}links.forEach(link=>link.classList.toggle('active',link.hash===`#${active}`))},{passive:true});
-    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
-  </script>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
+<body>
+<header class="hero"><div class="hero-in">
+<h1>Tasteful Agents：长程智能体决策品味的测量与训练</h1>
+<p class="paper-name">The Tasteful Agent: Measuring and Improving Taste in Long-Horizon Tasks</p>
+<p class="paper-authors">作者：Wenbo Pan、Zhichao Liu、Shujie Liu、Jingying Zeng、Chin-Yew Lin、Xianfeng Tang、Yan Lu、Qi He、Xiaohua Jia</p>
+<p class="paper-affiliation">作者单位：City University of Hong Kong / Independent Researcher / Microsoft</p>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/abs/2609.25804v2" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">代理在长程任务中常遇到两条当下都合理的路线，真正差异要到很久之后才显现：选择哪种实现、下一步验证哪个假设，可能决定后面大量工作是否白费。最终任务成功率能评价整体能力，却难区分执行能力与关键时刻选择方向的能力。论文将这种长时距决策能力称为 taste，即“品味”。</p><div class="table-wrap"><table data-source=""><caption>直接测量关键决策的困难</caption><thead><tr><th>困难</th><th>简单做法为何不足</th><th>论文转化</th></tr></thead><tbody><tr><td>好坏在将来才显现</td><td>只看当前语言合理性缺少依据</td><td>使用轨迹后缀中的真实结果为分叉标注</td></tr><tr><td>专家判断成本高</td><td>人工难覆盖工程与研究两域</td><td>从并行尝试和绕路纠错中自动挖掘</td></tr><tr><td>答案可能被措辞泄漏</td><td>模型只需识别自信、成功或数值暗示</td><td>中性改写、隐藏后缀、交换选项顺序评分</td></tr></tbody></table></div><p class="prose">Taste-Bench 把真实轨迹冻结在决策分叉，只给测试模型任务、已有前缀和两种方向；标签来自隐藏的后续证据。创新不是要求模型预测所有未来，而是把过去已经发生的尝试转化为可测量、可蒸馏的判断训练。对该能力的测量仍依赖分叉构造是否能把后果归因于当时可选择的方向。</p><p class="prose">所谓品味在这里有明确任务边界：在给定前缀与有限方向中选择后果更好的一条。它不等于审美，也不囊括所有规划能力。把这个窄对象定义清楚，才既能解释为何终局榜单不够，也能防止把二选一判断提升误称为全面自主研究能力。</p></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">方法包含两条路径：从真实工作构造可信分叉；再把有后见信息教师的判断蒸馏给只看前缀的学生。测量与训练共享数据结构，部署顾问却还需要外部给定分叉。</p><figure class="method-overview" data-source="primary-method"><figcaption>自绘总览｜分叉证据、判断蒸馏与顾问部署</figcaption><div class="split-grid"><div class="flow-box"><h4>Parallel · 多条真实尝试</h4><p>同任务不同路线有不同原生结果；寻找可归因的早期分歧</p></div><div class="flow-box"><h4>Detour · 单条绕路轨迹</h4><p>坏方向 → 明确失败 → 改走好方向并成功；检查好方向在分叉时已可提出</p></div></div><div class="flow-connector">↓ 时间顺序、逐字证据、因果相关性与中性表述检查</div><div class="flow-box"><h4>独立评审组 · 两道过滤</h4><p>不含生成器；仅看候选全部答对 → 丢弃简单题；看完整任务/轨迹/后果未全票认可标签 → 丢弃不可判定题</p></div><div class="flow-connector">↓ 4,657 候选中 502 题通过，10.8%</div><div class="state-band"><b>Taste-Bench 项目</b><span>任务＋分叉前缀＋中性 A/B；后见证据与好方向标签不提供给测试者</span></div><div class="split-grid"><div class="flow-box"><h4>测量</h4><p>两种选项顺序各测试；区分平均准确率与两次都正确的严格指标</p></div><div class="flow-box"><h4>蒸馏</h4><p>教师额外读取支持方向的 demonstration；学生仅以任务、前缀和选项学习判断与推理</p></div></div><div class="flow-connector">↓ 仅蒸馏分支产出学习后的判断器；测量分支不更新权重</div><div class="state-band"><b>端到端检验 · 固定分叉顾问</b><span>41 个保留任务、98 个已挖掘分叉；预先将这些分叉的建议统一写入任务上下文，固定执行器独立工作</span></div><div class="feedback-band">↶ 不是完整自主流程：何时暂停与如何提出候选仍由给定分叉提供</div></figure><section class="method-section"><h3>分叉构造：后见标签不能变成后见选项</h3><p class="prose">Parallel 从同任务的不同尝试中找路线分歧，要求后续完成结果与该选择有关；Detour 从一个轨迹找错误承诺、实际碰壁、转向和成功。后者尤其容易把“看到报错后才知道的修复”伪装成当时应知道的好决策，因此检查好选项在分叉前缀下是否可由专业者提出；若只能事后命名就拒收。</p><p class="prose">原始证据的引文与时间顺序做机械检查，选项不得包含成绩、成功暗示、分支名或价值倾向措辞，也不能把只启动但没有完成的实验当成功。这些机械条件只验证记录一致性，不能独立判断方向的优劣是否可由后果归因。</p><p class="prose">因此，论文还使用不包含生成器的独立评审模型组做两阶段过滤：先只给两条候选、不提供任务轨迹；若所有评审都答对，就视为仅凭措辞可猜的简单题并丢弃。随后给评审完整任务、轨迹及结果，只有所有评审都同意标签才保留，以排除后果不足以支持优劣的不可判定题。每个最终题目都至少让一个评审在隐藏轨迹时答错，又让所有评审在完整记录下认可标签。</p><p class="prose">4,657 个候选中最终保留 502 个，保留率 10.8%，其中工程 390、研究 112。严格过滤增强了标签和题目的可用性，也限定了测试分布：它测量通过这组评审筛选的可判别分叉，不代表所有真实决策。多评审一致仍是对观察记录的判断，不等价于在完全相同状态随机执行两个方向的因果实验。</p></section><section class="method-section"><h3>双顺序评价：排除位置偏好，不混用两个准确率</h3><p class="prose">每题交换 A/B 顺序测试两次。呈现平均正确率按两次作答分别计分，严格指标则要求两次均选对同一实质方向，因而同时惩罚判断错误和位置不稳定；独立随机猜测时严格命中率为 25%。论文榜单名为 Average 的列另指研究与工程两个子集严格准确率的 1:1 平均，不能与呈现平均正确率混用。模型只能读取前缀，隐藏后续的作用正是测试能否在结果出现前作判断。</p></section><section class="method-section"><h3>蒸馏与部署：学生学判断，执行器负责继续工作</h3><p class="prose">教师在额外获知支持候选的 demonstration 后生成推理；Qwen3.6-27B 学生用 LoRA 学习这些判断，而测试时没有这份特权信息。需要区分教师可见信息与学生输入，避免把标签泄漏当作能力。部署实验将此前已挖掘分叉的建议在任务开始前放入固定执行器上下文，观察判断是否能转化为后续完成；学生选对 98 个分叉中的 77 个。顾问不负责自动识别“现在是关键时刻”，也不负责从无限动作空间生成两条候选。</p></section><section class="method-section"><h3>蒸馏的实际输入：教师知道支持方向，学生不知道</h3><p class="prose">390 个工程问题按源任务分为互斥的两折，每个学生在一折训练、另一折评价。教师和学生来自同一基础模型，但教师上下文额外提供支持候选的简短 demonstration，因而能生成正确选择的完整推理；学生输入只有任务、分叉前缀和打乱的选项。额外信息并不是测试时可用的提示。</p><figure class="method-overview" data-source="primary-method"><figcaption>局部示意｜把特权条件中的判断内化到学生</figcaption><div class="split-grid"><div class="flow-box"><h4>冻结教师上下文</h4><p>普通题目＋支持候选的 demonstration → 采样推理和最终选择</p></div><div class="flow-box"><h4>学生上下文</h4><p>仅普通题目 → 对同一教师续写计算概率；LoRA 更新</p></div></div><div class="flow-connector">↓ 在教师采样续写上计算 forward KL</div><div class="state-band"><b>信息隔离</b><span>损失覆盖推理与选择；测试只用学生；源任务隔离避免同任务直接记忆</span></div></figure><p class="prose">这不是仅对二值标签做 SFT，也不是在学生自己采样的答案上做 on-policy 蒸馏。论文选择教师采样续写，使训练始终有可学习的正确推理序列；是否学到可迁移判断，须依赖任务外结果，而不是训练准确率。部署建议还包含分叉情境、应避免与应选择的方向，全部在新执行开始前放入任务上下文，执行器随后独立工作。</p></section></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="method-section"><h3>当前模型判断困难在哪里？</h3><div class="table-wrap"><table data-source="§4"><caption>测量结果与具体含义</caption><thead><tr><th>观察</th><th>结果</th><th>能支持的结论</th></tr></thead><tbody><tr><td>最佳模型</td><td>GPT-5.6 Sol：59.7%</td><td>在该分叉集合上仍有明显提升空间</td></tr><tr><td>决策影响时距增加</td><td>62.3% → 21.0%</td><td>较晚显现后果的选择更难识别</td></tr><tr><td>增加内部推理预算</td><td>Sol −0.2、Luna +2.2 个百分点</td><td>该接口下单加推理未明显解决问题</td></tr><tr><td>与 SWE-bench Verified 相关</td><td>总体 r=0.63；工程子集 r=0.37</td><td>测量与端到端能力部分重合</td></tr></tbody></table></div><p class="prose">时距与难度的相关并不证明距离是唯一原因，后果更晚的决策也可能更依赖领域知识。与端到端榜单部分相关支持测量有补充价值，却还不能宣告建立了完全独立的心理能力构念；内部推理预算实验也不能外推到工具实验、候选搜索都无效。</p></section><section class="method-section"><h3>判断能否学会，又能否帮助执行？</h3><div class="table-wrap"><table data-source="§5"><caption>任务外判断与给定分叉顾问结果</caption><thead><tr><th>条件</th><th>训练前 / 无顾问</th><th>训练后 / 顾问</th></tr></thead><tbody><tr><td>Qwen3.6-27B 严格双顺序</td><td>30.0%</td><td>47.9%</td></tr><tr><td>同模型两顺序平均</td><td>42.7%</td><td>62.4%</td></tr><tr><td>固定执行器 / 41 个保留任务</td><td>14.6%</td><td>学生建议 33.7%</td></tr><tr><td>同执行器 / 正确建议参考</td><td>14.6%</td><td>39.0%</td></tr></tbody></table></div><p class="prose">判断与执行两类结果一起，支持学到的偏好不只会答选择题：在给定分叉条件下它确实能改变完成率。正确建议参考显示仍有执行损失与可改进空间。由于位置及候选来自预先挖掘分叉，这不能解释为一个开箱即用的自主代理将成功率普遍从 14.6% 提高到 33.7%。</p></section><p class="prose">训练折单顺序正确率从 48.6% 到 92.9%，本身可能是记忆，任务互斥测试才提供迁移证据。端到端顾问实验又利用同一批保留任务此前运行所挖分叉，因此虽然没有训练任务泄漏，却仍具有任务特定经验；这两种“未见”边界应分别说明。</p></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>核心贡献：从轨迹后果中提取可学习的决策监督</h3><p class="prose">方法将终局结果与早期可选择方向连接，既为测量提供原生后果依据，也为训练提供比单个成功轨迹更有辨别力的比较监督。时间检查、中性选项和双顺序评分是这项贡献可信度的关键支撑；仅有二选一形式并不足以测量长程判断。</p></section><section class="method-section"><h3>最深的未决问题在分叉之前</h3><p class="prose">已给出一个明确分叉时选好方向，与在连续执行中发现值得决策的位置、提出有质量的替代路线，是不同能力。固定分叉部署隔离了判断的效用，也同时把这两项难题放在系统边界之外。若实际代理很少生成好候选，再强的选择器也无法复制顾问收益；若触发太频繁，顾问成本与干扰可能吞掉收益。</p><p class="prose">一个决定性下一步是将分叉发现、候选生成和选择器分别组合测试：先用原挖掘分叉确定判断上限，再逐步替换为在线触发与在线候选，保持执行器和预算相同。这样可以定位损失来自判断、候选覆盖还是触发。另需在分叉处真实随机执行两方向，检验观察性标签是否仍预测因果后果。</p></section><p class="prose">还有一个重要解释：建议不仅告诉执行器选哪个方向，也压缩提供了该任务此前轨迹中的决策情境。完整建议收益可能包括任务特定经验与方向选择的共同作用。相同情境、随机或反向候选建议可进一步隔离学生判断质量；在线自动分叉实验则检验这一任务前知识能否在首次处理新任务时获得。</p><p class="prose">论文已经支持长程决策判断可以被测量、蒸馏，并在预定义决策点帮助执行。它最有启发的方向是利用经验后果训练判断；完整自主“品味”仍包括对何时决策与有哪些选项的控制。</p></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>

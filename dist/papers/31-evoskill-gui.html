@@ -1,394 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="EvoSkill-GUI 中文深度解读：如何把静态 Skill 变成部署中可修订、可持久化、可复用的外部策略 Artifact；以及为什么它仍属于 Case-level Skill Evolution，而非 Strategy-level Self-Evolution。">
-  <title>EvoSkill-GUI：部署期可持续修订的 GUI Agent 技能｜论文精读</title>
-  <style>
-    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}.hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(66,182,126,.25),transparent 29%),radial-gradient(circle at 8% 100%,rgba(93,133,221,.18),transparent 30%),linear-gradient(125deg,#10223c,#163d4c 56%,#3e315f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1150px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font:13px var(--sans);cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}.layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}.chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:810px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:810px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}.cards,.steps,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.step,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2),.step:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3),.step:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n),.step:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.step h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.step p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:18px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.figure-wide img{width:100%;max-height:none}.figure-compact img{width:auto;max-width:760px}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}.table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:720px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.analysis,.warning{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.boundary article{border-color:#ead5b4;background:var(--at)}.rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .step p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}@media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.steps,.boundary{grid-template-columns:1fr}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img,.figure-compact img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.step,.boundary article{break-inside:avoid;background:#fff}}
-    .comparison-table{min-width:900px}.result-table{min-width:780px}.equation-line{margin:18px 0;padding:16px 18px;border:1px solid #cad9eb;border-radius:11px;color:#263f61;background:var(--bt);font-size:clamp(16px,2.3vw,21px);font-weight:780;line-height:1.65;text-align:center;letter-spacing:.01em}.equation-line small{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}.takeaways{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0 8px;padding:0;counter-reset:takeaway;list-style:none}.takeaways li{position:relative;padding:13px 14px 13px 46px;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);color:#415267;font-size:14px;line-height:1.68}.takeaways li:before{position:absolute;left:13px;top:13px;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:#fff;background:var(--blue);font-size:11px;font-weight:800;content:counter(takeaway);counter-increment:takeaway}.takeaways li:nth-child(2){border-color:#d7caec;background:var(--pt)}.takeaways li:nth-child(2):before{background:var(--purple)}.takeaways li:nth-child(3){border-color:#c9deb3;background:var(--gt)}.takeaways li:nth-child(3):before{background:var(--green)}.takeaways li:nth-child(4),.takeaways li:nth-child(5){border-color:#ead5b4;background:var(--at)}.takeaways li:nth-child(4):before,.takeaways li:nth-child(5):before{background:var(--amber)}.takeaways li:last-child{grid-column:1/-1;font-weight:680}.level-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.level-compare article{padding:16px;border:1px solid #c9deb3;border-radius:11px;background:var(--gt)}.level-compare article:last-child{border-color:#d7caec;background:var(--pt)}.level-compare h3{margin:0 0 8px;font-size:15px}.level-compare p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.case-path{margin:17px 0;padding:17px 18px;border:1px solid #ead5b4;border-radius:11px;background:var(--at);font-size:14px;line-height:1.78}.case-path strong{color:#7b4b18}.case-path code{white-space:normal}.case-path .arrow{display:block;margin:3px 0;color:var(--amber);font-weight:800}.classification{margin:18px 0;padding:18px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center}.classification b{display:block;font-size:21px;color:var(--purple)}.classification span{display:block;margin-top:6px;color:var(--muted);font-size:13px}
-    body.dark .equation-line,body.dark .takeaways li,body.dark .level-compare article,body.dark .case-path,body.dark .classification{color:var(--ink);border-color:var(--line)}body.dark .equation-line,body.dark .takeaways li{background:var(--bt)}body.dark .takeaways li:nth-child(2),body.dark .level-compare article:last-child,body.dark .classification{background:var(--pt)}body.dark .takeaways li:nth-child(3),body.dark .level-compare article{background:var(--gt)}body.dark .takeaways li:nth-child(4),body.dark .takeaways li:nth-child(5),body.dark .case-path{background:var(--at)}body.dark .level-compare p{color:#bfcbda}@media(max-width:820px){.takeaways,.level-compare{grid-template-columns:1fr}.takeaways li:last-child{grid-column:auto}.equation-line{font-size:16px}}
-  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="结构化 GUI 技能通过即时修订、隔离反思和元数据复用持续更新，并区分当前任务重试与跨任务迁移。">
+<title>EvoSkill-GUI：部署期可持续修订的 GUI Agent 技能</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
-    /* 2026-09 standardized research-report layout; original palette is retained. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
-    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
-    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
-    .metric:nth-child(n+5){display:none}
-    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
-    .rail{display:none!important}
-    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
-    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
-    .chapter+.chapter{border-top:1px solid var(--line)}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
-    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
-    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
-    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
-    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
-    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
-    .key-points>li strong{color:var(--ink)}
-    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
-    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
-    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
-    .analysis,.warning{box-shadow:none}
-    .verdict{margin:18px 0;padding:15px 17px;border:1px solid var(--line);border-radius:10px;background:var(--bt)}
-    .verdict h3{margin:0 0 8px;font-size:17px}.verdict p{margin:7px 0;font-size:14.5px;line-height:1.76;text-align:justify}
-    @media(max-width:820px){
-      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .layout{display:block;padding:14px 11px 54px}
-      main{border-radius:11px}
-      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
-      h1{font-size:clamp(27px,8.2vw,34px)}
-      h2{font-size:21px}
-      .section-intro,.lead{font-size:15.5px}
-    }
-    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
 
-  
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
 
-    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
-    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
-    h2{margin-bottom:16px;padding-bottom:12px}
-    .subhead{margin:21px 0 8px}
-    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
-    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
-    .key-points{margin-bottom:14px}
-    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
-    .key-points>li::before{top:21px}
-    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
-    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
-    .paper-figure>a{padding:9px}
-    .paper-figure figcaption{padding:14px 18px 15px}
-    .table-wrap{margin:14px 0 8px}
-    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
-    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
-    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
-    .chapter>*:last-child{margin-bottom:0}
-    @media(max-width:820px){
-      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
-      .subhead{margin-top:18px}
-      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
-      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
-      .paper-figure{margin:14px 0 9px}
-      .paper-figure>a{padding:5px}
-    }
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
 
-    /* Collection hero: aligned with the approved LearningAgent reference. */
-    .hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 83% 10%,rgba(185,244,91,.15),transparent 28%),radial-gradient(circle at 12% 92%,rgba(120,85,199,.32),transparent 33%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-    .hero::after{content:"";position:absolute;inset:0;opacity:.1;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}
-    .hero-in{position:relative;z-index:1;max-width:1280px;padding:52px 28px 42px}
-    .eyebrow{color:#bdc9dc;letter-spacing:.14em}.hero h1{margin-top:12px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.04em}.subtitle{margin-top:15px;color:#cbd6e8;font-size:17px}.actions{margin-top:20px}
-    .metrics{grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;max-width:940px;margin-top:30px}.metric{padding:12px 14px;border-color:rgba(255,255,255,.14);border-radius:10px;background:rgba(3,17,37,.35)}.metric small,.metric span{color:#aebbd2}
-    @media(max-width:820px){.hero-in{padding:42px 18px 32px}.hero h1{font-size:32px}.metrics{grid-template-columns:repeat(2,1fr)}}
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
 
-    /* Collection typography contract: one Chinese-first face and stable body scale. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    body{font-weight:400}
-    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
-    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
 
-  
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
-
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
-<body id="top">
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
-  <header class="hero">
-    <div class="hero-in">
-      <div class="eyebrow">PAPER REVIEW · arXiv:2609.17653v1</div>
-      <h1>EvoSkill-GUI：部署期可持续修订的 GUI Agent 技能｜论文精读</h1>
-      <p class="subtitle"><span class="paper-name">Reflect, Revise, Reuse: Training-Free Skill Evolution for GUI Agents</span>Bofan Chen、Boxuan Zhang、Fei Tang 等 10 位作者 · 浙江大学、电子科技大学 · 2026-09-15</p>
-      <div class="actions">
-        <a class="action" href="https://arxiv.org/html/2609.17653v1" target="_blank" rel="noreferrer">查看论文原文 ↗</a>
-        <a class="action" href="https://github.com/ZJU-REAL/EvoSkill-GUI" target="_blank" rel="noreferrer">代码仓库 ↗</a>
-        <a class="action" href="https://zju-real.github.io/EvoSkill-GUI/" target="_blank" rel="noreferrer">项目主页 ↗</a>
-        <button class="theme" id="theme" type="button">◐ 切换主题</button>
-      </div>
-      <div class="metrics">
-        <div class="metric"><small>研究对象</small><b>部署中的 Skill</b><span>不更新模型参数</span></div>
-        <div class="metric"><small>评测平台</small><b>3 个</b><span>MobileWorld / AndroidWorld / OSWorld</span></div>
-        <div class="metric"><small>MobileWorld 最大增益</small><b>+16.2 pt</b><span>Qwen3.6-Plus</span></div>
-        <div class="metric"><small>OSWorld 最大增益</small><b>+10.5 pt</b><span>Qwen3-VL-8B</span></div>
-      </div>
-    </div>
-  </header>
-
-  <div class="layout">
-    <nav class="toc" aria-label="章节导航">
-      <p class="side-title">阅读导航</p>
-      <ol>
-        <li><a href="#s1">01 · 论文概览</a></li>
-        <li><a href="#s2">02 · 研究背景与问题定义</a></li>
-        <li><a href="#s3">03 · 方法与技术路线</a></li>
-        <li><a href="#s4">04 · 实验设计与结果分析</a></li>
-        <li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-      </ol>
-    </nav>
-
-    <main>
-            <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文概览</h2>
-
-<p class="section-intro">EvoSkill-GUI 研究图形界面 Agent 的技能如何在使用过程中持续修改。它不把 Skill 当成执行前一次性写好的说明书，而是允许系统根据真实失败补充和修正规则。</p>
-
-        <h3 class="subhead">核心结论</h3>
-        <ul class="key-points">
-          <li><strong>研究对象：</strong>系统不训练模型参数，而是修改保存在模型外部的 Skill。失败记录可以分别更新计划、控件定位、异常恢复和反面案例。</li>
-          <li><strong>核心方法：</strong>系统结合执行中的即时修订与任务后的隔离反思，使局部偏差和结构性错误分别进入不同的更新回路。</li>
-          <li><strong>主要结论：</strong>技能修订优于相近预算的重复尝试，并能在相关留出任务上复用；但诊断错误和任务相似性限制了持续积累的可靠性。</li>
-        </ul>
-      </section>
-
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>研究背景与问题定义</h2>
-
-<h3 class="subhead">问题背景与相邻方法</h3>
-<p class="section-intro">论文最重要的概念移动，是把 Skill 从执行前生成、执行时冻结的 Prompt，变成部署中可修改、跨任务可持久保存的外部策略 Artifact。 以下从问题成因、既有方法缺口与论文假设三个层面界定研究问题。</p>
-        <div class="equation-line">Static Skill → Mutable Skill → Persistent Skill<small>模型参数保持不变，变化的是外部 Skill：S₀ → S₁ → S₂ → …</small></div>
-        <ul class="key-points">
-          <li><strong>部署期失效：</strong>弹窗、延迟、控件迁移和可访问性树过期会使预生成流程中途失效，而冻结 Skill 无法把失败线索写回后续任务。</li>
-          <li><strong>研究问题：</strong>在不训练模型或引入更强教师的条件下，能否依据真实轨迹定位知识缺口、修订持久 Skill，并服务后续相关任务。</li>
-          <li><strong>更新载体：</strong>经验不经梯度写入模型，而是进入模型外部、可读取且可继续编辑的程序性知识对象。</li>
-        </ul>
-        <div class="analysis"><strong>去品牌化后的本质：</strong>在部分可观测、界面持续变化的环境里，论文把适应边界从固定模型与固定文档移动到结构化 Skill 文件；以执行轨迹和终局成败为反馈，产出可检索的程序性资产，代价是额外推理调用、错误写回与维护成本。</div>
-        <p class="block-intro">如果把全文再压缩一次，后续所有方法与实验都可以挂到四个核心点和一个关键判断上。前四项是论文已经实现或用实验支持的内容，最后一项是决定其研究定位的证据边界。</p>
-        <ol class="takeaways">
-          <li><strong>研究对象改变：</strong>部署轨迹成为 Skill 更新信号，Skill 从静态文档变成持久可变对象。</li>
-          <li><strong>表示支持演化：</strong>Plan / Backup / Recovery / Failure 的结构化拆分，让错误可以局部 mutation。</li>
-          <li><strong>两个时间尺度：</strong>rollout 内即时止损，rollout 后依据完整轨迹反思与修订。</li>
-          <li><strong>证据超越 Retry：</strong>在相近三轮与 Token 预算下，Skill Revision 明显优于 pass@3，并出现留出任务复用。</li>
-          <li><strong>关键判断：</strong>论文证明的是 Case-level Skill Evolution；它没有显式完成 Case → Pattern → General Strategy，因此尚非更强意义的 Strategy-level Self-Evolution。</li>
-        </ol>
-        <p class="block-intro">这使它与“记忆更新”“权重学习”“离线建库”既相邻又不等价。下表不比较谁更强，而是说明每条路线把什么设为变量，以及部署后究竟留下什么。</p>
-        <div class="table-wrap">
-          <table class="comparison-table">
-            <caption>相邻路线的关键差异：谁被改写、何时改写、沉淀为何物</caption>
-            <thead><tr><th>路线</th><th>主要适应对象</th><th>发生阶段</th><th>反馈信号</th><th>EvoSkill-GUI 的新增边界</th></tr></thead>
-            <tbody>
-              <tr><td>CUA-Skill / WebXSkill / MMSkills</td><td>结构化流程、程序或多模态 Skill</td><td>主要在部署前构造，检索后相对静态</td><td>离线数据与人工设计</td><td>把真实 rollout 的失败直接写回正在使用的 Skill</td></tr>
-              <tr><td>HyMem / Memp 等记忆系统</td><td>经验与记忆库</td><td>在线或跨任务更新</td><td>历史轨迹与检索反馈</td><td>修改的是可执行程序性 Skill，而不只是经验条目</td></tr>
-              <tr><td>SkillRL / EvoCUA 等训练路线</td><td>策略或模型权重</td><td>训练阶段</td><td>奖励、蒸馏或合成经验</td><td>不做参数更新，修改外部 Skill Artifact</td></tr>
-              <tr><td>CoEvoSkills</td><td>多文件 Skill Package</td><td>构建 / 演化阶段</td><td>代理验证器</td><td>聚焦动态 GUI 部署，加入即时修订、同骨干诊断与复用库</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="source-note">来源：论文 Introduction 与 Related Work。以上定位采用作者给出的比较框架，不构成对相邻工作的独立全面评测。</p>
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 1</span><span>静态 Skill → 可演化 Skill</span></div>
-          <a href="assets/paper-figures/31-evoskill-gui/intro.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/intro.png" alt="论文图一，对比静态单文件 Skill 与 EvoSkill-GUI 的结构化 Skill、即时修订、同骨干反思和元数据检索"></a>
-          <figcaption><strong>一张图读懂论文的概念移动</strong><p>上半部分把 Skill 视为检索后冻结的长文本；下半部分则让 Skill 具有可编辑结构，并把执行、反思、修订和复用闭合成循环。</p><p class="figure-reading"><strong>阅读要点：</strong>图中最值得记住的不是文件夹数量，而是失败反馈获得了持久化出口：一次 rollout 的教训不再只存在于临时上下文中。</p><div class="figure-source"><span>来源：论文 Figure 1</span><a href="https://arxiv.org/html/2609.17653v1#S1.F1" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
-        </figure>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>方法与技术路线</h2>
-
-<h3 class="subhead">结构化技能与双尺度修订</h3>
-<p class="section-intro">可进化的知识首先必须可编辑。EvoSkill-GUI 用结构化表示提供局部 mutation 的落点，再用 rollout 内与 rollout 后两条反馈回路决定何时修改。 以下按总体流程、关键机制与实现约束说明技术路线。</p>
-        <div class="equation-line">S = (D, A, P, B, C, F)<small>Structured representation → Localized mutation</small></div>
-        <p>Skill Package 被写成六元组：元数据 D、可访问性工具 A、计划 P、备用定位 B、恢复规则 C、失败案例 F。最关键的不是六个字母本身，而是错误类型与可编辑位置之间形成了稳定映射；系统无需每失败一次就重写整个 Skill，而可以把修改限制在最相关的知识单元。</p>
-        <p class="block-intro">下面四项是理解“为什么结构化”最直接的方式。它们分别回答正常流程、定位替代、异常恢复和历史负例四类问题，同时把一次失败的修改范围压缩到对应文件。</p>
-        <div class="table-wrap">
-          <table>
-            <caption>从错误类型到局部 Skill mutation</caption>
-            <thead><tr><th>知识模块</th><th>回答的问题</th><th>典型错误</th><th>局部更新</th></tr></thead>
-            <tbody>
-              <tr><td><strong>P · Plan</strong></td><td>正常情况下怎样完成任务</td><td>步骤缺失、顺序错误、过早结束</td><td>修改 <code>plan.md</code></td></tr>
-              <tr><td><strong>B · Backup</strong></td><td>默认定位失效后怎么办</td><td>按钮移动、识别失败、选择器失效</td><td>修改 <code>backup.md</code></td></tr>
-              <tr><td><strong>C · Recovery</strong></td><td>进入异常状态后怎样恢复</td><td>弹窗、加载失败、流程偏航</td><td>修改 <code>recover.md</code></td></tr>
-              <tr><td><strong>F · Failure cases</strong></td><td>过去怎样失败、为何失败</td><td>同一错误重复出现</td><td>写入 <code>failure_examples/</code></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="source-note">来源：论文 §3.2、Equation 4 与 Appendix A.6。结构化 Skill 相比单文件 Skill，MobileWorld 成功率由 66.67% 提升至 69.52%。</p>
-        <p>执行阶段允许 Agent 通过一组受限工具修改 Skill。界面与预期不符时，Agent 可以立即修正相关文件并继续任务。</p>
-        <p>如果整次任务失败，系统会启动一个隔离的诊断会话。诊断者只看任务指令、截图、界面结构和动作记录，不看原 Skill、执行者的推理过程或标准答案。它指出失败发生在哪一步、直接原因是什么，并给出修改建议；执行者再据此修订文件。</p>
-        <p>信息隔离解决的不是模型能力，而是诊断污染：如果 Critic 继承原计划，它容易替错误决策辩护；如果看到标准答案，又会把不可部署的特权信息写进 Skill。但“同一参数、不同会话”仍不等于独立监督——Critic 与执行者共享盲点，论文后续人工审计也确实发现近两成诊断错误。</p>
-        <p class="block-intro">两个修订回路不是重复设计，而是处理不同故障半径。即时修订阻止局部 mismatch 扩散；事后反思使用完整轨迹处理已经暴露出的结构性错误。</p>
-        <div class="level-compare">
-          <article><h3>A · 执行中的即时修订</h3><p>任务尚未结束时，如果出现弹窗、控件变化或 Skill 不适配，系统立即修改对应文件并继续执行。目的在于避免一个局部错误把后续状态全部带偏。</p></article>
-          <article><h3>B · 失败后的完整复盘</h3><p>整次执行失败后，隔离的诊断者给出失败步骤、直接原因和修改建议。执行者修订 Skill 后，再从头运行任务。</p></article>
-        </div>
-        <p>因此，系统在两个时间尺度上学习：执行中处理眼前偏差，执行后根据完整失败记录修改未来规则。这一设计比“把 Skill 拆成多个文件”更值得记住。</p>
-        <p class="block-intro">完整系统还需要第三个层面：元数据检索决定修订后的知识能否在未来任务被正确调用。结构、反馈时机与检索门控共同形成闭环，缺一项都会退化成一次性修补。</p>
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 2</span><span>结构、演化与复用</span></div>
-          <a href="assets/paper-figures/31-evoskill-gui/method.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/method.png" alt="EvoSkill-GUI 总体架构，包含多文件 Skill Package、执行反思修订循环、信息隔离和元数据检索复用"></a>
-          <figcaption><strong>系统不是一个 Prompt，而是一个带写权限边界的控制回路</strong><p>A 展示文件级知识分工；B 展示即时编辑、隔离诊断与事后修订；C 展示命中阈值后的复用，以及未命中时的新 Skill 生成。</p><p class="figure-reading"><strong>阅读要点：</strong>受限工具接口提供的是可审计性与作用域约束，不是正确性保证。修订是否有害，仍取决于 Critic 诊断与后续验证。</p><div class="figure-source"><span>来源：论文 Figure 2</span><a href="https://arxiv.org/html/2609.17653v1#S2.F2" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
-        </figure>
-        <h3 class="subhead">任务边界约束下的技能检索</h3>
-        <p>每个 Skill 的检索元数据包含 intent、app、platform、keywords、args、history 与 status。评分将查询覆盖率和集合重叠度组合，再加入应用与关键词奖励、缺失关键概念的惩罚；最高分超过阈值 0.6 才复用，否则新建 Skill。它本质上是一个低成本、人工加权的选择门，而不是学习到的检索器。</p>
-        <div class="analysis"><strong>方法主线：</strong>结构化表示让知识可以局部改；双时间尺度让系统知道何时改；元数据检索让改过的知识能够在未来再次被调用。三者合在一起，才构成 Skill Evolution，而不只是失败后的 Prompt 修补。</div>
-      </section>
-
-      <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验设计与结果分析</h2>
-
-<h3 class="subhead">主结果与机制消融</h3>
-<p class="section-intro">论文最有辨识度的结果，不只是成功率提高。在同样最多执行三轮、且 Token 总量更低的条件下，“执行—复盘—修订 Skill”明显优于不总结经验的连续重试。</p>
-        <div class="level-compare">
-          <article><h3>Repeated Sampling · pass@3</h3><p><strong>62.8%</strong> 成功率 · <strong>103.00M</strong> tokens<br>每次 rollout 相互独立，失败不改变下一次的程序性知识。</p></article>
-          <article><h3>EvoSkill-GUI · 3 rounds</h3><p><strong>69.5%</strong> 成功率 · <strong>94.75M</strong> tokens<br>失败经过反思并写回 Skill，下一轮从修订后的状态继续。</p></article>
-        </div>
-        <ul class="key-points">
-          <li><strong>预算对照：</strong>相近三轮预算下，技能修订以更低总 Token 获得高 6.7 个百分点的结果，削弱了“只是多尝试”的解释。</li>
-          <li><strong>因果边界：</strong>完整系统同时改变 Skill 生成、反思、工具与可访问性信息；主结果证明端到端有效，机制归因仍依赖消融。</li>
-          <li><strong>跨模型结果：</strong>MobileWorld 四种骨干提升 7.6–16.2 个百分点，OSWorld 与 AndroidWorld 亦有增益；但缺少独立重复与置信区间。</li>
-        </ul>
-        <figure class="paper-figure figure-compact">
-          <div class="figure-head"><span>论文原图 · Figure 3</span><span>MobileWorld 主结果</span></div>
-          <a href="assets/paper-figures/31-evoskill-gui/mobileworld_summary_final.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/mobileworld_summary_final.png" alt="MobileWorld 上四个基础模型加入 EvoSkill-GUI 前后的成功率柱状图"></a>
-          <figcaption><strong>四类骨干都受益，但绝对水平仍由基础模型决定</strong><p>完整框架在闭源通用模型、开放权重模型和 GUI 专用模型上都提高成功率；这支持“外部 Skill 适应可以补足不同骨干”的实用性判断。</p><p class="figure-reading"><strong>谨慎解读：</strong>该图是端到端结果，不能单独证明结构化文件、信息隔离或持久复用中的任一机制是唯一原因。</p><div class="figure-source"><span>来源：论文 Figure 3</span><a href="https://arxiv.org/html/2609.17653v1#S4.F3" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
-        </figure>
-        <p class="block-intro">下面把论文最关键的“主结果—机制证据—成本对照”放在同一证据板上。最强机制信号来自信息隔离与即时修订消融；单文件对照也有效，但差距相对较小。</p>
-        <div class="table-wrap">
-          <table class="result-table">
-            <caption>核心结果与它们真正支持的结论（成功率，%）</caption>
-            <thead><tr><th>实验</th><th>基线 / 对照</th><th>EvoSkill-GUI</th><th>变化</th><th>可支持的结论</th></tr></thead>
-            <tbody>
-              <tr><td>MobileWorld · Qwen3.6-Plus</td><td>53.3</td><td>69.5</td><td class="positive">+16.2 pt</td><td>完整系统对该骨干有效</td></tr>
-              <tr><td>OSWorld · GUI-Owl-1.5-8B</td><td>46.7</td><td>54.8</td><td class="positive">+8.1 pt</td><td>方法可延伸到桌面工作流</td></tr>
-              <tr><td>OSWorld · Qwen3-VL-8B</td><td>23.8</td><td>34.3</td><td class="positive">+10.5 pt</td><td>跨骨干的桌面收益</td></tr>
-              <tr><td>去掉信息隔离</td><td>60.95</td><td>69.52</td><td class="positive">+8.57 pt</td><td>隔离 Critic 上下文对修订质量有贡献</td></tr>
-              <tr><td>去掉即时修订</td><td>62.86</td><td>69.52</td><td class="positive">+6.66 pt</td><td>rollout 内止损有贡献</td></tr>
-              <tr><td>单文件 → 结构化 Package</td><td>66.67</td><td>69.52</td><td class="positive">+2.85 pt</td><td>文件级分工支持定向修订</td></tr>
-              <tr><td>相近预算：pass@3</td><td>62.8 / 103.00M token</td><td>69.5 / 94.75M token</td><td class="positive">+6.7 pt</td><td>收益不能仅由更多 token 解释</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="source-note">来源：论文 Figure 3、Table 1–4、Table 10。百分点差值按论文报告值；Token 对照来自 MobileWorld，M 表示百万。</p>
-        <p>结构化表示的证据也应放在正确层级理解：单文件到多文件 Package 带来 +2.85 个百分点，说明局部编辑具有价值；但信息隔离与即时修订的影响更大，分别对应 +8.57 与 +6.66 个百分点。这表明论文的贡献不是一个目录结构，而是“可编辑表示 + 双尺度反馈 + 受控诊断”的联合机制。</p>
-        <p>失败类型分析也支持定向修改文件。计划错误在修改 <code>plan.md</code> 后恢复 16/23（69.6%）；定位错误在修改 <code>backup.md</code> 后恢复 6/12（50.0%）；缺少应急分支的问题在修改 <code>recover.md</code> 后只恢复 1/4（25.0%）。这说明错误分类确实能指导修订，也表明恢复规则最难仅凭少量失败记录学稳。</p>
-        <div class="warning"><strong>没有被主结果证明的事：</strong>论文没有证明 Skill 修订永远单调变好，也没有给出形式化 verifier。OSWorld 中仍出现 GUI-Owl 的 OS 类别 -4.1 pt、Qwen 的 Thunderbird -13.3 pt；作者将其归因于运行波动和简单任务被 Skill 过度复杂化，但这些解释仍是合理假设，不是隔离后的因果结论。</div>
-
-        <h3 class="subhead">跨任务复用与诊断可靠性</h3>
-<p class="block-intro">“多轮变好”并不自动等于“持续自进化”，同任务族复用也不等于通用策略迁移。论文真正有力的证据，是冻结来源任务后，已有 Skill 在部分留出任务上仍提供了可测收益。</p>
-        <p>MobileWorld 上四个骨干从第 1 轮到第 3 轮都上升。Qwen3.6-Plus 的五轮扩展更能说明形状：56.2% → 61.9% → 68.6% → 68.6% → 69.5%。前三轮累计 +12.4 个百分点，后两轮只再增加 0.9，说明反馈循环存在明显边际递减；“最多三轮”是成本—性能折中，不是已经发现可无限递归提升的过程。</p>
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 6</span><span>三轮演化轨迹</span></div>
-          <a href="assets/paper-figures/31-evoskill-gui/evolution.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/evolution.png" alt="四个基础模型在 MobileWorld 三轮 Skill 演化中的成功率变化"></a>
-          <figcaption><strong>反馈带来累积收益，但图中只有三个离散轮次</strong><p>四条曲线共同上升，支持短周期 Skill 修订的普适实用性；开放权重与专用 GUI 模型同样受益。</p><p class="figure-reading"><strong>谨慎解读：</strong>该图不构成长期稳定性或递归自改进证据。论文自己对五轮 Qwen3.6-Plus 的结果显示，提升在第三轮后基本饱和。</p><div class="figure-source"><span>来源：论文 Figure 6</span><a href="https://arxiv.org/html/2609.17653v1#S4.F6" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
-        </figure>
-        <h3 class="subhead">三类复用证据</h3>
-        <p>AndroidWorld 包含前后两组各 116 个任务。第二组是同类任务的参数变体，并全部使用既有技能库；成功率从 55.2% 提升到 61.2%，最终有 56.1% 的任务复用了已有 Skill。这支持同类任务中的经验积累，但不能直接外推到全新应用。</p>
-        <p>更严格的 MobileWorld 留出实验将 87 个任务用于建库、30 个任务只做评测。仅使用已有库时，EvoSkill-GUI 完成 22/30（73.3%），无 Skill 的 pass@3 完成 12/30（40.0%）。16 个触发检索的任务中，15 个检索到合适 Skill；其中 EvoSkill-GUI 成功 12 个，而 pass@3 成功 7 个。另 14 个未检索任务的收益则来自新 Package 生成与演化，不能计作“已有 Skill 迁移”。</p>
-        <div class="analysis"><strong>这项证据不能忽略：</strong>检索已有 Skill 的 16 个任务中，EvoSkill-GUI 比 pass@3 多成功 5 个，说明 Skill 并非只能修好原任务。但它证明的是“相关任务间存在可复用程序性知识”，尚未证明系统已经从具体案例中抽取出带明确适用边界的通用策略。</div>
-        <figure class="paper-figure figure-wide">
-          <div class="figure-head"><span>论文原图 · Figure 4</span><span>AndroidWorld 顺序任务流</span></div>
-          <a href="assets/paper-figures/31-evoskill-gui/skill_library.png" target="_blank"><img src="assets/paper-figures/31-evoskill-gui/skill_library.png" alt="AndroidWorld 两阶段任务流中成功率、Skill 库规模和复用比例随任务推进的变化"></a>
-          <figcaption><strong>库变大、复用变多，累计成功率保持领先</strong><p>上图对比基线与 EvoSkill-GUI 的滑动成功率，下图显示 Skill 数量和复用率随任务推进增长；虚线分隔 seed-30 与相关 seed-42 变体。</p><p class="figure-reading"><strong>阅读要点：</strong>它展示了“程序性知识会积累”，但 Phase 2 并非跨应用类别的开放世界迁移，因此更适合称为相关任务复用。</p><div class="figure-source"><span>来源：论文 Figure 4</span><a href="https://arxiv.org/html/2609.17653v1#S4.F4" target="_blank" rel="noreferrer">查看原文图注 ↗</a></div></figcaption>
-        </figure>
-        <p>Critic 的可靠性决定了积累是复利还是污染。作者人工标注 56 个失败任务中的 143 次判断，115 次正确（80.4%），28 次错误（19.6%）；至少 4 次把失败误判为成功并提前终止。这个结果很重要，因为它把“同骨干自诊断”从宣传语变成可测对象，也说明没有 verifier 的持久化写回具有真实回归风险。</p>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
-        <p class="section-intro">本章先总结论文已经验证的贡献，再说明证据停止在哪里。最后单独讨论“从案例修复走向策略抽象”这一研究延伸，避免把它误写成论文已经完成的能力。</p>
-
-        <h3 class="subhead">论文贡献</h3>
-        <p class="block-intro">EvoSkill-GUI 的研究对象是部署中的外部 Skill，而不是模型参数。论文建立的是一条可运行的持续修订链路。</p>
-        <ul class="key-points">
-          <li><strong>适应对象：</strong>Skill 从执行前生成的静态文档，变成能被真实执行记录持续修改和保存的外部行为规则。</li>
-          <li><strong>系统闭环：</strong>结构化文件、受限写接口、执行中纠偏、失败后隔离诊断和元数据检索共同连接修改与后续复用。</li>
-          <li><strong>实验结果：</strong>在相近执行轮数下，修订 Skill 优于连续重试；部分已有 Skill 还能在相关留出任务上继续发挥作用。</li>
-        </ul>
-        <div class="analysis"><strong>最小忠实抽象：</strong>当模型参数保持不变时，系统可以把真实 GUI 执行中的局部失败写回一个结构化、可检索的外部程序，并在后续相关任务中复用。</div>
-
-        <h3 class="subhead">证据边界与局限</h3>
-        <p class="block-intro">论文支持“Skill 可以持续修订并在相关任务间复用”，但没有证明系统已经学会跨场景的通用策略。</p>
-        <div class="level-compare">
-          <article><h3>论文已经支持</h3><p>结构化 Skill 可以局部编辑；执行中和执行后都能写回；修订优于相近预算重试；部分旧 Skill 能服务相关留出任务。</p></article>
-          <article><h3>论文尚未建立</h3><p>从多个案例显式归纳共同规律；学习规则的适用边界；处理互相冲突的经验；在全新应用类别中保持迁移收益。</p></article>
-        </div>
-        <ul class="key-points">
-          <li><strong>诊断可靠性：</strong>人工审计的 143 次判断中有 19.6% 错误，且至少 4 次把失败误判为成功。错误诊断可能被永久写入 Skill。</li>
-          <li><strong>迁移范围：</strong>AndroidWorld 第二阶段仍是同任务族的参数变体；MobileWorld 留出实验更严格，但任务规模较小，不能代表跨应用类别迁移。</li>
-          <li><strong>抽象证据：</strong>发邮件案例证明“失败诊断可以修好具体流程”，却没有证明系统能把一次检查动作归纳成适用于多种不可逆操作的通用原则。</li>
-          <li><strong>完整成本：</strong>论文报告的 Token 低于 pass@3，但界面读取、诊断、修订、验证和长期维护成本尚未形成完整账单。</li>
-        </ul>
-        <div class="warning"><strong>决定性区分实验：</strong>构造一组表面任务不同、底层检查原则相同的任务，只在少量任务上提供失败记录。随后冻结更新，比较连续重试、单案例直接写回和多案例规律归纳三种路径在未见应用上的表现。只有第三种路径稳定胜出，才支持“策略抽象”而不仅是“案例修复”。</div>
-
-        <h3 class="subhead">独立研究启发</h3>
-        <p class="block-intro"><strong>以下内容是编辑性研究延伸，不是论文已经实现的模块。</strong>EvoSkill-GUI 展示了从失败记录到直接修改的链路，由此可以进一步研究独立的规律归纳层。</p>
-        <p>一种可能的扩展，是先把多个相似失败归并为模式，再写明规则的适用条件、例外和反例，最后才更新具体 Skill。这样可以把“Kevin 的附件要检查”提升为待验证假设：在执行不可撤销动作前，必须确认关键中间状态。</p>
-        <p>这项扩展需要新的证据。系统不仅要在原案例上成功，还要在删除文件、修改价格或提交表单等表面不同的任务上迁移，并在不适用时主动拒绝调用该规则。</p>
-
-        <div class="verdict"><h3>综合判断</h3><p><strong>论文证据：</strong>EvoSkill-GUI 证明部署中的结构化 Skill 可以根据真实轨迹被持续修改，并在一部分相关任务上复用。</p><p><strong>支持性解释：</strong>信息隔离和双时间尺度反馈可能是主要收益来源，但各机制的因果贡献没有被完全拆开。</p><p><strong>开放问题：</strong>系统能否从多个案例中归纳出带适用边界的通用策略，仍然没有直接证据。</p></div>
-        <p class="source-note">资料来源：<a href="https://arxiv.org/html/2609.17653v1" target="_blank" rel="noreferrer">arXiv:2609.17653v1</a>（2026-09-15）、论文附录与作者公开代码页面。本页未独立复现实验；“独立研究启发”部分明确超出论文结论。</p>
-        <a class="back" href="#top">↑ 返回顶部</a>
-      </section>
-    </main>
-  </div>
-  <script>
-    const progress=document.getElementById('progress');
-    const links=[...document.querySelectorAll('.toc a')];
-    const sections=links.map(a=>document.querySelector(a.getAttribute('href')));
-    function update(){const d=document.documentElement;const max=d.scrollHeight-d.clientHeight;progress.style.width=(max?d.scrollTop/max*100:0)+'%';let active=0;sections.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<160)active=i});links.forEach((a,i)=>a.classList.toggle('active',i===active))}
-    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
-    const theme=document.getElementById('theme');theme.addEventListener('click',()=>{document.body.classList.toggle('dark');localStorage.setItem('paper-theme',document.body.classList.contains('dark')?'dark':'light')});if(localStorage.getItem('paper-theme')==='dark')document.body.classList.add('dark');
-  </script>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
+<body>
+<header class="hero"><div class="hero-in">
+<h1>EvoSkill-GUI：部署期可持续修订的 GUI Agent 技能</h1>
+<p class="paper-name">Reflect, Revise, Reuse: Training-Free Skill Evolution for GUI Agents</p>
+<p class="paper-authors">作者：Bofan Chen、Boxuan Zhang、Fei Tang、Zhengxi Lu、Yong Du、Tongbo Chen、Weiming Lu、Jun Xiao、Yueting Zhuang、Yongliang Shen</p>
+<p class="paper-affiliation">作者单位：作者单位：Zhejiang University / UESTC</p>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/html/2609.17653v1" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">GUI 任务的执行环境会在过程中变化：弹窗出现、页面加载延迟、控件位置改变，都可能使一份预先生成的计划失效。普通技能可以复用步骤，却常把计划、定位提示和恢复规则混写在一个长文件里，失败后难以定点修复。EvoSkill-GUI 把技能当成<strong>部署期间可以被观察证据修订的程序包</strong>。</p><p class="prose">它不更新模型权重，而是将技能分成规划、备用定位、恢复规则、无障碍工具、失败案例和检索元数据；执行中可即时修订，失败后再由隔离批评者诊断，让执行者修改相关文件。创新既在可编辑表示，也在“什么证据可以影响修订”的信息边界。</p><div class="table-wrap"><table data-source=""><caption>GUI 动态性如何改变技能设计</caption><thead><tr><th>失败层级</th><th>仅保留静态步骤的不足</th><th>程序包责任</th></tr></thead><tbody><tr><td>操作顺序错</td><td>继续照原计划会重复同一流程缺口。</td><td>Planning 写执行程序和必要检查点。</td></tr><tr><td>控件定位失配</td><td>整份计划重写可能破坏其他正确部分。</td><td>Backup 保存替代定位策略。</td></tr><tr><td>中途状态不符合预期</td><td>没有恢复规则就从局部错误级联到整题失败。</td><td>Recovery 与即时修改应对异常状态。</td></tr></tbody></table></div><p class="prose">“无需训练”不等于无需额外推理。反思、重试、文件维护和技能检索都占预算；需要和相同数量独立尝试比较，才能判断收益是否超出多跑几次。</p></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">运行中执行者持有技能和自己的推理，批评者只看任务、可见界面与动作；两者使用同一骨干的不同上下文。技能包可持久化，任务轨迹和界面状态则随每次执行变化。</p><figure class="method-overview" data-source="primary-method"><figcaption>自绘总览｜检索选择入口，回合内与回合后两种修订共同更新技能</figcaption><div class="flow-box"><h4>任务 → 元数据检索</h4><p>按词汇覆盖、语义紧密度及 app / 关键词约束打分；过阈值复用，否则创建新包。</p></div><div class="state-band"><b>结构化技能包</b><span>计划 P / 定位 B / 恢复 C / 无障碍 A / 失败 F / 检索 D；通过受限读写工具更新</span></div><div class="flow-box"><h4>执行者 · 真实 GUI rollout</h4><p>观察截图 + accessibility tree，采取动作；遇到局部状态变化时即时修改对应文件。</p></div><div class="flow-connector">↓ rollout 成功 / 失败 / 步数上限后，进入独立审视</div><div class="process-row three"><div class="flow-box"><h4>隔离 Critic</h4><p>只读取任务、观察和动作；不读技能、私有思维链或真值，输出失败步、原因和可执行建议。</p></div><div class="flow-arrow" aria-hidden="true">→<span></span></div><div class="flow-box"><h4>执行者定点修订</h4><p>读取回合后技能快照 + 轨迹 + 建议，改相关文件；失败记录写入案例库。</p></div></div><div class="feedback-band">↶ 未成功且未达最大修订轮数 → 再执行；成功或演化后可进入技能库供后续相关任务复用。</div></figure><section class="method-section"><h3>多文件表示：把不同错误映射到不同修改位置</h3><p class="prose">规划文件回答要做什么顺序，备用定位回答界面元素如何认出，恢复规则回答预期状态被破坏后怎么办。无障碍工具补充当前窗口的结构观察，失败案例保存任务、反馈与轨迹，检索元数据则负责未来能否找到技能。</p><p class="prose">文件操作只开放预定义技能结构内的读取、写入、追加、列举、搜索及失败创建，避免把技能修订混成任意系统文件改动。可见界面读取本身不改技能；程序知识更新与环境观察因而在工具权限上分开。</p></section><section class="method-section"><h3>即时修订与隔离反思处理不同尺度的失配</h3><p class="prose">执行中发现控件移动或弹窗时，可以直接修改位置提示和恢复规则，避免把能及时修复的偏差等到整题失败。回合结束后，独立批评者对可见轨迹定位失败步骤、直接原因和建议，再由执行者结合当前技能快照做更结构化修订。</p><p class="prose">批评者没有技能和私有思维链，也不读取基准真值。它无法通过“知道原计划所以解释原计划”来替执行者自我辩护，但同骨干仍可能具有相同视觉盲点。所谓独立是信息上下文隔离，不是独立模型能力或绝对正确的裁判。修订循环到任务成功或轮数上限结束，不能把持续更新理解为无条件成功。</p></section><section class="method-section"><h3>复用是有约束的选择，而非全文相似度</h3><p class="prose">元数据区分意图、应用、平台、关键词、参数、使用历史和状态。查询与技能词项的覆盖和重合度构成基础分，再加应用、关键词奖励和概念缺失惩罚；最高分超过门槛才复用，未过则新建。</p><p class="prose">这种选择主要是可解释的词项与任务约束评分，不能笼统说成复杂学习式语义检索。索引元数据而非长正文，减少无关操作词造成的误匹配；但它也依赖元数据能表达关键任务差异。复用成功不证明可以无条件跨应用或跨界面版本迁移。</p></section><details class="original-figure"><summary>论文原始结构图 · 点击对照</summary><figure class="main-figure"><a href="assets/paper-figures/31-evoskill-gui/method.png" target="_blank" rel="noopener"><img loading="lazy" src="assets/paper-figures/31-evoskill-gui/method.png" alt="论文原始结构图"></a><figcaption>论文 Figure 2：结构化包、信息隔离、反思修订与检索 · 点击图片查看原始尺寸</figcaption></figure></details></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="evidence-section"><h3>修订是否比同预算多次独立尝试更有效</h3><p class="evidence-setting">MobileWorld，Qwen3.6-Plus；token 单位百万。EvoSkill-GUI 三轮是序贯演化，基线 pass@3 是三次独立尝试。</p><div class="table-wrap"><table data-source="Appendix Table 13"><caption></caption><thead><tr><th>设置</th><th>总 token M</th><th>准确率</th></tr></thead><tbody><tr><td>基线 pass@1</td><td>33.20</td><td>53.3%</td></tr><tr><td>基线 pass@3</td><td>103.00</td><td>62.8%</td></tr><tr><td>单文件技能 pass@3</td><td>84.54</td><td>66.7%</td></tr><tr><td>EvoSkill-GUI 三轮</td><td>94.75</td><td>69.5%</td></tr></tbody></table></div><p class="prose">演化在低于独立三次尝试的总 token 下达到更高成功率，支持保存并修订程序带来额外价值，而不只是重试。与单文件技能相比，结构化包更准确，但花费更多 token，因此不能把包结构的优势概括为所有成本都下降。</p><p class="prose">token 统计采用论文附录更正后的 94.75M，避免把累计快照重复相加造成虚高。该表是测试期预算对照，不包含所有技能库构建与后续复用生命周期的总成本。</p></section><section class="evidence-section"><h3>信息隔离和即时修订是否只是装饰</h3><p class="evidence-setting">MobileWorld，同一 Qwen3.6-Plus；对应组件消融。</p><div class="table-wrap"><table data-source="Tables 3–4; Appendix A.5"><caption></caption><thead><tr><th>设置</th><th>成功率</th><th>相对完整设置</th></tr></thead><tbody><tr><td>完整方法</td><td>69.52%</td><td>—</td></tr><tr><td>无信息隔离</td><td>60.95%</td><td>−8.57 pp</td></tr><tr><td>无即时修订</td><td>62.86%</td><td>−6.66 pp</td></tr><tr><td>单文件表示</td><td>66.67%</td><td>−2.85 pp</td></tr></tbody></table></div><p class="prose">隔离和即时修订的影响大于单纯拆文件，说明收益来自执行反馈如何进入修复，而不只是文件更好读。跨移动与桌面多骨干结果也显示改进，但 OSWorld 存在少数领域回归，不能把总分提升等同每种界面都更可靠。</p><p class="prose">这些消融证明组件在当前系统中的贡献，尚未证明隔离只通过减少确认偏差起作用：输入长度、批评注意范围等也同时变化。需要进一步匹配信息量，才能更精确归因。</p></section></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>核心贡献：把动态 GUI 技能拆成可修复的知识层</h3><p class="prose">EvoSkill-GUI 把执行时局部纠错与跨回合程序修订连接起来，技能因此不再只是预生成计划。更重要的是用同骨干隔离审视与受限写接口约束修改，形成可解释的反馈所有权。预算对照支持这套程序化积累优于单纯增加独立尝试。</p></section><section class="method-section"><h3>成功修订不等于稳定的跨任务知识</h3><p class="prose">主要三轮结果包含对当前任务的重试与适应，因此不能全部算成后续任务的可迁移技能收益。反思者虽不读真值，仍可能因视觉误判写入错误恢复规则；一旦进入库，错误便可能在相似任务重复传播。少量领域回归提示该风险不只是概念问题。</p><p class="prose">可将“当前任务重试”和“仅复用冻结技能的新任务”完全分开，按界面扰动和应用版本划分测试，并追踪每条规则的后续回归率。若增益主要停留在当前任务，应称有效的测试期修复；若冻结技能跨扰动仍有效，才更支持持续程序知识的积累。</p></section><p class="prose">综合看，论文提供了有执行逻辑和成本对照的训练外 GUI 修复框架。它最值得借鉴的是让错误层级决定修改位置，让批评者依赖可见证据；技能长期保真、自动验收和广泛迁移仍需要额外验证。</p></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>

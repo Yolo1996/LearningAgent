@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>长程智能体：十篇论文精读</title><style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--bg:#f3f5f8;--ink:#223146;--muted:#627187;--line:#dce3eb;--blue:#365d8b;--surface:#fff}*{box-sizing:border-box}html{font-family:var(--sans)}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:var(--bg);color:var(--ink);font-size:15.5px;line-height:1.82}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}header{position:relative;color:#fff;background:linear-gradient(125deg,#0b1930,#17285a 60%,#431668);overflow:hidden}header:before{content:"";position:absolute;inset:0;opacity:.1;background-image:linear-gradient(#fff5 1px,transparent 1px),linear-gradient(90deg,#fff5 1px,transparent 1px);background-size:42px 42px}.hero{position:relative;max-width:1040px;margin:auto;padding:42px 28px 38px}.eyebrow{font-size:12px;letter-spacing:.14em;color:#becce2}h1{font-size:clamp(30px,4.2vw,46px);line-height:1.35;margin:12px 0 14px}.lead{max-width:880px;color:#d2dced;margin:0}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.actions a{color:#fff;border:1px solid #ffffff45;border-radius:7px;padding:7px 12px;font-size:13px;background:#ffffff0b}main{max-width:1040px;margin:24px auto 50px;padding:0 24px}.note{margin:0 0 18px;color:var(--muted);font-size:13px}.list{border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden}.paper{display:grid;grid-template-columns:38px minmax(0,1fr);gap:14px;padding:23px 28px;border-bottom:1px solid var(--line)}.paper:last-child{border:0}.number{font-size:13px;font-weight:700;color:var(--blue);padding-top:4px}h2{margin:0 0 6px;font-size:21px;line-height:1.5}h2 a{color:var(--ink)}.original{font-size:13px;color:var(--muted);margin:0 0 9px;overflow-wrap:anywhere}.paper p:not(.original){margin:0 0 10px}.read{font-size:13px;font-weight:600}footer{margin:20px 0 0;color:var(--muted);font-size:12px}@media(max-width:600px){.hero{padding:32px 19px}.paper{grid-template-columns:26px minmax(0,1fr);gap:8px;padding:20px 17px}main{padding:0 12px;margin-top:16px}h2{font-size:19px}}@media print{body{background:#fff}header{background:#fff;color:#111;border-bottom:1px solid #333}.eyebrow,.lead{color:#333}.actions{display:none}main{max-width:none;margin-top:18px}.paper{break-inside:avoid}.list{border:0}.hero{padding:20px 0}h1{font-size:27pt}}
+.review-tag{display:inline-block;margin:1px 0 8px;padding:2px 8px;border:1px solid #bad3c5;border-radius:5px;background:#eff7f2;color:#34664f;font-size:12px;line-height:1.7}
+</style><script src="../library-nav.js" data-material-type="paper" defer></script></head><body><header><div class="hero"><div class="eyebrow">LONG-HORIZON AGENTS · PAPER READING COLLECTION</div><h1>长程智能体：十篇论文精读</h1><p class="lead">从多轮强化学习的信用分配，到记忆与上下文管理，再到失败后的恢复与经验利用。按原始清单排列，每篇均可独立打开和保存。</p><div class="actions"><a href="long-horizon-10-papers.zip" download>下载十篇 HTML 合集</a><a href="index.html">查看全部论文</a></div></div></header><main><p class="note">每篇按研究背景与问题定义、方法与技术路线、实验设计与结果分析、贡献、局限与综合评价四章组织；方法总览前置，示例和实现参考可按需展开。</p><div class="list"><article class="paper"><div class="number">01</div><div>
+<h2><a href="66-archer.html">ArCHer：话语价值与词元策略分离的多轮强化学习</a></h2>
+<p class="original">ArCHer: Training Language Model Agents via Hierarchical Multi-Turn RL</p><p>以 utterance 级价值学习和 token 级策略优化分离多轮信用与语言生成。</p>
+<a class="read" href="66-archer.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">02</div><div>
+<h2><a href="67-gigpo.html">GiGPO：基于锚状态分组的智能体信用分配</a></h2>
+<p class="original">Group-in-Group Policy Optimization for LLM Agent Training</p><p>事后锚定重复状态，用全局与局部相对回报改进多轮策略。</p>
+<a class="read" href="67-gigpo.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">03</div><div>
+<h2><a href="68-trace.html">TRACE：基于答案可预测性变化的逐轮信用分配</a></h2>
+<p class="original">TRACE: Turn-level Reward Assignment via Credit Estimation for Long-Horizon Agents</p><p>冻结参考模型的答案概率差距，转化为训练时轮级信用并保留终局锚定。</p>
+<a class="read" href="68-trace.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">04</div><div>
+<h2><a href="69-procredit.html">ProCredit：可验证进度与逐轮信用分配</a></h2>
+<p class="original">ProCredit: From Outcome Rewards to Progress Credit in Agentic Reinforcement Learning</p><p>用中间验收进度构造轨迹与轮次两级信用，解释折扣和监督粒度。</p>
+<a class="read" href="69-procredit.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">05</div><div>
+<h2><a href="70-t1.html">T1：大规模混合专家终端代理的强化学习训练</a></h2>
+<p class="original">T1: Terminal Agent Reinforcement Learning for Long-Horizon Tasks</p><p>终端 MoE 强化学习中，任务验收、token 忠实性、路由回放与 critic 稳定训练的协同。</p>
+<a class="read" href="70-t1.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">06</div><div>
+<h2><a href="71-mem1.html">MEM1：联合学习记忆整理与长程推理</a></h2>
+<p class="original">MEM1: Learning to Synergize Memory and Reasoning for Efficient Long-Horizon Agents</p><p>逐轮重写工作状态并用掩码轨迹做 RL，解释跨度迁移、近常量记忆及信息丢失边界。</p>
+<a class="read" href="71-mem1.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">07</div><div>
+<h2><a href="72-context-folding.html">Context-Folding：子任务边界上的上下文折叠</a></h2>
+<p class="original">Scaling Long-Horizon LLM Agent via Context-Folding</p><p>通过单层分支与返回管理活动上下文，结合 FoldGRPO 学习规划、执行与压缩边界。</p>
+<a class="read" href="72-context-folding.html">打开独立精读 →</a></div></article><article class="paper" data-review-status="confirmed-twice"><div class="number">08</div><div>
+<h2><a href="45-context-language-models.html">Context Language Models：模型自主上下文管理</a></h2>
+<span class="review-tag">已二次校验</span>
+<p class="original">Context Language Models</p><p>长程任务不断产生工具输出，既挤占有限窗口，也增加计算与状态维护负担。CLM 允许模型直接编辑下一轮输入，协调资料另存、历史移除和按需取回；策略可通过不更新参数的文档演化，或更新权重的 GRPO 改善。</p>
+<a class="read" href="45-context-language-models.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">09</div><div>
+<h2><a href="15-verifiable-memory.html">VerMem：统一记忆操作与层级信用分配</a></h2>
+<p class="original">Verifiable Memory: Learning Unified Memory Management with Local and Global Verifiers for Large Language Model Agents</p><p>长期存储、活动上下文与同任务历史分开建模，用统一操作策略与局部/全局分层反馈训练记忆决策。</p>
+<a class="read" href="15-verifiable-memory.html">打开独立精读 →</a></div></article><article class="paper"><div class="number">10</div><div>
+<h2><a href="64-retrail.html">ReTRAIL：长程智能体的环境回退与分支经验学习</a></h2>
+<p class="original">Travel Back To Move Forward: Retrospective Exploration and Evolving for Long Horizon Agents</p><p>回退环境并保留探索经验，以状态锚定和分支进展分别训练执行与反思。</p>
+<a class="read" href="64-retrail.html">打开独立精读 →</a></div></article></div><footer>论文事实、作者解释与独立研究启发分开呈现。各篇保留原文入口；HTML 内嵌正文样式与论文插图，可离线阅读。</footer></main></body></html>

@@ -1,367 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="RSIAgent 中文深度解读：它如何把 training-free self-evolution 从利用既有 Experience 推进到主动选择 Experience，以及为何 Autonomous Exploration 尚不等于 Autonomous Experimentation。">
-  <title>RSIAgent：基于主动经验获取的递归自改进智能体｜论文精读</title>
-  <style>
-    :root{--bg:#f3f1ec;--paper:#fffefa;--ink:#182231;--muted:#687488;--line:#ddd9cf;--blue:#356bb3;--green:#39845d;--amber:#a7651c;--red:#b84f46;--purple:#7453ad;--bt:#edf4fd;--gt:#edf7f1;--at:#fff4e5;--pt:#f3effa;--shadow:0 12px 32px rgba(28,40,55,.07);--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:var(--sans)}body{margin:0;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.88;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}.progress{position:fixed;inset:0 0 auto;height:3px;z-index:9}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
-    .hero{color:#f8fbff;background:radial-gradient(circle at 86% 8%,rgba(114,84,181,.28),transparent 29%),radial-gradient(circle at 8% 100%,rgba(57,132,93,.2),transparent 30%),linear-gradient(125deg,#10223c,#183b52 56%,#49305f)}.hero-in{max-width:1420px;margin:auto;padding:42px 28px 32px}.eyebrow{color:#c7d4e7;font-size:12px;font-weight:800;letter-spacing:.12em}h1{max-width:1180px;margin:10px 0 0;font-size:clamp(31px,4.1vw,54px);line-height:1.13;letter-spacing:-.035em}.subtitle{max-width:1120px;margin:14px 0 0;color:#d6deea;font-size:15.5px;line-height:1.72}.paper-name{display:block;color:#fff;font-weight:750}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.action,.theme{padding:8px 12px;border:1px solid rgba(255,255,255,.22);border-radius:9px;color:#fff;background:rgba(255,255,255,.08);font-size:13px;cursor:pointer}.metrics{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin-top:25px}.metric{padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(4,17,41,.3)}.metric small,.metric span{display:block;color:#b6c3d4;font-size:11px;line-height:1.42}.metric b{display:block;margin:4px 0;color:#fff;font-size:16px;line-height:1.35}
-    .layout{display:grid;grid-template-columns:220px minmax(0,960px) 200px;gap:22px;max-width:1450px;margin:auto;padding:26px 24px 76px;align-items:start}.toc,.rail{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.side-title{margin:0 0 9px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.11em}.toc ol{margin:0;padding:0;list-style:none}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.4}.toc a.active{border-color:var(--green);color:var(--green);background:var(--gt);font-weight:750}
-    .chapter{--accent:var(--blue);--tint:var(--bt);min-width:0;margin-bottom:20px;padding:27px 30px 31px;border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:15px;background:linear-gradient(180deg,var(--tint),var(--paper) 150px);box-shadow:var(--shadow)}.chapter:nth-of-type(2){--accent:var(--purple);--tint:var(--pt)}.chapter:nth-of-type(3){--accent:var(--green);--tint:var(--gt)}.chapter:nth-of-type(4){--accent:var(--amber);--tint:var(--at)}.chapter:nth-of-type(5){--accent:var(--blue);--tint:var(--bt)}h2{display:flex;align-items:center;margin:0 0 20px;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.32}.num{display:grid;min-width:35px;height:27px;margin-right:10px;padding:0 8px;place-items:center;border-radius:8px;color:#fff;background:var(--accent);font-size:12px}.lead{margin:0 0 18px;padding:17px 19px;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--tint),rgba(255,255,255,.42));font-size:17px;font-weight:650;line-height:1.78}.chapter>p:not(.lead):not(.source-note):not(.block-intro){max-width:820px;margin:0 0 14px;line-height:1.92;text-indent:2em;text-align:justify}.block-intro{max-width:820px;margin:20px 0 16px;color:#405065;line-height:1.9;text-indent:2em;text-align:justify}.subhead{margin:26px 0 10px;font-size:17px}.subhead:before{content:"";display:inline-block;width:5px;height:17px;margin-right:9px;border-radius:3px;background:var(--accent);vertical-align:-2px}
-    .cards,.boundary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card,.boundary article{padding:14px 15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.card:nth-child(4n+2){border-color:#d7caec;background:var(--pt)}.card:nth-child(4n+3){border-color:#c9deb3;background:var(--gt)}.card:nth-child(4n){border-color:#ead5b4;background:var(--at)}.card h3,.boundary h3{margin:0 0 6px;font-size:15px}.card p,.boundary p{margin:0;color:#4a5a6d;font-size:14px;line-height:1.72}.boundary article{border-color:#ead5b4;background:var(--at)}.boundary article:last-child:nth-child(odd){grid-column:1/-1}
-    .shift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.shift article{position:relative;padding:15px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt)}.shift article:nth-child(2){border-color:#c9deb3;background:var(--gt)}.shift article:nth-child(3){border-color:#d7caec;background:var(--pt)}.shift article+article:before{content:"→";position:absolute;left:-17px;top:42%;z-index:2;display:grid;width:24px;height:24px;place-items:center;border-radius:50%;color:var(--muted);background:var(--paper);font-weight:850}.shift small{display:block;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}.shift h3{margin:5px 0 6px;font-size:15px}.shift p{margin:0;color:#4a5a6d;font-size:13px;line-height:1.65}.thesis-line{margin:18px 0;padding:17px;border:1px solid #d7caec;border-radius:12px;background:linear-gradient(135deg,var(--pt),var(--bt));text-align:center;font-size:18px;font-weight:780;line-height:1.55}.thesis-line span{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:500}.cycle{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:18px 0}.cycle div{position:relative;display:grid;min-height:92px;padding:11px 9px;place-items:center;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);text-align:center;font-size:12.5px;font-weight:750;line-height:1.45}.cycle div:nth-child(2),.cycle div:nth-child(5){border-color:#d7caec;background:var(--pt)}.cycle div:nth-child(3),.cycle div:nth-child(6){border-color:#c9deb3;background:var(--gt)}.cycle div:nth-child(4){border-color:#ead5b4;background:var(--at)}.cycle div:not(:last-child):after{content:"→";position:absolute;right:-11px;z-index:2;color:var(--muted);font-size:16px}.research-table{min-width:1120px}.research-table td:first-child{font-weight:780;white-space:nowrap}.research-table td{min-width:135px}.experiment-ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:18px 0}.experiment-ladder div{position:relative;padding:12px 10px 12px 38px;border:1px solid #cad9eb;border-radius:10px;background:var(--bt);color:#415267;font-size:13px;line-height:1.55}.experiment-ladder div:nth-child(2),.experiment-ladder div:nth-child(6){border-color:#d7caec;background:var(--pt)}.experiment-ladder div:nth-child(3),.experiment-ladder div:nth-child(7){border-color:#c9deb3;background:var(--gt)}.experiment-ladder div:nth-child(4),.experiment-ladder div:nth-child(8){border-color:#ead5b4;background:var(--at)}.experiment-ladder b{position:absolute;left:10px;top:11px;display:grid;width:20px;height:20px;place-items:center;border-radius:50%;color:#fff;background:var(--blue);font-size:10px}.knowledge-schema{margin:16px 0;padding:15px;border:1px solid #d7caec;border-radius:11px;background:var(--pt);color:#42516a;font-size:13px;line-height:1.75;white-space:pre-wrap;text-align:left}
-    .paper-figure{margin:25px 0 14px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(25,35,50,.06)}.figure-head{display:flex;justify-content:space-between;gap:10px;padding:11px 17px;border-bottom:1px solid var(--line);color:var(--purple);background:#f3f1ed;font-size:11px;font-weight:800}.paper-figure>a{display:flex;justify-content:center;align-items:center;padding:16px;background:#fff}.paper-figure img{display:block;width:100%;height:auto;max-height:760px;object-fit:contain}.paper-figure figcaption{padding:17px 20px 19px;border-top:1px solid var(--line);background:linear-gradient(#fff,var(--bt))}.paper-figure figcaption strong{display:block;margin-bottom:7px;font-size:16px}.paper-figure figcaption p{margin:0;color:#475467;font-size:14px;line-height:1.75}.figure-reading{margin-top:11px!important;padding:11px 13px;border-left:3px solid var(--green);background:var(--gt)}.figure-source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:11.5px}
-    .table-wrap{width:100%;max-width:100%;min-width:0;margin:18px 0 10px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:11px;background:var(--paper)}table{width:100%;min-width:780px;border-collapse:collapse;font-size:13px;line-height:1.58}caption{padding:13px 14px 9px;font-size:14px;font-weight:800;text-align:left;caption-side:top}th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#324b6a;background:var(--bt);white-space:nowrap}tbody tr:nth-child(even) td{background:#fafbfd}tbody tr:last-child td{border-bottom:0}.focus-row td{background:var(--gt)!important;font-weight:750}.negative{color:var(--red);font-weight:750}.positive{color:var(--green);font-weight:750}.analysis,.warning,.verdict{margin:15px 0;padding:13px 15px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;color:#345447;background:var(--gt);font-size:14px;line-height:1.76}.warning{border-color:var(--amber);color:#6d4b1c;background:var(--at)}.verdict{border-color:var(--purple);color:#55426f;background:var(--pt)}.source-note{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:18px 0}.flow div{display:grid;place-items:center;min-height:82px;padding:12px;border:1px solid #cad9eb;border-radius:11px;background:var(--bt);text-align:center;font-size:14px;font-weight:750;line-height:1.45}.flow div:nth-of-type(2){border-color:#d7caec;background:var(--pt)}.flow div:nth-of-type(3){border-color:#c9deb3;background:var(--gt)}.flow span{align-self:center;color:var(--muted);font-size:20px;font-weight:800}
-    .rail-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.rail-card+.rail-card{margin-top:12px}.rail-card h3{margin:0 0 7px;font-size:13px}.rail-card p,.rail-card li{color:var(--muted);font-size:12.5px;line-height:1.65}.rail-card ul{margin:0;padding-left:17px}.back{display:inline-block;margin-top:18px;font-size:12px;font-weight:750}
-    body.dark{--bg:#0d1420;--paper:#151e2c;--ink:#e8eef6;--muted:#9bacc0;--line:#2f3b4a;--bt:#1a2d47;--pt:#292442;--gt:#193528;--at:#382b1c;--shadow:none}body.dark .chapter{background:linear-gradient(180deg,var(--tint),var(--paper) 150px)}body.dark .paper-figure,body.dark .paper-figure>a,body.dark .table-wrap{background:#172230}body.dark .figure-head{background:#1b2635;color:#d7e2ef}body.dark .paper-figure figcaption{background:linear-gradient(var(--paper),var(--bt))}body.dark .card p,body.dark .boundary p,body.dark .paper-figure figcaption p,body.dark .block-intro,body.dark .shift p{color:#bfcbda}body.dark tbody tr:nth-child(even) td{background:#182230}body.dark .shift article+article:before{background:var(--paper)}
-    @media(max-width:1210px){.layout{grid-template-columns:210px minmax(0,1fr)}.rail{display:none}.metrics{grid-template-columns:repeat(3,1fr)}.cycle{grid-template-columns:repeat(3,minmax(0,1fr))}.cycle div:nth-child(3):after{display:none}}@media(max-width:820px){body{font-size:15px}.hero-in{padding:35px 18px 27px}.metrics{grid-template-columns:repeat(2,1fr)}.layout{display:block;padding:15px 12px 60px}.toc{position:static;max-height:none;margin-bottom:14px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}.chapter{padding:22px 19px 26px}.cards,.boundary,.shift,.cycle,.experiment-ladder{grid-template-columns:1fr}.shift article+article:before{content:"↓";left:calc(50% - 12px);top:-18px}.cycle div:not(:last-child):after{content:"↓";right:auto;bottom:-17px}.cycle div:nth-child(3):after{display:block}.flow{grid-template-columns:1fr}.flow span{transform:rotate(90deg)}.chapter>p:not(.lead):not(.source-note):not(.block-intro),.block-intro{max-width:none;font-size:15px;line-height:1.84}.paper-figure>a{padding:8px}.paper-figure img{width:100%;max-width:100%;max-height:none}.figure-source{display:block}}@media print{body{color:#111;background:#fff}.progress,.toc,.rail,.actions,.back{display:none!important}.hero,.chapter{color:#111;background:#fff;box-shadow:none}.subtitle,.metric small,.metric span{color:#333}.metric b{color:#111}.layout{display:block;max-width:none}.paper-figure,.table-wrap,.card,.boundary article,.shift article,.experiment-ladder div{break-inside:avoid;background:#fff}}
-  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="主动课程与独立环境核验驱动外部记忆演化，重点区分目标条件化练习、冻结复用与非匹配汇总证据。">
+<title>RSIAgent：基于主动经验获取的递归自改进智能体</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--blue-tint:#edf4fd;--green:#287a60;--green-tint:#edf7f2;--amber:#a76324;--amber-tint:#fff5e8}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:22px}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1100px;margin:0;font-size:clamp(30px,4vw,48px);line-height:1.46;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 9px;color:#c8d3e7;font-size:13px;line-height:1.7}.source-link{color:#e7efff;font-size:13px}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);justify-content:center;align-items:start;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;padding:0;margin:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.5}.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue);font-weight:600}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:12px;margin:0 0 17px;color:#1c2d43;font-size:24px;line-height:1.4}.num{position:static;flex:0 0 auto;min-width:max-content;width:auto;height:auto;margin:0;padding:0;color:inherit;font-size:1em;font-weight:inherit;line-height:inherit;letter-spacing:0}h3{margin:23px 0 10px;font-size:17px;line-height:1.5}.chapter>p,.prose,.section-intro{text-indent:2em;text-align:justify}.chapter>p.source-note,.chapter>p.table-note,.chapter>p.callout{text-indent:0}.section-intro{margin:0 0 16px;font-size:15.5px;font-weight:400;line-height:1.84}.prose{margin:12px 0}.key-points{list-style:none;margin:12px 0 17px;padding:0}.key-points li{margin:8px 0;padding-left:14px;border-left:2px solid #ccd9eb;font-size:15.5px;line-height:1.8}.callout{margin:15px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:var(--blue-tint);font-size:15.5px;line-height:1.8}.callout.cost{border-color:var(--amber);background:var(--amber-tint)}.table-wrap{width:100%;max-width:100%;min-width:0;margin:13px 0;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;font-weight:600;color:#36506f;background:#f8fafd}th,td{padding:12px 13px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}th{font-weight:600;color:#324b6a;background:var(--blue-tint)}tbody tr:last-child td{border-bottom:0}.motivation-table{min-width:540px}.results-table{min-width:720px}.model-table{min-width:630px}.up{color:var(--amber);font-weight:600}.down{color:var(--green);font-weight:600}.cell-note{display:block;margin-top:3px;color:var(--muted);font-size:12px}.results-table td:nth-child(4){background:#fffbf5}.results-table .saved td:nth-child(4){background:var(--green-tint)}
 
-    /* 2026-09 standardized research-report layout; original palette is retained. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    h1{max-width:1050px;font-size:clamp(30px,3.4vw,42px);line-height:1.18;letter-spacing:-.025em}
-    .hero-in{max-width:1240px;padding-top:38px;padding-bottom:30px}
-    .metrics{grid-template-columns:repeat(4,minmax(130px,1fr));max-width:980px}
-    .metric:nth-child(n+5){display:none}
-    .layout{grid-template-columns:210px minmax(0,940px);max-width:1210px;gap:24px}
-    .rail{display:none!important}
-    main{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow);overflow:hidden}
-    .chapter,.chapter:nth-of-type(n){margin:0;padding:34px 38px 38px;border:0;border-radius:0;background:var(--paper);box-shadow:none}
-    .chapter+.chapter{border-top:1px solid var(--line)}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro){max-width:840px;margin:0 0 15px;line-height:1.86;text-indent:0;text-align:left}
-    .section-intro,.lead{margin:0 0 20px;padding:0 0 0 15px;border-left:4px solid var(--accent);border-radius:0;background:none;font-size:16.5px;font-weight:600;line-height:1.82}
-    .block-intro{max-width:840px;margin:22px 0 13px;color:var(--muted);line-height:1.82;text-indent:0;text-align:left}
-    .key-points{display:grid;grid-template-columns:1fr;gap:0;margin:0 0 22px;padding:0;list-style:none;border-top:1px solid var(--line)}
-    .key-points>li{position:relative;margin:0;padding:13px 10px 13px 27px;border-bottom:1px solid var(--line);background:transparent;line-height:1.78}
-    .key-points>li::before{content:"";position:absolute;left:7px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
-    .key-points>li strong{color:var(--ink)}
-    .cards,.steps,.boundary{grid-template-columns:1fr;gap:0;margin-bottom:22px;border-top:1px solid var(--line)}
-    .card,.step,.boundary article,.cards article,.steps article{padding:13px 10px 13px 27px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent!important}
-    .card p,.step p,.boundary p,.cards article p,.steps article p{font-size:15px;line-height:1.76}
-    .analysis,.warning{box-shadow:none}
-    @media(max-width:820px){
-      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .layout{display:block;padding:14px 11px 54px}
-      main{border-radius:11px}
-      .chapter,.chapter:nth-of-type(n){padding:24px 20px 29px}
-      h1{font-size:clamp(27px,8.2vw,34px)}
-      h2{font-size:21px}
-      .section-intro,.lead{font-size:15.5px}
-    }
-    @media print{main{border:0;box-shadow:none}.chapter{padding:24px 0}.chapter+.chapter{border-top:1px solid #bbb}}
+.paper-authors,.paper-affiliation{margin:7px 0;color:#c8d3e7;font-size:13px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:14px}.review-tag{padding:2px 9px;border:1px solid rgba(162,214,189,.45);border-radius:5px;background:rgba(162,214,189,.10);color:#c9efdc;font-size:12px;line-height:1.8}
 
-  
+.original-figure{margin:15px 0 21px;padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#fff}.original-figure summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.7}.main-figure{margin:14px 0 0;overflow:hidden;background:#fff}.main-figure a{display:block}.main-figure img{display:block;width:100%;height:auto;object-fit:contain}.main-figure figcaption{margin-top:9px;color:var(--muted);font-size:13px;line-height:1.8}
+.example-label{margin:10px 0 14px;color:var(--muted);font-size:14px;line-height:1.8}.context-examples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.context-example{min-width:0;border:1px solid #314a69;border-radius:9px;overflow:hidden;background:#122137;color:#e2eaf4;box-shadow:0 5px 15px rgba(16,31,51,.08)}.context-bar{display:flex;justify-content:space-between;gap:12px;padding:10px 15px;border-bottom:1px solid #33465f;background:#1c304a;color:#b9cee7;font-size:11px;line-height:1.6;letter-spacing:.07em}.context-payload{padding:16px}.context-example h4{margin:0 0 17px;color:#f3f7fd;font-size:16px;line-height:1.6}.context-example dl{margin:0}.context-example dt{margin-top:15px;padding-bottom:4px;border-bottom:1px solid #30445f;color:#9fc2ed;font-size:13px;font-weight:600}.context-example dt:first-child{margin-top:0}.context-example dd{margin:7px 0 0;color:#dce6f2;font-size:15.5px;line-height:1.85}.context-example code{font-family:inherit;color:#c1e8d7;overflow-wrap:anywhere}.comparison-note{margin:16px 0;padding:13px 16px;border-left:3px solid var(--blue);background:var(--blue-tint);font-size:15.5px;line-height:1.85}
+/* The template supplies reading structure; source-specific reasoning determines content and diagram topology. */
+.chapter-title{min-width:0;overflow-wrap:anywhere}
+.method-section,.evidence-section,.assessment-section{min-width:0;margin:22px 0}
+:where(.method-section,.evidence-analysis,.assessment-section)>p:not(.source-note):not(.table-note):not(.callout){text-indent:2em;text-align:justify;font-size:15.5px;font-weight:400;line-height:1.84}
+.evidence-setting{margin:12px 0;color:#52657e;font-size:14px;line-height:1.8}
+.method-overview,.local-diagram{min-width:0;margin:17px 0;padding:16px;border:1px solid #cad9ec;border-radius:10px;background:#f8fafd}
+.method-overview>figcaption,.local-diagram>figcaption{margin:0 0 13px;color:#415d80;font-size:13px;line-height:1.7}
+.method-overview svg,.local-diagram svg{display:block;max-width:100%;height:auto}
+/* Layout and responsive arrows inside these figures must follow the target paper's relationships. */
+@media(max-width:820px){.hero-in{padding:31px 20px 27px}h1{font-size:clamp(29px,6.5vw,39px);line-height:1.48}.paper-name{font-size:12px}.layout{display:block;padding:14px 10px 42px}.toc{position:static;margin-bottom:14px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:10px}.toc-label{display:none}.toc ol{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}.toc a{font-size:12px;padding:6px 8px}main{border-radius:11px}.chapter{padding:23px 19px 26px}h2{font-size:22px}.context-examples{grid-template-columns:1fr}.method-overview,.local-diagram{padding:13px}.context-payload{padding:14px}}
+@media(max-width:1100px){.context-examples{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:#fff;color:#111}.hero{background:#fff;color:#111;border-bottom:1px solid #aaa}.hero:after,.toc{display:none}.hero-in{padding:20px 0}.paper-name,.source-link{color:#333}h1{font-size:27px;line-height:1.45}.layout{display:block;padding:0;max-width:none}main{border:0;box-shadow:none}.chapter{padding:23px 0}.table-wrap{overflow:visible;border-color:#aaa}table{min-width:0!important}.context-example,.comparison-note,.callout,.callout.cost,th,.results-table td:nth-child(4),.results-table .saved td:nth-child(4){background:#fff}.context-examples{grid-template-columns:1fr 1fr}.review-tag{color:#111;border-color:#888;background:#fff}.paper-authors,.paper-affiliation{color:#333}.main-figure figcaption{background:#fff}.original-figure{display:none}.method-overview,.local-diagram,.context-bar,.context-example{background:#fff;color:#111;box-shadow:none}.context-bar,.context-example dt{border-color:#aaa;color:#333}.context-example h4,.context-example dd,.context-example code{color:#111}h2,h3{break-after:avoid}tr,.context-example{break-inside:avoid}.main-figure{break-inside:avoid}}
+.example-block{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}.example-block>summary{cursor:pointer;color:var(--blue);font-size:14px;line-height:1.8}.example-block>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px}.example-block[open]>summary{margin-bottom:12px}
 
-    /* 2026-09 reading-rhythm refinement: original palette remains unchanged. */
-    .chapter,.chapter:nth-of-type(n){padding:24px 38px 18px}.chapter+.chapter{padding-top:20px}
-    h2{margin-bottom:16px;padding-bottom:12px}
-    .subhead{margin:21px 0 8px}
-    .section-intro,.lead{margin-bottom:15px;line-height:1.76}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict){margin-bottom:11px;text-indent:2em;text-align:justify;line-height:1.84}
-    .block-intro{margin:15px 0 11px;text-indent:2em;text-align:justify;line-height:1.82}
-    .key-points{margin-bottom:14px}
-    .key-points>li{padding-top:10px;padding-bottom:10px;line-height:1.72;text-align:justify}
-    .key-points>li::before{top:21px}
-    .key-points>li>strong:first-child{font-weight:800;white-space:nowrap}
-    .paper-figure{margin:17px 0 11px;box-shadow:0 7px 20px rgba(25,35,50,.045)}
-    .paper-figure>a{padding:9px}
-    .paper-figure figcaption{padding:14px 18px 15px}
-    .table-wrap{margin:14px 0 8px}
-    .analysis,.warning,.verdict,.formula,.equation,.equation-line,.thesis-line,.classification,.case-path{margin-top:12px;margin-bottom:12px}
-    .flow,.shift,.schema-grid,.subfigure-grid,.level-compare,.cards,.boundary,.takeaways{margin-top:13px;margin-bottom:13px}
-    .flow>*,.shift>*,.schema-grid>*,.subfigure-grid>*,.level-compare>*,.cards>*,.boundary>*{min-height:0}
-    .chapter>*:last-child{margin-bottom:0}
-    @media(max-width:820px){
-      .chapter,.chapter:nth-of-type(n){padding:20px 19px 16px}.chapter+.chapter{padding-top:18px}
-      .subhead{margin-top:18px}
-      .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{text-indent:2em;text-align:justify}
-      .key-points>li{padding-top:9px;padding-bottom:9px;text-align:left}
-      .paper-figure{margin:14px 0 9px}
-      .paper-figure>a{padding:5px}
-    }
+/* H2 owns chapter numbering; optional diagram-linked H3 prefixes remain subordinate. */
+h3.method-heading{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 11px}
+.subsection-label{flex:none;color:#647c9d;font-size:12px;font-weight:500;line-height:1.8;letter-spacing:.04em}
+@media print{.subsection-label{color:#555}.method-section,.evidence-section,.assessment-section{margin:16px 0}.method-overview,.local-diagram{background:#fff;color:#111}}
 
-    /* Collection typography contract: one Chinese-first face and stable body scale. */
-    html{font-family:var(--sans)}
-    body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-    body{font-weight:400}
-    .section-intro,.lead{font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important}
-    .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict),.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84}
-    .key-points>li{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-    table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
+/* Relationships are chosen separately for each paper; shared primitives only control typography. */
+.method-overview,.local-diagram{margin:18px 0 22px;padding:18px;background:#f6f9fe;border:1px solid #cadaee;border-radius:10px}
+.method-overview>figcaption,.local-diagram>figcaption{font-size:13px;font-weight:600;color:#36577f;margin:0 0 15px}
+.state-band{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px 14px;background:#eaf1fb;border:1px solid #c5d7ed;border-radius:7px;font-size:13.5px;line-height:1.8}
+.state-band b{font-weight:600;color:#315984}.state-band span{color:#3f5a7a;min-width:0}
+.flow-box{position:relative;min-width:0;border:1px solid #b9cde7;border-radius:7px;background:#fff;padding:13px 14px}
+.flow-box h4,.scope-band h4,.diagnostic-region h4{margin:0 0 7px;font-size:14px;line-height:1.65;color:#2a527f}
+.flow-box p,.scope-band p,.diagnostic-region p{margin:7px 0 0;color:#3e5570;font-size:13.5px;line-height:1.8;text-indent:0}
+.node-result{margin-top:10px;padding-top:8px;border-top:1px solid #dce5f1;color:#52708f;font-size:12px;line-height:1.75}
+.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1.2fr);align-items:stretch;margin:16px 0}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5079ac;font-size:26px;line-height:1.3}
+.flow-arrow span{font-size:11px;line-height:1.6;text-align:center}
+.flow-connector{margin:12px 0;text-align:center;color:#58789e;font-size:12px;line-height:1.8}
+.split-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:13px 0}
+.three-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.three-grid.connected{gap:27px;margin:18px 0}
+.three-grid.connected>.flow-box:not(:last-child):after{content:'→';position:absolute;right:-24px;top:46%;color:#5e80aa;font-size:22px}
+.scope-band{margin:15px 0;padding:13px 15px;background:#f0f5fb;border:1px dashed #9eb8d9;border-radius:7px}
+.feedback-band{margin:16px 0 0;padding:11px 13px;border-top:1px solid #c3d3e7;border-bottom:1px solid #c3d3e7;color:#42658e;font-size:13px;line-height:1.8}
+.diagnostic-region{margin:20px 0 0;padding:13px;border:1px dashed #a8a4c5;border-radius:8px;background:#f6f4fb}
+.region-label{font-size:12px;color:#6a608a;margin-bottom:12px}.diagnostic-region .three-grid>div{min-width:0;padding:10px;border:1px solid #ddd9eb;background:white;border-radius:5px}
+.scope-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #d6e1ef;color:#60728a;font-size:12px;line-height:1.8}
+.timeline-row{display:grid;grid-template-columns:50px minmax(0,1fr);gap:12px;padding:11px 0;font-size:13.5px;line-height:1.9;color:#3f5d81}.timeline-row+.timeline-row{border-top:1px dashed #c7d7e9}
+.formal{margin:16px 0;padding:14px 16px;border:1px solid #d5e1ef;border-radius:8px;background:#f8fafd}.equation{font-size:14.5px;line-height:1.9;color:#2c507d;overflow-wrap:anywhere}.formal p{font-size:13px;line-height:1.8;color:#5c718b;margin:8px 0 0;text-indent:0}
+.example-stages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.example-stages>div{padding:15px;border:1px solid #30496a;border-radius:8px;background:#14243b;color:#e5edf7}.example-stages h4{font-size:14px;line-height:1.7;margin:0 0 10px;color:#b8d5f9}.example-stages p{font-size:14px;line-height:1.85;margin:0;text-indent:0}.example-block>p{font-size:14px;line-height:1.8}.example-label{color:#6a7a91}
+.evidence-section>h3{margin-top:25px}.evidence-setting{font-size:13.5px;line-height:1.85;border-left:3px solid #acbfd8;padding-left:12px;color:#60728a}.evidence-analysis p{margin:13px 0;font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify}
+.chapter p{overflow-wrap:break-word}table{min-width:580px}th,td{overflow-wrap:break-word}th:first-child,td:first-child{min-width:90px}tbody th{font-weight:500}.table-wrap+ .table-wrap{margin-top:22px}.chapter+.chapter{margin-top:0}h2{padding-bottom:13px;border-bottom:1px solid #dbe4ef}
+@media(max-width:820px){.method-overview,.local-diagram{padding:13px 11px}.state-band{display:block;padding:11px}.state-band b{display:block;margin-bottom:5px}.process-row.three{display:flex;flex-direction:column;gap:8px}.flow-arrow{font-size:0;padding:3px}.flow-arrow:after{content:'↓';font-size:23px}.flow-arrow span{font-size:11px}.split-grid,.three-grid,.three-grid.connected,.example-stages{grid-template-columns:1fr}.three-grid.connected{gap:32px}.three-grid.connected>.flow-box:not(:last-child):after{content:'↓';right:48%;top:auto;bottom:-29px}.flow-box{padding:12px}.diagnostic-region{padding:10px}.timeline-row{grid-template-columns:40px minmax(0,1fr)}table{min-width:550px}}
+@media print{.method-overview,.local-diagram,.state-band,.flow-box,.scope-band,.diagnostic-region,.diagnostic-region .three-grid>div,.formal,.example-stages>div{background:white;color:#111;box-shadow:none}.example-stages p,.example-stages h4{color:#111}.flow-box,.scope-band,.timeline-row{break-inside:avoid}.process-row.three{display:grid;grid-template-columns:minmax(0,1fr) 35px minmax(0,1.2fr)}.flow-arrow{font-size:22px}.flow-arrow:after{display:none}.three-grid,.three-grid.connected{grid-template-columns:repeat(3,minmax(0,1fr))}.three-grid.connected>.flow-box:not(:last-child):after{content:'→';right:-24px;top:46%;bottom:auto}.split-grid,.example-stages{grid-template-columns:repeat(2,minmax(0,1fr))}.state-band{display:grid}table{min-width:0!important;font-size:11px}.table-wrap{overflow:visible}.flow-box p,.scope-band p,.state-band,.timeline-row{font-size:11px}.formal p,.scope-note,.feedback-band,.evidence-setting{font-size:11px}.chapter p,.method-section>p,.evidence-analysis p,.assessment-section>p{font-size:12px;line-height:1.8}}
 
-  
-/* collection-refresh: 2026-09-24 / academic-paper-summary-html */
-:root{
-  --sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:18px}
-body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}
-body{font-size:15.5px;font-weight:400;line-height:1.84}
-.hero{background:
-  radial-gradient(circle at 86% 8%,rgba(185,244,91,.15),transparent 26%),
-  radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),
-  linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}
-.hero:after{opacity:.10;background-size:42px 42px}
-.hero-in{max-width:1240px;padding:52px 28px 42px}
-h1{max-width:1120px;margin-top:14px;font-size:clamp(35px,5vw,60px);line-height:1.08;letter-spacing:-.038em}
-.subtitle{max-width:1000px;font-size:17px;line-height:1.66}
-.metrics{grid-template-columns:repeat(4,minmax(0,1fr));max-width:940px;gap:10px;margin-top:26px}
-.metric{min-height:82px;padding:13px 14px;border-radius:11px;background:rgba(3,16,38,.34)}
-.layout{grid-template-columns:minmax(190px,220px) minmax(0,940px);justify-content:center;gap:28px;max-width:1240px;padding:28px 20px 76px}
-.layout>main{min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 36px rgba(39,44,51,.055);overflow:hidden}
-.chapter{min-width:0;margin:0;padding:30px 38px 34px;border:0;border-radius:0;background:transparent;box-shadow:none}
-.chapter+.chapter{border-top:1px solid var(--line)}
-h2{margin:0 0 20px;padding-bottom:15px;font-size:25px;line-height:1.3}
-.section-intro,.lead{margin:0 0 18px;font-family:var(--sans);font-size:16px!important;font-weight:600;line-height:1.78!important;text-indent:0;text-align:left}
-.chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-.chapter .prose p,.block-intro{font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.84;text-indent:2em;text-align:justify}
-.chapter .prose p{margin:0 0 13px}
-.block-intro{margin:18px 0 10px}
-.subhead,.epistemic-heading{margin:24px 0 11px;font-size:17px;line-height:1.45}
-.key-points{margin:10px 0 16px;padding:0;list-style:none}
-.key-points,.dense-list{margin:10px 0 16px;padding:0;list-style:none}
-.key-points>li,.dense-list>li{position:relative;margin:7px 0;padding:10px 12px 10px 30px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);font-family:var(--sans);font-size:15.5px;font-weight:400;line-height:1.72}
-.key-points>li:before,.dense-list>li:before{content:"•";position:absolute;left:13px;color:var(--purple);font-weight:900}
-.cards,.card-grid,.evidence-board,.reading-grid{gap:10px;margin:12px 0 18px}
-.card,.mini,.evidence,.reading-card,.boundary article{box-shadow:none}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain}
-table{font-family:var(--sans);font-size:13.5px;font-weight:400;line-height:1.6}
-.paper-figure,.figure{margin:16px 0}
-.source-note{font-family:var(--sans);font-size:12.5px;line-height:1.7;text-indent:0}
-.rail{display:none!important}
-@media(max-width:820px){
-  .hero-in{padding:38px 18px 30px}
-  h1{font-size:clamp(31px,10vw,43px)}
-  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .layout{display:block;padding:14px 10px 58px}
-  .layout>main{border-radius:13px}
-  .chapter{padding:23px 19px 27px}
-  h2{font-size:22px}
-  .section-intro,.lead{font-size:16px!important;line-height:1.78!important}
-  .chapter>p:not(.section-intro):not(.lead):not(.source-note):not(.block-intro):not(.analysis):not(.warning):not(.verdict):not(.callout):not(.correction),
-  .chapter .prose p,.block-intro,.key-points>li,.dense-list>li{font-size:15.5px;line-height:1.78}
-}
-@media print{
-  .layout>main{border:0;box-shadow:none}
-  .chapter{padding:24px 0}
-}
 
+/* BEGIN collection-paper-header-scale-v1 */
+.hero h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);font-weight:700;line-height:1.46;overflow-wrap:anywhere}
+.hero .paper-name{max-width:1100px;margin:16px 0 10px;font-size:20px;font-weight:400;line-height:1.65;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:16px;font-weight:400;line-height:1.8;text-indent:0;overflow-wrap:break-word}
+.hero .paper-authors,.hero .paper-affiliation{margin:7px 0}
+.hero .paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}
+.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:15px;font-weight:400;line-height:1.8}
+.hero .review-tag{font-size:14px;line-height:1.8}
+@media(max-width:700px){.hero h1{font-size:28px}.hero .paper-name{font-size:17px;margin-top:14px}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:15px}.hero .paper-links a,.hero a.source-link,.hero a.paper-link{font-size:14.5px}.hero .review-tag{font-size:13.5px}}
+@media print{.hero h1{font-size:23pt;line-height:1.45}.hero .paper-name{font-size:12.5pt}.hero .paper-authors,.hero .paper-affiliation,.hero .byline{font-size:11pt}.hero .paper-links a,.hero a.source-link,.hero a.paper-link,.hero .review-tag{font-size:10.5pt}}
+/* END collection-paper-header-scale-v1 */
 </style>
-</head>
-<body id="top">
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
-  <header class="hero">
-    <div class="hero-in">
-      <div class="eyebrow">PAPER REVIEW · arXiv:2609.15364v1</div>
-      <h1>RSIAgent：基于主动经验获取的递归自改进智能体｜论文精读</h1>
-      <p class="subtitle"><span class="paper-name">RSIAgent: Autonomous Exploration for Recursive Self-improvement in New Environments</span>Sibo Zhu、Shicheng Fan、Xinyue Wang、Wenyi Wu、Kun Zhou、Biwei Huang · Aether AI / UC San Diego / UIC · 2026-09-14</p>
-      <div class="actions">
-        <a class="action" href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">查看论文原文 ↗</a>
-        <a class="action" href="assets/33-rsiagent/paper.pdf" target="_blank">本地 PDF ↗</a>
-        <button class="theme" id="theme" type="button">◐ 切换主题</button>
-      </div>
-      <div class="metrics"><div class="metric"><small>适应方式</small><b>不更新参数</b><span>探索、验证、写入外部持久记忆</span></div><div class="metric"><small>探索结构</small><b>Broad → Deep</b><span>并行覆盖后，顺序追击难点</span></div><div class="metric"><small>主模型配置</small><b>GLM-5.3 + Kimi-K3</b><span>Actor / Verifier / Curriculum 分工</span></div><div class="metric"><small>OSWorld 2.0</small><b>78.98 Partial</b><span>基线 71.97；82 个离线任务</span></div></div>
-    </div>
-  </header>
-
-  <div class="layout">
-    <nav class="toc" aria-label="章节导航">
-      <p class="side-title">阅读导航</p>
-      <ol>
-        <li><a href="#s1">01 · 论文概览</a></li>
-        <li><a href="#s2">02 · 研究背景与问题定义</a></li>
-        <li><a href="#s3">03 · 方法与技术路线</a></li>
-        <li><a href="#s4">04 · 实验设计与结果分析</a></li>
-        <li><a href="#s5">05 · 贡献、局限与综合评价</a></li>
-      </ol>
-    </nav>
-
-    <main>
-            <section class="chapter" id="s1">
-        <h2><span class="num">01</span>论文概览</h2>
-
-<p class="section-intro">RSIAgent 不只总结已经发生的经验，还会主动决定下一步练习什么。系统根据当前记忆发现知识缺口，在可重置的数字环境中安排探索，再把验证过的新经验写回记忆。</p>
-
-        <h3 class="subhead">核心结论</h3>
-        <ul class="key-points">
-          <li><strong>研究对象：</strong>系统开始控制经验从哪里来。当前记忆会决定下一轮需要练习什么、测试哪些变体，以及追查哪些失败。</li>
-          <li><strong>核心方法：</strong>课程生成器安排练习，执行者操作环境，验证者检查结果。广度探索扩大知识覆盖，深度探索继续追查难例和隐藏条件。</li>
-          <li><strong>主要结论：</strong>主动经验获取具有实用增益，但现有结果更能支持“经验分布可被控制”，尚不能证明改进算法本身已实现开放式递归进化。</li>
-        </ul>
-      </section>
-
-      <section class="chapter" id="s2">
-        <h2><span class="num">02</span>研究背景与问题定义</h2>
-
-<h3 class="subhead">问题背景与相邻方法</h3>
-<p class="section-intro">RSIAgent 最值得关注的不是多 Agent 分工，而是它让系统主动决定“下一步应该获得什么经验”。它把自进化从被动总结已有记录，推进到主动选择学习材料。</p>
-        <p>许多自进化方法要等任务执行完，才根据成功或失败记录做反思、提炼技能或验证补丁。它们默认学习材料由外部任务提供：Agent 可以改变如何解释经验，却不能决定经验从哪里来。</p>
-        <p>在陌生软件环境中，问题往往更早出现：Agent 甚至不知道自己缺少哪条环境规则，也未必会自然遇到能暴露这一缺口的任务。RSIAgent 因此根据当前记忆主动生成练习。广度探索（BRS）并行覆盖更多功能，深度探索（DRS）再围绕难例、隐藏约束和边界条件继续追问。</p>
-        <div class="shift" aria-label="从经验利用到自主实验的研究推进">
-          <article><small>既有范式</small><h3>Experience Utilization</h3><p>Trajectory 由外部给定；系统负责反思、提炼或修补 Skill。</p></article>
-          <article><small>RSIAgent 的推进</small><h3>Experience Acquisition</h3><p>根据当前知识缺口，主动选择下一条 Practice Experience。</p></article>
-          <article><small>尚未完成的下一步</small><h3>Autonomous Experimentation</h3><p>显式提出假设，用受控实验与聚合证据确定策略及适用边界。</p></article>
-        </div>
-        <div class="thesis-line">Learning from Experience → Choosing Experience → Designing Experiments<span>论文完成了中间这一步；最后一步仍是开放问题。</span></div>
-        <div class="analysis"><strong>去品牌化后的本质：</strong>在可重置、可操作、可观察的数字环境中，RSIAgent 把原本由外部任务分布决定的 <em>P(Experience)</em> 部分交给 Agent 控制：当前记忆生成下一轮练习，环境反馈形成新经验，新经验再改变未来课程。代价是额外探索计算、验证可靠性与长期知识治理风险。</div>
-        <p>这里的“recursive self-improvement”也应精确理解。论文没有更新模型权重，也没有让改进算法自身跨代进化；递归发生在 <strong>Memory → Curriculum → Experience → Memory</strong> 的闭环中。更准确的名字是“Recursive Context / Experience Improvement”：学到了什么，会改变下一步去学什么。</p>
-        <p class="source-note">论文依据：§1–3、Appendix A–B。这里对“Experience Utilization → Acquisition → Experimentation”的分层属于编辑性综合，用来区分论文已实现的能力与自然延伸。</p>
-      </section>
-
-      <section class="chapter" id="s3">
-        <h2><span class="num">03</span>方法与技术路线</h2>
-
-<h3 class="subhead">主动经验获取闭环</h3>
-<p class="section-intro">多 Agent 分工只是实现手段；真正的自治性来自闭环：当前 Memory 决定 Curriculum，Curriculum 改变下一轮 Experience，新的 Experience 又重写 Memory。 以下按总体流程、关键机制与实现约束说明技术路线。</p>
-        <div class="cycle" aria-label="RSIAgent 的递归经验获取循环">
-          <div>Current<br>Memory</div><div>Knowledge<br>Gap</div><div>Curriculum<br>Practice</div><div>Actor<br>Execution</div><div>Verifier<br>Evidence</div><div>Memory<br>Reconciliation</div>
-        </div>
-        <p>三类角色构成这个闭环。Curriculum 选择下一项练习；Actor 以代码控制环境，并拥有最终的记忆写权限；Verifier 与 Actor 的私有 reasoning 和 memory 隔离，直接检查执行结果、界面状态与交付物证据。收到 PASS、FAIL 或未解决的验证结果后，Actor 蒸馏程序、约束和失败教训，再与旧记忆协调冲突。</p>
-        <p>这种记忆更关注环境规则，而不是单个任务的操作步骤。它不只保存“遇到 X 就执行 A、B、C”，还记录一个操作需要哪些前提、在什么状态下有效、失败时会出现什么信号，以及哪些检查可以跨任务复用。</p>
-        <p>理论上，同一条环境规则可以服务多个下游任务。不过，论文还没有系统证明，这种规则式记忆一定优于针对具体任务编写的流程。</p>
-        <div class="cards">
-          <article class="card"><h3>Skill-centric</h3><p>Task A → Procedure A。复用依赖新任务与旧任务足够相似，重点是“步骤怎么做”。</p></article>
-          <article class="card"><h3>Environment-centric</h3><p>Condition × Action → Consequence。复用依赖共享环境机制，重点是“世界在什么条件下怎样响应”。</p></article>
-        </div>
-        <p class="block-intro">Broad → Deep 是这个闭环最简洁、也最可迁移的设计：先建立世界地图，再主动寻找地图边界。两阶段并不是两个独立模块，而是让后续精细探索拥有更可靠的先验。</p>
-        <h3 class="subhead">Broad Recursive Self-exploration（BRS）</h3>
-        <p>BRS 在每一轮提出多个互补项目，并行执行以覆盖工具、工作流与失败模式。所有并行项目从同一份不可变记忆快照开始；完成后再按顺序把各自经验写入最新 canonical memory。主配置的名义预算是 8 个项目、最多 4 个并发，但预算在整轮结束后检查，实际项目数可能超过 8。</p>
-        <h3 class="subhead">Deep Recursive Self-exploration（DRS）</h3>
-        <p>DRS 从目标任务出发顺序探索：每次执行和核验都会立即进入记忆，Curriculum 再根据当前失败、未确定规则或已通过但仍脆弱的环节选择下一项练习。成功后可以继续生成 contrastive exercise，失败后也可以生成区分 competing explanations 的练习；成功本身不必停止，只有课程代理认为继续练习的预期价值已经很低时才冻结记忆。</p>
-        <div class="warning"><strong>重要边界：</strong>“对比练习”已经接近假设辨别，但系统仍没有显式表示假设、控制变量、处理组/对照组、重复试验与证据聚合。因此，DRS 是 hypothesis-aware exploration 的雏形，还不是严格的 autonomous experimentation。</div>
-        <figure class="paper-figure">
-          <div class="figure-head"><span>论文原图 · Figure 2</span><span>框架与数据流</span></div>
-          <a href="assets/paper-figures/33-rsiagent/figure2-framework.png" target="_blank"><img src="assets/paper-figures/33-rsiagent/figure2-framework.png" alt="RSIAgent 在 FreeCAD 环境中的广度探索、深度探索和冻结记忆复用流程"></a>
-          <figcaption>
-            <strong>从多方向练习到目标压力测试，再到只读复用</strong>
-            <p>左侧 BRS 并行建立不同技能切片，中间 DRS 用目标失败逐步修正规则，右侧在环境重置后读取冻结记忆完成任务。最终评测禁用 Curriculum 和写回，因此测到的是已学经验的复用，而不是边测边学。</p>
-            <p class="figure-reading"><strong>阅读要点：</strong>“递归”发生在任务选择—执行—验证—记忆更新的闭环里；冻结点把探索阶段与正式评测阶段分开，这是避免直接用测试分数在线优化的关键。</p>
-            <div class="figure-source"><span>来源：论文 Figure 2，第 4 页</span><a href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">原文 ↗</a></div>
-          </figcaption>
-        </figure>
-      </section>
-
-      <section class="chapter" id="s4">
-        <h2><span class="num">04</span>实验设计与结果分析</h2>
-
-<h3 class="subhead">主要效用结果</h3>
-<p class="section-intro">在作者自己的 Actor–Verifier Harness 内，加入探索与冻结记忆后，OSWorld 的提升明显、ALE 的提升较小；“超过 GPT-6”只适用于跨系统 Partial 分数，不能当作同预算、同执行框架的受控比较。 以下先说明评测设置，再结合主结果、消融与边界判断证据强度。</p>
-        <div class="table-wrap">
-          <table>
-            <caption>Table 1 中 RSIAgent 自身前后对比（百分点为绝对差）</caption>
-            <thead><tr><th>Benchmark</th><th>任务数</th><th>指标</th><th>w/o RSI</th><th>RSIAgent</th><th>变化</th></tr></thead>
-            <tbody>
-              <tr><td rowspan="2">OSWorld 2.0 · 0808 offline</td><td rowspan="2">82</td><td>Partial ↑</td><td>71.97</td><td class="positive">78.98</td><td>+7.01 pt</td></tr>
-              <tr><td>Binary ↑</td><td>37.80</td><td class="positive">42.68</td><td>+4.88 pt</td></tr>
-              <tr><td rowspan="2">Agents’ Last Exam · Near-term</td><td rowspan="2">67</td><td>Partial ↑</td><td>83.75</td><td class="positive">84.82</td><td>+1.07 pt</td></tr>
-              <tr><td>Binary ↑</td><td>49.25</td><td class="positive">50.75</td><td>+1.50 pt</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>这组数字支持“外部记忆可提高现有 Harness 的任务完成度”，尤其是 OSWorld 的 graded partial credit 与 full-credit 成功率同时上升。但聚合方式并不是对全部任务重新运行 RSI：OSWorld 只有 41 个任务有可报告 RSI 分数，其余保留基线；ALE 由 19 个 RSI 分数与 48 个基线分数组成。新增探索还优先投向尚未满分的任务，因此这更像选择性部署收益，而不是对随机任务分布的无偏平均处理效应。</p>
-        <div class="warning"><strong>排行榜边界：</strong>论文报告 RSIAgent 的 Partial 分数高于 GPT-6 Astra（OSWorld 78.98 vs 72.60；ALE 84.82 vs 82.26），但公开系统保留各自 Harness 与执行预算。ALE 的 Binary 反而是 RSIAgent 50.75、GPT-6 Astra 52.24。可说“在公开榜单口径下 Partial 更高”，不能说“同条件能力全面超过”。</div>
-        <p class="block-intro">论文还在 40 个随机 GameCraft-Bench 任务上测试了另一种环境：同一个起始游戏经反复试玩、诊断和改码后，由外部评测器给出质量分。这里的意义是把“记忆复用”从办公软件扩展到可执行游戏开发，而不是证明跨任意领域通用。</p>
-        <div class="table-wrap">
-          <table>
-            <caption>GameCraft-Bench：不同起始生成器下的 Overall 质量分</caption>
-            <thead><tr><th>起始游戏生成器</th><th>Baseline</th><th>Play2Code</th><th>RSIAgent w/o RSI</th><th>Full RSIAgent</th></tr></thead>
-            <tbody>
-              <tr><td>Codex + GPT-5.5 (high)</td><td>52.77</td><td class="negative">51.05</td><td>57.84</td><td class="positive">61.28</td></tr>
-              <tr><td>Kimi-K2.6</td><td>31.28</td><td>36.02</td><td>42.61</td><td class="positive">46.37</td></tr>
-              <tr><td>GLM-5.3-Flash</td><td>30.55</td><td>38.25</td><td>44.73</td><td class="positive">48.72</td></tr>
-              <tr><td>Qwen3.8-27B</td><td>41.30</td><td>47.67</td><td>53.82</td><td class="positive">57.46</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="source-note">来源：论文 Table 1、Table 2、Appendix C.3–C.4 与 D。游戏开发每次最多 15 轮、每轮 Actor 最多 26 次工具调用。</p>
-
-        <h3 class="subhead">研究定位与经验获取边界</h3>
-<p class="block-intro">把近期 self-evolution 工作放在一起看，RSIAgent 的独特位置不是“更会总结 Experience”，而是把 Experience 的来源也纳入闭环；SkillCAT、Branch2Skill 与 SkillHEX 则分别更强调可靠归纳、经验效率和假设检验。</p>
-        <p>比较这些工作时，最有区分力的轴不是是否使用 Skill 或 Memory，而是谁产生学习经验、是否显式提出可证伪假设、用什么方式验证，以及最终沉淀什么 Artifact。下面的表是研究定位图，不是统一实验协议下的性能排名。</p>
-        <div class="table-wrap">
-          <table class="research-table">
-            <caption>Training-free / self-evolution 相邻工作的知识生产位置</caption>
-            <thead><tr><th>工作</th><th>核心问题</th><th>Experience 来源</th><th>主动生成任务</th><th>Hypothesis</th><th>主要验证</th><th>产物</th></tr></thead>
-            <tbody>
-              <tr><td><a href="31-evoskill-gui.html">EvoSkill-GUI</a></td><td>部署中怎样持续修 Skill</td><td>当前执行失败</td><td>否，偏 reactive</td><td>弱 / 隐式</td><td>Critic + 后续执行</td><td>Evolving GUI Skill</td></tr>
-              <tr><td><a href="27-skillcat.html">SkillCAT</a></td><td>怎样避免从轨迹错误归纳</td><td>同任务多条成功/失败轨迹</td><td>否</td><td>对比式、隐式</td><td>来源任务克隆回放与审计</td><td>Validated Skill Patch</td></tr>
-              <tr><td><a href="https://arxiv.org/abs/2608.08677" target="_blank" rel="noreferrer">Branch2Skill</a></td><td>怎样提高 Experience 效率</td><td>固定预算的 MCTS reasoning tree</td><td>Tree Search</td><td>非显式假设</td><td>Elite path vs sibling evidence</td><td>Skill Update</td></tr>
-              <tr><td><a href="https://arxiv.org/abs/2608.05628" target="_blank" rel="noreferrer">SkillHEX</a></td><td>怎样判断 Skill 为什么失败</td><td>Failure + executable tests</td><td>是，诊断测试</td><td><strong>显式可证伪</strong></td><td>Self-verification + evidence tree</td><td>Verified Skill Revision</td></tr>
-              <tr><td><a href="04-skill-self-play.html">Skill Self-Play</a> / <a href="09-sesa.html">SESA</a></td><td>怎样让任务与能力共同演化</td><td>Proposer / Challenger 生成任务</td><td><strong>是</strong></td><td>弱，重难度课程</td><td>Environment / task outcome</td><td>Skill + Policy / Model</td></tr>
-              <tr><td><a href="05-coral.html">CORAL</a></td><td>怎样持续进行开放式发现</td><td>多 Agent 自主搜索</td><td><strong>是</strong></td><td>中等 / 隐式</td><td>Evaluator</td><td>Shared Discovery Memory</td></tr>
-              <tr class="focus-row"><td>RSIAgent</td><td>怎样在未知 Environment 主动获得知识</td><td>自主环境探索</td><td><strong>是</strong></td><td>中等 / 隐式</td><td>隔离的环境 Verifier</td><td>Environment Memory</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="source-note">编辑性综合。相邻工作依据各自论文与本合集解读；SkillHEX 明确把可证伪失败假设转成 executable tests，Branch2Skill 以 reasoning tree 产生更密集的 step-wise evidence。不同论文任务、模型与预算不可横向比较分数。</p>
-        <p class="block-intro">这些方法解决的是经验链条上的不同环节。RSIAgent 负责从环境中主动获得经验；SkillCAT 负责把经验转成更可靠的技能；Branch2Skill 关注如何用更少轨迹获得有效经验；SkillHEX 则把失败转成可检验的假设。就 RSIAgent 自身而言，四项任务的消融实验表明，广度覆盖与深度追查在这些任务上确实互补。</p>
-        <figure class="paper-figure">
-          <div class="figure-head"><span>论文原图 · Figure 4</span><span>阶段消融</span></div>
-          <a href="assets/paper-figures/33-rsiagent/figure4-ablation.png" target="_blank"><img src="assets/paper-figures/33-rsiagent/figure4-ablation.png" alt="四个 OSWorld 任务上无 RSI、仅深度、仅广度和完整 RSI 的 Partial 分数比较"></a>
-          <figcaption>
-            <strong>Full RSI 平均 74.54%，Broad-only 为 65.52%，Deep-only 为 56.50%</strong>
-            <p>图中 w/o BRS 表示“从空记忆只做 DRS”，w/o DRS 表示“只保留 BRS 记忆”。T085 与 T089 上 Deep-only 低于空记忆，说明窄而少的练习可能把错误或过拟合规则写入记忆。</p>
-            <p class="figure-reading"><strong>谨慎解读：</strong>四项任务来自已有改进记录的探索性 cohort；Full RSI 是两次历史评测均值，而 Deep-only 最多允许两个课程练习，预算并不对称。这支持“在这些任务上两阶段互补”，尚不足以证明普遍因果优越性。</p>
-            <div class="figure-source"><span>来源：论文 Figure 4、Appendix C.5，第 9、29 页</span><a href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">原文 ↗</a></div>
-          </figcaption>
-        </figure>
-        <p>为什么广度可能成为深度的前提？一种合理解释是：BRS 先提供多个程序范式、检查方式与失败边界，DRS 才能围绕目标差距做局部辨识；如果一开始就只盯目标，课程代理容易在极少样本上形成错误信念。这个解释与消融方向一致，但论文没有用等预算随机任务实验隔离“覆盖多样性”“总练习量”和“阶段顺序”三者。</p>
-        <p class="block-intro">附录的案例追踪比聚合分数更接近机制证据：它把某条记忆、最终操作与评分组件连起来。下面三例说明收益不是抽象的“想得更好”，而是保存了可执行的环境细节。</p>        <ul class="key-points">
-          <li><strong>REAPER · T085：</strong> 记忆保存了片段解析与渲染配置；分句间隔从 0.8250 升至 1.0000，处理后末句从 0.2837 升至 0.8996，总分从 0.6800 升至约 0.9415。</li>
-          <li><strong>WPS 演示文稿 · T049：</strong> 冻结记忆提供连接线端点的边缘中心约定，关键 connector 误差归零，总分从 0.40 升到 0.80；但另一页仍未得分。</li>
-          <li><strong>Shotcut 视频 · T044：</strong> 记忆让 Agent 使用原生 Crop: Source 和 76 像素裁剪，满足项目结构检查，总分 0.40 → 1.00；代价不是更少步骤，Actor 迭代反而 26 → 42。</li>
-          <li><strong>FreeCAD · T103：</strong> 记忆提供图纸解释与几何验证程序，0.2500 的历史基线上升到 0.6789/0.6897，但支撑与安装孔仍有可见误差，说明是部分重建而非彻底解决。</li>
-        </ul>
-        <div class="verdict"><strong>证据等级：</strong>端到端结果强力支持“冻结记忆有用”；阶段消融支持 BRS 与 DRS 在选定任务上的组件贡献；案例追踪支持具体规则被检索并影响执行。论文仍未把“主动课程更好”“独立验证更可靠”“记忆捕获的是因果关系”三项主张分别做出充分的受控验证。</div>
-      </section>
-
-      <section class="chapter" id="s5">
-        <h2><span class="num">05</span>贡献、局限与综合评价</h2>
-        <p class="section-intro">RSIAgent 的主要进展，是让智能体主动选择下一批经验，而不再完全依赖预先给定的任务流。论文已经证明主动探索和持久知识可以改善后续执行，但尚未把“安排练习”提升为严格的受控实验。</p>
-
-        <h3 class="subhead epistemic-heading">论文贡献</h3>
-        <p class="block-intro">贡献可分为研究对象、探索机制、知识载体和经验结果四层。这里仅保留论文方法与实验能够直接支持的部分。</p>
-        <ul class="key-points">
-          <li><strong>研究对象：</strong>把经验获取本身变成可调节环节，智能体可根据当前知识缺口决定下一步探索什么，而不是只从固定任务流中被动学习。</li>
-          <li><strong>双层探索：</strong>广度探索用于发现值得深入的方向，深度探索围绕一个方向连续生成练习，使系统能在覆盖范围与局部验证之间分配交互预算。</li>
-          <li><strong>持久知识：</strong>执行结果经过提炼与冲突处理后写入外部记忆，后续任务可以复用；模型参数保持不变，改进主要发生在经验与知识层。</li>
-          <li><strong>经验结果：</strong>完整系统、广度探索和深度探索的比较支持主动经验获取具有增量价值；失败案例同时表明课程选择、验证和知识固化仍会出错。</li>
-        </ul>
-
-        <h3 class="subhead epistemic-heading">证据边界与局限</h3>
-        <p class="block-intro">论文支持“主动挑选经验有用”，但中心机制仍受四类证据边界约束。它们分别影响因果归因、长期可靠性和成本判断。</p>
-        <ul class="key-points">
-          <li><strong>练习不等于实验：</strong>更难或更相似的任务能暴露薄弱点，却不能自动区分竞争假设；系统没有显式构造控制组、处理组和重复试验。</li>
-          <li><strong>验证误差：</strong>一次错误通过可能被写成长期规则，随后改变课程分布并制造更多选择性证据。论文案例支持这条风险链，但没有估计其长期发生率。</li>
-          <li><strong>知识边界：</strong>知识提炼与冲突处理仍由语言模型完成，局部成功可能被推广成适用范围过宽的规则；条件、反例和置信度尚未成为稳定字段。</li>
-          <li><strong>完整成本：</strong>练习生成、执行、复核和记忆维护都消耗调用预算。现有结果没有闭合长期运行的 Token、墙钟时间和失败恢复成本。</li>
-        </ul>
-        <figure class="paper-figure">
-          <div class="figure-head"><span>论文原图 · Figure 5</span><span>失败模式审计</span></div>
-          <a href="assets/paper-figures/33-rsiagent/figure5-failure-modes.png" target="_blank"><img src="assets/paper-figures/33-rsiagent/figure5-failure-modes.png" alt="探索不够针对、验证不完整与记忆固化不可靠的三类失败子型"></a>
-          <figcaption><strong>错误可能沿“课程遗漏—验证漏检—规则固化”传播</strong><p>案例显示，练习可能没有触及真正薄弱点，验证器也可能只检查产物是否存在。图中样本规模有限且一例可进入多个面板，适合作为故障分类，不宜解读为总体发生率。</p><p class="figure-reading"><strong>谨慎解读：</strong>持久记忆会放大错误规则的影响，因此写入前需要独立复核，并记录适用条件、反例和不确定性。</p><div class="figure-source"><span>来源：论文 Figure 5 与 §4.6</span><a href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">查看原文 ↗</a></div></figcaption>
-        </figure>
-
-        <h3 class="subhead epistemic-heading">独立研究启发</h3>
-        <p>从主动探索走向自主实验，关键不是继续增加角色，而是让每次交互服务于区分一个不确定命题。一个更严格的闭环可按“提出假设—定义变量—安排对照—多次执行—汇总证据—更新有边界的策略”推进。</p>
-        <p>在这种结构中，课程模块只负责选择值得验证的问题；多个执行者负责不同条件与随机种子；独立检查器决定证据是否足以修改知识库。这样可以把“经验多了以后改规则”转成可复核的知识生产过程。</p>
-        <div class="analysis"><strong>决定性实验：</strong>在隐藏目标任务上对齐总调用、Token、墙钟时间和工具权限，比较完整系统、仅广度探索、随机课程、信息增益课程、人工策略手册与无记忆重试。若主动课程在多随机种子下仍提高迁移效率，才能更有力地支持其因果价值。</div>
-        <p class="verdict"><strong>综合判断：</strong>RSIAgent 把研究重点从“如何利用已有经验”推进到“如何主动获得下一批经验”。这一转向具有持续价值；但论文展示的仍是主动练习与知识积累，还不是能够控制变量、估计不确定性并自行证伪的实验科学智能体。</p>
-        <p class="source-note">主要来源：arXiv:2609.15364v1（2026-09-14）正文与附录。本文未独立复现实验；“自主实验”部分属于明确标注的研究延伸。</p>
-        <a class="back" href="#top">↑ 返回顶部</a>
-      </section>
-      <a class="back" href="#top">↑ 返回顶部</a>
-    </main>
-  </div>
-  <script>
-    const bar=document.getElementById('progress'),links=[...document.querySelectorAll('.toc a')],sections=links.map(a=>document.querySelector(a.getAttribute('href'))),theme=document.getElementById('theme');
-    function update(){const d=document.documentElement,s=d.scrollHeight-innerHeight;bar.style.width=(s?scrollY/s*100:0)+'%';let active=0;sections.forEach((sec,i)=>{if(sec.getBoundingClientRect().top<150)active=i});links.forEach((a,i)=>a.classList.toggle('active',i===active))}
-    addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
-    theme.addEventListener('click',()=>document.body.classList.toggle('dark'));
-  </script>
+<script src="../library-nav.js" data-material-type="paper" defer></script></head>
+<body>
+<header class="hero"><div class="hero-in">
+<h1>RSIAgent：基于主动经验获取的递归自改进智能体</h1>
+<p class="paper-name">RSIAgent: Autonomous Exploration for Recursive Self-improvement in New Environments</p>
+<p class="paper-authors">作者：Sibo Zhu、Shicheng Fan、Xinyue Wang、Wenyi Wu、Kun Zhou、Biwei Huang</p>
+<p class="paper-affiliation">作者单位：作者单位：Aether AI / University of California San Diego / University of Illinois Chicago</p>
+<div class="paper-links"><a class="source-link" href="https://arxiv.org/abs/2609.15364" target="_blank" rel="noreferrer">阅读原论文 ↗</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s2">01 · 研究背景与问题定义</a></li>
+<li><a href="#s3">02 · 方法与技术路线</a></li>
+<li><a href="#s4">03 · 实验设计与结果分析</a></li>
+<li><a href="#s5">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main><span class="anchor-alias" id="s1"></span>
+<section class="chapter" id="s2"><h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2><p class="prose">进入陌生软件环境后，智能体即使知道通用操作，也未必了解具体版本的隐藏约束：某种导出设置是否有效、任务结果怎样验证、失败由哪条条件触发。只在正式任务中试错，既昂贵又容易反复丢失经验；直接写反思笔记，又可能把未验证猜测存成事实。RSIAgent 将<strong>主动练习、环境取证和记忆维护</strong>组织成一个训练外适应过程。</p><p class="prose">课程代理提出练习，执行代理探索，独立验证代理检查可见结果；经过验证的经验更新外部记忆。探索分广度与深度，完成后冻结记忆，再用于目标执行。需要提前说明，论文的参考实现是目标条件化的：目标查询会指导探索，深度阶段也可能练习目标本身，所以它不是在完全不知道下游任务时独立学到一套通用能力。</p><div class="table-wrap"><table data-source=""><caption>从被动试错到有目的经验获取</caption><thead><tr><th>问题</th><th>仅多跑正式任务的不足</th><th>方法改变</th></tr></thead><tbody><tr><td>缺少环境知识</td><td>重复踩同样接口和流程陷阱。</td><td>主动生成不同方向的练习，扩大覆盖。</td></tr><tr><td>经验不够可信</td><td>执行者的成功自述可能与实际产物不符。</td><td>验证者直接检查环境证据，隔离执行者私有思考与记忆。</td></tr><tr><td>已有知识只覆盖容易情况</td><td>广度采样难碰到隐藏约束和边界。</td><td>顺序深挖缺口，每次验证后再更新记忆和课程。</td></tr></tbody></table></div><p class="prose">“递归自改进”的持久对象是外部环境记忆，基础模型不训练。它借额外探索预算换取后续更好的执行条件，因此评价时必须分清学习阶段、冻结阶段，以及新知识到底有多接近测试目标。</p></section><section class="chapter" id="s3"><h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2><p class="prose">三个代理分工贯穿两阶段，而不是三个阶段各自独立。验证反馈约束写入，记忆又影响下一次任务和行动；测试时关闭课程和记忆写入，保留执行—验证循环。</p><figure class="method-overview" data-source="primary-method"><figcaption>自绘总览｜广度并行采集，深度顺序修订，最终只读复用</figcaption><div class="state-band"><b>输入与初始状态</b><span>目标查询参考 + 新环境；可演化的外部记忆，不更新模型权重</span></div><div class="flow-box"><h4>BRS · 广度递归探索</h4><p>课程提出多方向项目 → 多个 Actor 并行执行 → Verifier 看环境结果 → 汇总已知与缺口。</p></div><div class="flow-connector">↓ 带已验证经验的记忆进入深度阶段</div><div class="flow-box"><h4>DRS · 深度递归探索</h4><p>课程选择挑战 / 隐藏约束 → 顺序执行和验证 → Actor 修订或删除旧知识 → 再决定下一项练习。</p></div><div class="split-grid"><div class="flow-box"><h4>Actor 的写入责任</h4><p>将验证后的流程、脚本、条件—动作—后果和失败经验合并到持久记忆。</p></div><div class="flow-box"><h4>Verifier 的证据边界</h4><p>看执行结果、界面和可观察产物；不读 Actor 私有推理与记忆，返回判断及理由。</p></div></div><div class="flow-connector">↓ 课程判断继续练习价值不足 → 冻结记忆并重置环境</div><div class="flow-box"><h4>目标执行 · 只读复用</h4><p>Actor 读取冻结程序与约束，Verifier 继续检查任务是否满足；课程及记忆更新禁用。</p></div></figure><section class="method-section"><h3>三种角色：提任务、做动作和确认结果分开</h3><p class="prose">课程代理依据目标、已有经验和探索结果寻找前置技能、信息量大的变体及失败压力测试。它决定学什么与何时停止，而非只按一个固定题目列表抽样。Actor 则负责工具动作与记忆整合，持久经验包括可复用程序、脚本及条件约束。</p><p class="prose">Verifier 直接检查执行结果、界面状态和其他可见证据，不依赖 Actor 的私有解释与记忆。这个隔离降低同一错误叙事同时支配执行和验收的风险，但结果仍由模型判断，不能等同官方真值。被错误验证的经验会进入后续课程，因而写入可靠性决定整个递归链是否受益。</p></section><section class="method-section"><h3>广度到深度：覆盖与边界需要不同调度</h3><p class="prose">BRS 每轮给出多个方向并行执行和验证，汇总之后再寻找知识缺口，主要负责快速铺开环境结构。参考设置有名义八个探索项目、最多四个并行，预算在完成波次之间检查，不中途打断正在运行项目。名义预算因此不必等于精确固定调用量。</p><p class="prose">DRS 按顺序选择困难任务，利用上一步刚写入的知识继续追问边界。成功不是自动停止条件，课程还要判断是否值得进一步挑战。它也可能包括目标练习；一旦已针对目标调试，最终冻结运行是在复用目标相关研究成果，而不是纯粹零样本测试。</p></section><section class="method-section"><h3>冻结复用：停止更新并不消除前期适应成本</h3><p class="prose">探索完成后，记忆冻结，环境重置，Actor 在正式执行中只读已有知识，Verifier 继续确认要求是否满足。课程不再出题，记忆也不再接收测试执行反馈。这使最终任务轨迹与写入过程区分开。</p><p class="prose">然而知识可以来自目标条件化探索与此前尝试，冻结只规定最终执行的更新权限，不能把前面付出的探索、目标练习或选择检查点从成本和证据条件中删掉。部署表现需要同样适应预算的基线，才能分辨方法设计与更多练习的作用。</p></section><details class="original-figure"><summary>论文原始结构图 · 点击对照</summary><figure class="main-figure"><a href="assets/paper-figures/33-rsiagent/figure2-framework.png" target="_blank" rel="noopener"><img loading="lazy" src="assets/paper-figures/33-rsiagent/figure2-framework.png" alt="论文原始结构图"></a><figcaption>论文 Figure 2：广度探索、深度探索与冻结记忆复用 · 点击图片查看原始尺寸</figcaption></figure></details></section><section class="chapter" id="s4"><h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2><section class="evidence-section"><h3>汇总分数提高了多少，比较对象是否完全匹配</h3><p class="evidence-setting">OSWorld 82 个离线任务，ALE 67 个 Near-term 任务；按附录记录合成的报告结果。</p><div class="table-wrap"><table data-source="Table 1; Appendix C.3–C.4"><caption></caption><thead><tr><th>评测</th><th>无 RSI Partial</th><th>有 RSI Partial</th><th>无 / 有 RSI Binary</th></tr></thead><tbody><tr><td>OSWorld</td><td>71.97%</td><td>78.98%</td><td>37.80% / 42.68%</td></tr><tr><td>ALE</td><td>83.75%</td><td>84.82%</td><td>49.25% / 50.75%</td></tr></tbody></table></div><p class="prose">OSWorld 的改善大于 ALE，符合后者基线已较高、剩余缺口更小的表面模式。但这不是所有题都重新做过的完整匹配评测：OSWorld 只用 41 条报告 RSI 结果替换基线，其余保留；ALE 用 19 条 RSI 加 48 条基线，记录还含重试、局部修正等资格条件。</p><p class="prose">不同公开系统保留各自 harness 与预算，论文也明确比较协议未完全匹配。因此可以说报告汇总有所提高，不能据此断言同预算全面超过其他模型。ALE Binary 的 50.75% 仍低于 GPT-6 Astra 参考的 52.24%，Partial 名次不能替代所有指标。</p></section><section class="evidence-section"><h3>广度与深度是否互补</h3><p class="evidence-setting">四个 OSWorld 任务；来自为改进而选出的探索 cohort，完整 RSI 为两次历史冻结评估平均，非全基准等预算消融。</p><div class="table-wrap"><table data-source="Figure 4; Appendix C.5"><caption></caption><thead><tr><th>配置</th><th>四任务平均 Partial</th><th>可作何种证据</th></tr></thead><tbody><tr><td>只做深度</td><td>56.50%</td><td>空记忆上聚焦练习可能过窄。</td></tr><tr><td>只做广度</td><td>65.52%</td><td>广泛经验本身已有效。</td></tr><tr><td>完整两阶段</td><td>74.54%</td><td>在这组已选任务上组合最好。</td></tr></tbody></table></div><p class="prose">这组结果提供阶段互补的案例级证据：先建立环境面，再补具体约束，优于从空记忆直接深挖。它不能精确估计广度或深度的总体因果贡献，因为选择队列、历史运行与不同阶段预算限制都影响结果。</p><p class="prose">论文没有给出覆盖全部任务的统一探索成本—成功率曲线。若只看冻结执行分数，就会掩盖程序发现、失败练习和验证已经花费的计算。</p></section></section><section class="chapter" id="s5"><h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2><section class="method-section"><h3>核心贡献：把适应拆成经验获取与经验使用</h3><p class="prose">RSIAgent 最值得学习的设计，是把主动课程和环境证据放在记忆写入之前：不是见到日志就总结，而是通过练习补空白，再用验证后的结果更新程序与条件。广度并行、深度串行的安排也有清晰的信息理由：覆盖可以分散，边界修订依赖最新知识。</p></section><section class="method-section"><h3>当前实证更接近目标条件化研究，而非普遍自主进化</h3><p class="prose">目标参与出题、部分目标练习和未完全匹配的历史汇总，使“学到环境通用知识”与“针对当前任务做了充分研究”难以分开。两者都可能有实际价值，但对可迁移能力的结论不同。验证者误判又会改变后续课程，局部错误可能被反复强化。</p><p class="prose">最有区分力的设计是预先固定探索预算，在一组训练目标上构造记忆，冻结后评估完全新目标，并与同预算直接尝试及独立验证版本比较。如果收益跨目标保持，便支持通用环境知识；若主要依赖目标练习，则应将其定位为有效的测试期适应。</p></section><p class="prose">综合判断，这是一套机制清楚的主动环境学习框架，也提供有启发的经验演化记录。现有数字说明在特定探索和报告条件下可以改善任务执行，尚不足以建立等预算、全面泛化的递归自改进结论；区分这两层，反而更能看清方法真正可复用的部分。</p></section></main></div>
+<script>
+(()=>{const links=[...document.querySelectorAll('.toc a')];const sections=links.map(a=>document.querySelector(a.getAttribute('href')));function update(){let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=130)active=section;}for(const link of links){link.classList.toggle('active',link.getAttribute('href')==='#'+active.id);}}addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();})();
+</script>
 </body>
 </html>
