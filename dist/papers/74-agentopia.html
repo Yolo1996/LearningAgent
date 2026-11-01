@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Agentopia 中文精读：抽象周循环、文件记忆、生成式环境、三维生活奖励与拒绝采样微调；分析CoSER提升、奖励取舍和模拟成本。"><title>Agentopia：长期社会生活模拟与生活奖励驱动的模型学习</title><style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--navy:#243b59;--pale:#f3f7fc;--green:#287a60;--amber:#996121}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}a:focus-visible,summary:focus-visible{outline:3px solid #6495cf;outline-offset:4px}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.12),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;opacity:.1;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);line-height:1.46;font-weight:700;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 10px;color:#e0e8f7;font-size:20px;line-height:1.65;font-weight:400}.paper-authors,.paper-affiliation{margin:7px 0;color:#d4dff1;font-size:16px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}.paper-links a,.paper-links span{color:#e7efff;font-size:15px;line-height:1.8}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);align-items:start;justify-content:center;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px;max-height:calc(100vh - 44px);overflow:auto}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;margin:0;padding:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.6}.toc a:hover,.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue)}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{min-width:0;padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:14px;margin:0 0 18px;color:#1c2d43;font-size:24px;line-height:1.4}h2 .num{flex:0 0 auto;font-size:inherit;font-weight:inherit;line-height:inherit}h2 .chapter-title{flex:1 1 auto;min-width:0}h3{margin:26px 0 10px;color:var(--navy);font-size:18px;line-height:1.55}p{margin:11px 0}.chapter>p,.prose p{font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify;font-weight:400}strong{font-weight:650}
+.table-wrap{width:100%;max-width:100%;min-width:0;margin:16px 0 12px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;min-width:620px;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;color:var(--navy);font-size:14px;font-weight:650;background:#f7f9fc}th,td{padding:10px 12px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}th{background:#edf3fb;color:#294865;font-weight:650}th[scope=row]{background:#f9fbfe;width:22%}.numeric{white-space:nowrap;font-variant-numeric:tabular-nums}.best td,.best th[scope=row]{background:#edf8f3}.table-note,.chapter>p.table-note{font-size:12.5px;line-height:1.75;color:var(--muted);text-indent:0;text-align:left}.callout{margin:17px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:#edf4fd;font-size:14px;line-height:1.8}.callout.amber{border-color:var(--amber);background:#fff6e9}.formula{margin:16px 0;padding:13px 16px;border:1px solid var(--line);background:var(--pale);border-radius:8px}.equation{font-size:16px;font-weight:650;text-align:center;overflow-wrap:anywhere}.formula p{margin:8px 0 0;font-size:13px;line-height:1.75;text-indent:0}
+.method-map{margin:18px 0 22px;padding:18px;border:1px solid #cbd9ec;border-radius:12px;background:#f7faff;line-height:1.65}.method-map>figcaption{margin-bottom:14px;font-size:15px;font-weight:650;color:var(--navy)}.map-node{min-width:0;padding:12px 14px;border:1px solid #b8cbe4;border-radius:8px;background:#fff;color:#32475f;font-size:13px}.map-node strong{display:block;margin-bottom:5px;font-size:14px;color:#223e61}.map-node small{display:block;margin-top:5px;color:#60758d;font-size:12px}.store{background:#eaf1fb;border:2px solid #91add1}.arrow{text-align:center;margin:7px 0;color:#486e9a;font-size:12.5px}.arrow b{font-size:19px;margin-right:5px}.lanes{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;margin-top:13px}.lane{min-width:0;padding:12px;border:1px solid #cad9eb;border-radius:10px;background:#edf3fb}.lane.side{background:#f1f7f5;border-color:#bcd2c8}.lane-title{margin-bottom:10px;font-size:12px;font-weight:650;color:#4b6481}.lane.side .lane-title{color:#3d6957}.side .map-node{border-color:#b7d2c4}.map-return{margin-top:11px;padding:9px 11px;border-left:3px solid #6b94c3;background:#e5edf8;font-size:12px;color:#345574}.side .map-return{background:#e5f0e9;border-color:#6c9b82;color:#3b6651}.decision{margin-top:10px;padding-top:8px;border-top:1px solid #d8e2ef}.decision span{display:block;margin:4px 0}.engine{margin-top:13px;background:#172f4c;color:#e5eefb;border-color:#172f4c}.engine strong{color:white}.engine small{color:#c2d5ee}.loop{margin:11px 0 0;text-align:center;font-size:12.5px;color:#385c87}.map-note{margin:12px 0 0;color:var(--muted);font-size:12px}
+.reflection-flow{display:flex;align-items:stretch;gap:10px;margin:15px 0}.reflection-flow>div{flex:1;min-width:0;border:1px solid var(--line);border-radius:7px;padding:10px 12px;background:#f8fafc;font-size:13px}.reflection-flow strong{display:block;color:var(--navy);margin-bottom:4px}.reflection-flow>.local-arrow{flex:0 0 auto;border:0;background:none;padding:18px 0;color:#5d7da6;align-self:center;font-size:18px}
+details{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe}summary{cursor:pointer;color:var(--navy);font-size:14px;font-weight:600}.example-label{font-size:12px;color:var(--muted)}.input-panel{margin:12px 0;padding:14px 16px;border-radius:8px;background:#162b47;color:#e5edfa;font-size:13px;line-height:1.8}.input-panel strong{display:block;margin-bottom:6px;color:white}.example-block p{font-size:14px}.example-stages{padding-left:22px;font-size:14px}.example-stages li{margin:10px 0}.paper-figure{margin:14px 0;background:white;border:1px solid var(--line);border-radius:8px;overflow:hidden}.paper-figure img{display:block;width:100%;height:auto;object-fit:contain}.paper-figure figcaption{padding:10px 13px;font-size:12px;color:var(--muted)}
+@media(max-width:1000px){.layout{grid-template-columns:170px minmax(0,1fr);gap:18px;padding-inline:16px}.chapter{padding:26px}.hero-in{padding:34px 22px}.lanes{grid-template-columns:1fr}.reflection-flow{flex-wrap:wrap}.reflection-flow>div{flex-basis:25%}}
+@media(max-width:700px){.layout{display:block;padding:16px 12px 42px}.toc{position:static;max-height:none;margin-bottom:15px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f8faff}.toc ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.toc-label{padding-left:10px}.toc a{font-size:12px;padding:7px}.chapter{padding:24px 19px}h2{gap:11px;font-size:22px;line-height:1.45}h3{font-size:17px}h1{font-size:28px}.paper-name{font-size:17px;margin-top:14px}.paper-authors,.paper-affiliation{font-size:15px}.paper-links a,.paper-links span{font-size:14.5px}.hero-in{padding:30px 20px}.method-map{padding:12px}.lane{padding:10px}.reflection-flow{display:block}.reflection-flow>.local-arrow{padding:2px;text-align:center;transform:rotate(90deg)}}
+@media print{html{scroll-behavior:auto}body{background:white;color:#111;font-size:11pt}.hero{background:white;color:#111;border-bottom:2px solid #243b59}.hero:after,.toc{display:none}.hero-in{padding:10px 0 18px}.hero h1{font-size:23pt;line-height:1.45}.paper-name{font-size:12.5pt}.paper-authors,.paper-affiliation{font-size:11pt}.paper-links a,.paper-links span{font-size:10.5pt}.paper-name,.paper-authors,.paper-affiliation,.paper-links a,.paper-links span{color:#333}.layout{display:block;max-width:none;margin:0;padding:16px 0}main{border:0;box-shadow:none;overflow:visible}.chapter{padding:18px 0}.chapter>p,.prose p{font-size:11pt}h2{font-size:18pt;gap:12px}h3{font-size:13pt}h2,h3,summary{break-after:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9pt}thead{display:table-header-group}tr,.map-node,.paper-figure{break-inside:avoid}th,td{padding:7px 8px}.method-map{padding:12px;break-inside:auto}.lanes{grid-template-columns:1.2fr 1fr}.lane{padding:8px}.map-node{padding:9px;font-size:9pt}.map-node strong{font-size:10pt}.map-node small,.arrow,.map-return,.loop{font-size:8.5pt}.engine,.input-panel{background:#edf2f8;color:#111;border:1px solid #acbed5}.engine strong,.input-panel strong{color:#111}.engine small{color:#333}.formula,.callout{break-inside:avoid}.reflection-flow{display:flex;flex-wrap:nowrap}.reflection-flow>div{font-size:9pt}.paper-links a[href^="https"]:after{content:" (" attr(href) ")";font-size:8pt}}
+
+.orchestrator{margin:12px 0;padding:12px 14px;border:1px solid #9fb9d6;border-radius:8px;background:#e7eef8;font-size:12.5px;color:#37516f}.orchestrator strong{display:block;margin-bottom:6px;color:#213d5f;font-size:14px}.orchestrator span{display:block;margin:4px 0}.week-grid{display:grid;grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr);align-items:stretch;gap:6px;margin:12px 0}.week-grid .map-node{padding:11px;font-size:12.5px}.week-arrow{align-self:center;color:#5c7da7;font-size:19px;text-align:center}.training-band{margin-top:10px;padding:13px 15px;background:#173452;color:#e8f0fb;border-radius:8px;font-size:13px}.training-band strong{display:block;font-size:14px;color:white;margin-bottom:7px}.training-band small{display:block;margin-top:7px;color:#cbdcf0;font-size:12px}.selection-flow{display:flex;align-items:stretch;gap:8px;margin:16px 0}.selection-flow>div{flex:1;min-width:0;border:1px solid #cbd9ec;border-radius:7px;padding:11px 12px;background:#f5f8fc;font-size:13px}.selection-flow strong{display:block;color:#284b74;margin-bottom:5px}.selection-flow>span{flex:0 0 auto;align-self:center;font-size:19px;color:#5278a6}.regression th[scope=row],.regression td{background:#fff7ea}
+@media(max-width:1100px){.week-grid{display:block}.week-arrow{padding:2px;transform:rotate(90deg)}.week-grid .map-node{padding:12px;font-size:13px}}
+@media(max-width:700px){.selection-flow{display:block}.selection-flow>span{display:block;text-align:center;transform:rotate(90deg);padding:2px}.hero .paper-authors{overflow-wrap:anywhere}}
+@media print{.week-grid{display:grid;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) 14px minmax(0,1fr) 14px minmax(0,1fr);gap:4px}.week-arrow{transform:none;font-size:12pt;padding:0}.week-grid .map-node{font-size:8.5pt;padding:7px}.week-grid .map-node strong{font-size:9pt}.orchestrator,.training-band{font-size:9pt}.orchestrator strong,.training-band strong{font-size:10pt}.training-band{background:#edf2f8;color:#111;border:1px solid #acbed5}.training-band strong,.training-band small{color:#111}.selection-flow{display:flex}.selection-flow>span{transform:none;padding:0}.selection-flow>div{font-size:9pt;padding:8px}.paper-figure{break-inside:avoid}}
+.figure-scroll{overflow-x:auto;overscroll-behavior-inline:contain}.figure-scroll img{min-width:740px}@media print{.figure-scroll{overflow:visible}.figure-scroll img{min-width:0}}
+.hero h1{text-wrap:balance}
+</style></head><body>
+<header class="hero" id="top"><div class="hero-in">
+<h1>Agentopia：长期社会生活模拟与生活奖励驱动的模型学习</h1>
+<p class="paper-name">Agentopia: Long-Term Life Simulation and Learning in Agent Societies</p>
+<p class="paper-authors">Xintao Wang、Sirui Zheng、Hongqiu Wu、Weiyuan Li、Jen-tse Huang、Minghao Zhu、Can Zu、Qi Deng、Jiawei Wang、Qianyu He、Heng Wang、Xiaojian Wu、Yunzhe Tao</p>
+<p class="paper-affiliation">Fudan University；Johns Hopkins University；University of Science and Technology of China；Independent Researchers</p>
+<div class="paper-links"><a href="https://arxiv.org/abs/2606.07513v1" target="_blank" rel="noreferrer">阅读原论文 ↗</a><span>arXiv v1 · 2026-06-05</span><a href="index.html">返回论文目录</a></div>
+</div></header>
+<div class="layout"><nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s1">01 · 研究背景与问题定义</a></li><li><a href="#s2">02 · 方法与技术路线</a></li><li><a href="#s3">03 · 实验设计与结果分析</a></li><li><a href="#s4">04 · 贡献、局限与综合评价</a></li>
+</ol></nav><main>
+
+<section class="chapter" id="s1" data-source="§1; §3.2; §4; Limitations">
+<h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2>
+<p>一个角色能聊得像人，或者一群角色能办成一次活动，并不意味着系统能表现出多年关系变化、职业选择与生活取舍。要观察这些过程，需要让角色持续经历有后果的互动；但如果大量模型调用都用于移动、拿取物品等细小动作，延长模拟就会付出很高成本。与此同时，模拟出故事之后，仍缺少一个明确环节，把这些经历转成改进底层模型的训练材料。</p>
+<p>Agentopia 同时处理两个问题：<strong>怎样在可承受的计算量下运行长期社会生活，怎样从这种生活中筛选值得学习的行为</strong>。它把模拟单位提升到按周组织的计划、通信、活动和复盘，由环境模型解释开放行动的结果，再按年度计算“生活奖励”，选择进步较大的角色经历进行监督微调。系统的研究对象因而既包括角色社会的运行，也包括从合成社会经验中构造训练数据。</p>
+<h3>长期模拟需要改变行动粒度，也需要结果反馈</h3>
+<div class="table-wrap"><table><caption>从短期互动扩展到生活轨迹，要补上什么</caption><thead><tr><th scope="col">障碍</th><th scope="col">直接延长运行仍留下的问题</th><th scope="col">Agentopia 的改变</th></tr></thead><tbody>
+<tr><th scope="row">细小动作占用计算</th><td>调用量增长很快，却不一定增加关系发展、人生选择等有效互动。</td><td>抽象掉低层物理操作，以周阶段和每日一个活动槽推进社会生活。</td></tr>
+<tr><th scope="row">开放活动没有统一结果规则</th><td>只让角色写“做成了什么”，容易让意图直接变成成功，甚至替别人决定反应。</td><td>角色提出自身行动，环境模型判断可行性与后果，程序落实日程和状态规则。</td></tr>
+<tr><th scope="row">经历丰富不等于训练样本优质</th><td>高地位或富裕角色容易得高分，却未必作出了更好的选择。</td><td>用未来奖励相对自身过去的改善选轨迹，再过滤并微调。</td></tr>
+</tbody></table></div>
+<p>其中，“多年”必须按论文的时间定义理解：实验中每个模拟年为 10 周，每周 5 个活动日，所以 10 年对应 100 个抽象周、每人 500 个每日活动槽。作者明确说明日、周、年是分层的抽象时间，不严格对应现实日历。这样的设计让长时程社会情节变得可计算，也跳过了连续感知、自由时间分配和大量日常过程；它本身就是模拟假设的一部分。</p>
+<p>还需要区分两种“学习”。角色在模拟中更新记忆、技能数值或人物档案，使同一个固定模型在不同状态下作出不同选择；底层模型的学习，则发生在收集轨迹后对权重做监督微调。前者说明角色状态可以发展，后者才检验合成生活经验能否转移成模型能力。长期运行的数据并不会自动变成可靠的学习信号，关键仍在于环境怎样反馈、奖励偏好什么，以及筛选规则留下了什么。</p>
+</section>
+
+<section class="chapter" id="s2" data-source="§3–4; Appendix A–C">
+<h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2>
+<p>Agentopia 将“运行社会”和“训练模型”连成两个循环。运行中，角色根据自己的状态、记忆与阶段输入行动；环境模型给出社会情境和结果，程序处理有效性与资源约束。年度结果形成奖励和轨迹，离线筛选后才进入模型训练，训练后的模型再用于新的模拟与外部评测。</p>
+<figure class="method-map" aria-label="Agentopia 周期模拟与离线训练总览" data-source="§3; §4.2; B.2; B.8; C.1">
+<figcaption>两个循环：按周运行生活，按年度结果构造训练数据</figcaption>
+<div class="map-node store"><strong>角色状态与记忆 · Persona &amp; Memory Files</strong>档案、动态状态、周记、人物与主题记忆 → 组成每次调用的上下文。<small>文件与状态跨阶段保留；阶段内对话历史在切换阶段时清空，由摘要连接后续调用。</small></div>
+<div class="arrow"><b>↓</b>角色读入当前生活状态，进入全体同步的周阶段</div>
+<div class="orchestrator"><strong>环境模型 Environment Model ＋ 程序控制，贯穿下方周期</strong><span>模型：生成事件、选下一位说话者、评价行动结果与状态变化。</span><span>程序：解析动作、校验对象、解决日程冲突、执行固定收支及状态规则。</span></div>
+<div class="week-grid">
+<div class="map-node"><strong>Plan · 计划</strong>依据经历设本周目标，选择生活标准并读写计划记忆。<small>产物：行动意图与消费水平。</small></div>
+<div class="week-arrow" aria-hidden="true">→</div>
+<div class="map-node"><strong>Contact · 联系与排程</strong>5 轮发消息、正式提议、接受/拒绝或取消；结束后统一解决冲突。<small>产物：可执行的确认日程；错误下轮反馈。</small></div>
+<div class="week-arrow" aria-hidden="true">→</div>
+<div class="map-node"><strong>Activity · 活动</strong>每天一个活动：联合、公共、偶遇或默认独处；角色行动，环境评后果。<small>产物：互动记录、状态变化与个人反思。</small></div>
+<div class="week-arrow" aria-hidden="true">→</div>
+<div class="map-node"><strong>Review · 复盘</strong>总结本周经历，写周记、修订长期记忆。<small>产物：下一周的近期历史与持久笔记。</small></div>
+</div>
+<div class="map-return">↶ 周记、记忆与状态返回上方角色输入，进入下一周。公共活动在 Contact 前生成并报名，偶遇在 Contact 后安排。</div>
+<div class="arrow"><b>↓</b>每 10 周形成一个模拟年：更新档案 → 求职匹配 → 计算奖励</div>
+<div class="map-node"><strong>生活奖励 · Life Reward</strong>他人的喜欢/尊重 → 社会奖励；全年满足度与低状态惩罚 → 主观奖励；净储蓄增加 → 经济奖励。<small>分别标准化后按 0.4 / 0.4 / 0.2 加权；奖励是环境与模型定义的代理目标。</small></div>
+<div class="arrow"><b>↓</b>年度奖励与整段轨迹进入离线训练流程</div>
+<div class="training-band"><strong>生活奖励训练 · Life Reward Training（离线）</strong><span>计算归一化未来回报 → 与自身上一期比较 → 每期选择改善最大的前 25% 角色 → 收集该年轨迹并过滤 → 混合通用自蒸馏数据 → SFT 更新模型权重。</span><small>另采样环境模型训练数据；训练后得到 Qwen3.5-397B-Agentopia。</small></div>
+<div class="loop">↶ 新模型用于后续模拟与角色扮演评测；运行中的每次周记更新不等于权重训练。</div>
+</figure>
+<details class="original-figure"><summary>原论文总览图：世界构造、角色、社会模拟与训练</summary><figure class="paper-figure" data-source="Figure 2"><a href="assets/74-agentopia/architecture.png"><img src="assets/74-agentopia/architecture.png" width="2044" height="1145" loading="lazy" alt="Agentopia 原论文总览：世界与角色构造、记忆、每周生活模拟以及基于生活奖励的训练。"></a><figcaption>原论文 Figure 2。点击查看完整尺寸。</figcaption></figure></details>
+
+<h3>Persona 与 Memory Files：跨阶段保留什么</h3>
+<p>每个角色由人物档案、对他人的记忆和动态状态组成。档案包括背景、性格、天赋、价值观等，按年依据经历更新；精力、四维满足度、技能、职位与资产则随生活过程变化。关系主要写在“我如何认识和看待某人”的自由文本记忆里，能够表达单向好感、竞争或疏远，不要求始终把双方放进统一的朋友、恋人或敌人标签。</p>
+<p>角色拥有个人笔记、人物笔记和其他主题文件，可通过读取、更新、列举三个工具主动维护。系统强制<strong>同次调用中先读再更新已有文件</strong>，避免模型在没有看到旧内容时直接覆盖。这个约束保护更新过程，但保留哪些经历、怎样修订印象仍由角色模型判断。论文没有采用把全部历史统一做向量检索的固定方案，完整文件主要靠角色按需读取。</p>
+<div class="table-wrap"><table data-source="§3.1; B.8; Tables 5–6"><caption>三层上下文：持久状态与当前交互分开维护</caption><thead><tr><th scope="col">层次</th><th scope="col">模型读到的内容</th><th scope="col">何时保留或重建</th></tr></thead><tbody>
+<tr><th scope="row">Roleplay prompt</th><td>自身档案与状态、世界规则（含奖励规则）、近期周记/活动历史、记忆摘要、位置等。</td><td>每次重新组装；负责把过去经历带入新阶段。</td></tr>
+<tr><th scope="row">Stage prompt</th><td>当前阶段的任务、可用日程、通信记录、活动参与者和操作规则。</td><td>随计划、联系、活动、复盘等阶段改变。</td></tr>
+<tr><th scope="row">Message history</th><td>本阶段的多轮对话、工具请求与结果、压缩后的推理记录。</td><td>阶段内累积，阶段切换时清空。</td></tr>
+</tbody></table></div>
+<p>记忆摘要按访问近期性排序；认识的人超过 50 名时，提示只展示最近访问的 50 名，但保证当前互动对象被纳入，其他人的完整文件仍可主动读取。开放模型的显式推理还会经一次额外调用压成约 200 词摘要，供后续阶段使用。这样控制了每次输入的组织方式，却没有让长期记忆的读取成本消失；摘要持续增长和主动取回仍要消耗计算。</p>
+
+<h3>Plan、Contact、Activity、Review：从生活意图到可执行日程</h3>
+<p>每周先结算固定收入与状态衰减，再让角色计划本周。角色选择消费水平，使物质生活与存款发生取舍。情绪、社交、尊重满足度按当前数值每周衰减 15%，物质满足度由消费机制处理、不额外衰减。这是系统预设的持续需求机制：即使角色没有新的目标，维持满意状态也需要继续活动。</p>
+<p>公共事件由环境模型在 Contact 前生成，角色按兴趣报名；随后通过 5 轮通信安排联合活动。每轮全体角色读取新收到的信息，发出下一批动作，类似分轮的消息往来。日程不会因一句“愿意参加”自动成立，必须提出正式活动，并用正式接受或拒绝动作回应。所有联系轮结束后，程序统一处理取消、最后一次回应和时间冲突，才创建有效活动。</p>
+<div class="table-wrap"><table data-source="§3.4; B.4–B.7"><caption>四类活动：互动机会由谁产生、怎样执行</caption><thead><tr><th scope="col">类型</th><th scope="col">如何进入</th><th scope="col">执行方式与信息边界</th></tr></thead><tbody>
+<tr><th scope="row">Joint · 联合</th><td>角色正式提议、受邀者接受，程序确认日程。</td><td>多人轮流交谈；允许私密思想、定向发言、赠礼与提前离场。</td></tr>
+<tr><th scope="row">Public · 公共</th><td>环境生成开放事件，角色自行报名。</td><td>各自行动后看到他人的活动摘要，通常没有共同的现场多轮对话。</td></tr>
+<tr><th scope="row">Encounter · 偶遇</th><td>Contact 后，环境为没有安排的角色创造相遇。</td><td>沿用联合活动的多轮流程；接触机会由环境编排。</td></tr>
+<tr><th scope="row">Solo · 独处</th><td>当天没有其他有效活动时默认进入。</td><td>角色描述学习、工作、休闲或消费意图，环境判断是否可行并给结果。</td></tr>
+</tbody></table></div>
+<p>每天每人执行一个活动槽，构建当天日程时按联合、公共、偶遇、独处的次序优先安排。活动后，环境给出结果和状态变化，角色反思经历并可写记忆；周末再写周记。全体角色同步进入相同阶段，阶段内独立角色和不同活动可以并发，但一次多人活动里的轮流交谈仍有先后。这种组织方式降低了异步世界的调度复杂度，也限制了角色随时打断、自由切换活动的能力。</p>
+
+<h3>Environment Model 与程序控制：谁决定行动后果</h3>
+<p>环境模型是一个无状态 LLM：每次根据请求提供的场景与角色信息生成反馈，不拥有一段独立持续的人生记忆。它创建事件、选择下一位说话者、判断活动结果、评价求职者，并在年末依据全年经历更新人物档案。角色只控制自己的行动和话语，不能凭一句叙述宣布成功，也不能替别人规定心理反应。结果判断交给环境，才让“想做什么”和“实际得到什么”分开。</p>
+<p>这一开放判断仍由程序规则支撑。错误地点、无效人物、越界时间等动作被丢弃，原因进入下一轮提示；赠礼需要校验所有权并实际转移物品。日程冲突优先保留以前周已确认的联合活动，再依次考虑本人新提议、本人新接受的联合活动等。新活动只有发起者未因冲突退出、所有指定必到者接受，且至少一名受邀者接受时才创建。模型判断语义，程序落实这些明确条件。</p>
+<p>联合和偶遇活动默认持续 5–20 轮，环境在最低轮数后可结束，达到上限则终止；提前离场后不足两人也会结束。环境还依据 16 条角色原则标记幻觉、越权、人设不一致、助手腔等不合格回答，训练构造时将其排除。论文对运行中的拒绝是否回滚、重采样或移除对话交代不足，因此不能把这项检查理解成已经实现了可靠的实时纠错保证。</p>
+<p>经济与职业也包含明确设计：职位自动带来工资和部分技能增长；生活标准与消费影响物质满足，净储蓄则影响经济奖励。年末角色按偏好申请职位，在名额与能力要求下竞争，由环境模型评定。职业阶梯、有限职位和持续需求提供了长期行为的结构，社会故事是在这些条件内生成的。</p>
+<details class="example-block"><summary>说明性示例：口头同意怎样变成正式联合活动</summary>
+<p class="example-label">依据 §3.3、B.3 构造的流程示例，人物、活动与文字为说明用途。</p>
+<div class="input-panel"><strong>第一个联系轮 · 形成意图与提议</strong>角色甲希望组织读书会，正式提交活动名称、参与人、日期、地点与邀请。单纯发消息讨论想法，不会占用日程。</div>
+<div class="input-panel"><strong>后续联系轮 · 收到回应</strong>乙正式接受；丙先接受后拒绝，程序只保留最后一次回应。若邀请指定丙为必到者，活动便不满足创建条件。</div>
+<div class="input-panel"><strong>联系结束 · 程序统一结算</strong>再处理日期冲突：乙若已有以前周确认的联合活动，就保留旧活动并拒绝冲突安排。仅满足接受与冲突条件的读书会进入正式日程。</div>
+<p>正式动作、程序确认与自然语言意愿是三个不同环节。它们让系统能够判定某场活动是否存在，同时也把日程规则作为外部约束施加给角色。</p>
+</details>
+
+<h3>Life Reward：把认可、满足和储蓄转成年度目标</h3>
+<p>年末先更新人物档案、处理职位申请，再计算生活奖励。三个分量分别描述社会地位、全年满足与净储蓄；这些分数来自其他角色、环境反馈和程序状态，没有直接的人类幸福测量。它们为训练提供可计算信号，同时决定什么行为更容易被当成好经历。</p>
+<div class="table-wrap"><table data-source="§4.1; Table 8"><caption>三个奖励分量的计算对象与行为偏好</caption><thead><tr><th scope="col">分量</th><th scope="col">实际计算</th><th scope="col">奖励强调什么</th></tr></thead><tbody>
+<tr><th scope="row">Social · 社会</th><td>角色私密评价熟人的喜欢与尊重，按各自排名重标分数；分别建有向加权图，跑 PageRank，再加互惠关系加成，取两类分数均值。</td><td>来自有社会权重者的认可，以及相互重视的关系；含相对地位成分。</td></tr>
+<tr><th scope="row">Subjective · 主观</th><td>全年四维满足度总和减去低满足度/低精力惩罚总和，再除以周数 × 4。</td><td>维持多维状态，避免持续处于较差状态；“主观”是状态代理值，不是人类自评。</td></tr>
+<tr><th scope="row">Economy · 经济</th><td>年末存款 − 年初存款。</td><td>净储蓄增长，支出既能改善当下满足，也会减少该分量。</td></tr>
+</tbody></table></div>
+<p>社会评分先将每个评分者自己的排名缩放到 0–100，减少不同人打分松紧的影响。PageRank 之后的互惠项进一步增加“被自己重视的人重视”的贡献，系数为 2。主观奖励把每周各维低于当周群体第 25 百分位的状态计入惩罚，精力过低也独立处罚，每次以 5 计入惩罚总和，再与全年状态总和一起除以 10 × 4。因此，这些目标不只是绝对生活质量，也混入了相对比较和研究者选定的价值权重。</p>
+<div class="formula" data-source="§4.1 Eq.3; Table 8"><div class="equation">r<sub>subj</sub> = [Σ<sub>w,d</sub> f<sub>w,d</sub> − 5n<sub>p</sub>] / (10 × 4)<br>r = 0.4 z<sub>social</sub> + 0.4 z<sub>subj</sub> + 0.2 z<sub>econ</sub></div><p>nₚ 为全年低状态惩罚次数，f 为每周四维满足度；惩罚也按同一分母归一化。三个分量再分别做 z-score 标准化，加权得到年度奖励。原文未明确该标准化的完整统计范围，不宜自行补成固定的逐年或逐世界方案。</p></div>
+
+<h3>Life Reward Training：按自身改善筛选，再做监督微调</h3>
+<p>一段人生包含大量模型调用，用完整轨迹做端到端策略优化很昂贵；每个人又只有一条生活轨迹，缺少同一角色反复试验的基线。作者采用拒绝采样式训练：先用奖励决定哪些年度经历值得保留，再对通过过滤的生成内容做 SFT。它借用了回报与优势的思想，但训练更新本身不是 PPO 或 GRPO。</p>
+<div class="formula" data-source="§4.2; C.1 Eq.5"><div class="equation">Ḡ<sub>i,t</sub> = [Σ<sub>k=0…T−t</sub> γ<sup>k</sup> r<sub>i,t+k</sub>] / [Σ<sub>k=0…T−t</sub> γ<sup>k</sup>]<br>A<sub>i,t</sub> = Ḡ<sub>i,t</sub> − Ḡ<sub>i,t−1</sub>，γ = 0.90</div><p>先将未来年度奖励折扣相加，再除以折扣后的有效剩余时长。若每年奖励恒定，归一化回报也恒定，不会仅因接近终点而降低。优势表示当前回报相对自身上一期的变化。</p></div>
+<p>用自己过去作基线，意图减少初始财富、身份和关系的偏选：一个起点较低但持续改善的角色，也能胜过起点高却停滞的角色。但这仍是整年结果的相关性指标，不会识别哪句话、哪次活动导致了改善。每个奖励期独立选优势最高的前 25% 角色，再收录他们该期的全部轨迹；这样既避免跨年尺度差异主导筛选，也保留不同阶段的样本。首期没有过去回报，设虚拟前值为 0，其特殊性由分期选样来减轻。</p>
+<div class="selection-flow" role="group" aria-label="年度奖励到监督微调的操作路径">
+<div><strong>按期比较改善</strong>同一年内排序，每个角色与自身上一期比较。</div><span aria-hidden="true">→</span><div><strong>选整年、再过滤</strong>前 25% 角色的年度生成内容进入候选；剔除格式、对象和角色原则违规回答。</div><span aria-hidden="true">→</span><div><strong>混合数据做 SFT</strong>配入通用自蒸馏及另采样的环境数据，更新权重。</div>
+</div>
+<p>训练使用三个世界前四年的模拟数据；通用样本由基座回答 Tulu V3 指令产生，与角色扮演数据按输出 token 以 50:50 混合，旨在减少遗忘。附录还说明环境模型数据另行随机采样，并对高频活动降采样，但没有完整交代其混合占比。因而“从生活学习”指的是这套数据构造与微调流程，不能把所有收益单独归到年度奖励选择，也不能理解为完全不使用既有通用指令数据。</p>
+</section>
+
+<section class="chapter" id="s3" data-source="§5; C.2–C.3; D.1; D.12">
+<h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2>
+<p>实验先检验系统能否支持长期社会过程，再检验从这些过程筛选的数据能否改善模型。三个虚构世界分别是纽约共享住宅 The Apartment、魔法学校 Arcane Academy、中文高中 The Campus，每个世界 100 个角色、运行 10 个抽象年。世界设定与参考故事由作者选择，角色和初始关系再经模型生成及一致性检查；它们并非真实人群的随机样本。</p>
+<h3>十年运行：长期变化来自哪些层次</h3>
+<p>主要运行中，角色与环境模型均使用 Qwen3.5-397B-A17B，无效输出时回退 Gemini 3 Flash 重生成。模型权重在这段生活模拟中不做在线更新；角色的记忆、数值状态、职业和年度档案持续改变。作者据 100 角色 × 10 年 × 3 世界得到 3,000 条角色—年度观察，但同一角色多次出现、同一社会彼此影响，不能把它们当成 3,000 次独立实验。</p>
+<figure class="paper-figure" data-source="Figure 3"><div class="figure-scroll"><a href="assets/74-agentopia/reward-distribution.png"><img src="assets/74-agentopia/reward-distribution.png" width="2375" height="588" loading="lazy" alt="原论文三个世界合并的十年奖励分布：社会奖励总体稳定，主观与经济奖励的年度均值上升。"></a></div><figcaption>原论文 Figure 3：三个世界合并的年度奖励分布，三角形标记均值。横轴是抽象模拟年；窄屏可横向滚动或点击原图。</figcaption></figure>
+<p>主观与经济奖励总体上升，社会奖励较稳定。社会分数含排名，本来就不适合单独表示“所有人都更擅长相处”；它稳定不能直接解释为社会停滞。反过来，满足度与主观奖励、存款与经济奖励之间的高相关，也部分来自奖励定义本身，不能用来证明发现了真实社会的因果规律。该组结果的价值主要是展示持续状态变化与长期轨迹可被记录和分析。</p>
+<details class="example-block"><summary>论文多年案例：共同任务结束后，友谊出现不对称疏远</summary>
+<p class="example-label">原论文 Table 36，Case 4，The Campus。以下为作者记录的生成角色个案，时间采用模拟年份；好感分数来自角色模型的评价。</p>
+<ol class="example-stages"><li><strong>Y2020–2021：</strong>Qiu 与 Lu Jing 围绕共同任务进行了 13 次联合活动，Qiu 对 Lu Jing 的好感升至 80。</li><li><strong>Y2022：</strong>双方不再共同活动，Qiu 开始与日常节奏更接近的 Pu 频繁来往。</li><li><strong>Y2023–2029：</strong>Qiu 对 Lu Jing 的好感逐渐从 80 降到 60；Lu Jing 对 Qiu 的好感在整个模拟期间仍保持 88–92。</li></ol>
+<p>作者将这段轨迹解释为共同任务结束后的渐进疏远，展示了关系可以在两人的记忆与评价中朝不同方向发展。这是有时间跨度的定性例证；它没有隔离共同活动减少的因果作用，也不能据此归纳真实人的友谊规律。</p>
+</details>
+<h3>奖励筛选后的微调：社交改善伴随生活取舍</h3>
+<p>Qwen3.5-397B-Agentopia 由基座训练 1 个 epoch 得到。作者在 The Campus 和 The Apartment 的相同世界配置下重新运行四年，与基座比较。两个世界都属于训练数据来源，因此这项实验测的是熟悉模拟设置下的行为变化，不是对未见世界的泛化。</p>
+<div class="table-wrap"><table data-source="Table 2"><caption>两世界四年平均：奖励与社交收益，以及重要回退</caption><thead><tr><th scope="col">指标</th><th scope="col">基座</th><th scope="col">Agentopia 微调</th><th scope="col">原表相对变化</th></tr></thead><tbody>
+<tr><th scope="row">年度净储蓄奖励</th><td class="numeric">1077</td><td class="numeric">1104</td><td class="numeric">+2.5%</td></tr>
+<tr><th scope="row">主观奖励</th><td class="numeric">49.9</td><td class="numeric">50.8</td><td class="numeric">+1.8%</td></tr>
+<tr><th scope="row">被尊重人数</th><td class="numeric">9.5</td><td class="numeric">11.8</td><td class="numeric">+24.2%</td></tr>
+<tr><th scope="row">被喜欢人数</th><td class="numeric">6.9</td><td class="numeric">8.0</td><td class="numeric">+15.9%</td></tr>
+<tr><th scope="row">社交满足度</th><td class="numeric">63.7</td><td class="numeric">69.9</td><td class="numeric">+9.7%</td></tr>
+<tr class="regression"><th scope="row">物质满足度</th><td class="numeric">43.2</td><td class="numeric">36.8</td><td class="numeric">−14.8%</td></tr>
+<tr class="regression"><th scope="row">技能进步活动数</th><td class="numeric">13.3</td><td class="numeric">9.3</td><td class="numeric">−29.6%</td></tr>
+</tbody></table></div>
+<p class="table-note">选列自 Table 2；相对变化沿用原表，展示值已四舍五入。被喜欢/尊重人数按他人评分 ≥ 60 统计；技能进步活动数统计技能增加的活动，不等于技能总值。满足度是环境更新的 0–100 状态。</p>
+<p>最值得注意的不是单个总分，而是行为随目标发生了方向性变化：更多同伴给予认可，社交满足上升，同时物质满足和技能进步活动下降。经济奖励直接奖励净储蓄，消费却能提高物质满足，两者存在结构性冲突；技能成长没有成为独立奖励项，也可能在选择与训练中被弱化。作者据此解释为奖励偏好塑造了行为，结果确实与此一致，但尚缺少调整奖励权重或删除特定分量的对照来单独确认因果贡献。</p>
+<p>这项比较还同时涉及优势筛选、角色原则过滤、通用自蒸馏和环境数据混合。原文未清楚交代评估时环境模型是否保持固定，因此也不能自行补成“只换角色策略、环境完全相同”。现有结果支持整个训练流程改变了模拟表现；要把收益分给某一训练环节，还需要更严格的组件对照。</p>
+<h3>外部 CoSER 评测：+15.6% 是相对增幅</h3>
+<p>CoSER Test 提供更直接的外部任务证据：模型拿到文学角色与给定情境后生成对话、行动，检验拟人性、人设保持及情节发展。评估使用 200 个测试样本，每场最多 20 轮，由 Qwen3-235B-A22B 同时担任评审、下一位说话者预测器和环境模型。</p>
+<div class="table-wrap"><table data-source="Table 3; C.2"><caption>CoSER Test：同一基座微调前后的四维评分</caption><thead><tr><th scope="col">维度</th><th scope="col">Qwen3.5-397B</th><th scope="col">Agentopia</th><th scope="col">绝对增量</th></tr></thead><tbody>
+<tr><th scope="row">情节一致性</th><td class="numeric">39.60</td><td class="numeric">41.02</td><td class="numeric">+1.42</td></tr>
+<tr><th scope="row">拟人性</th><td class="numeric">40.16</td><td class="numeric">49.67</td><td class="numeric">+9.51</td></tr>
+<tr><th scope="row">角色保真度</th><td class="numeric">40.32</td><td class="numeric">46.93</td><td class="numeric">+6.61</td></tr>
+<tr><th scope="row">情节质量</th><td class="numeric">49.97</td><td class="numeric">59.01</td><td class="numeric">+9.04</td></tr>
+<tr class="best"><th scope="row">四维平均</th><td class="numeric">42.51</td><td class="numeric">49.16</td><td class="numeric">+6.65</td></tr>
+</tbody></table></div>
+<p>平均分相对提升为 6.65 ÷ 42.51 ≈ 15.6%，不能写成提升 15.6 个百分点。拟人性和角色保真度的相对增幅分别为 23.7%、16.4%，情节一致性则改善较小。增益分布并不均衡：拟人性提升最大，情节质量与角色保真度也改善，而情节一致性增幅较小。完整模型比较中，微调模型平均分超过 Claude 4.5-Sonnet 的 45.21，但仍低于 Opus 的 62.43 与 Gemini 3-Pro 的 61.80。</p>
+<p>CoSER 的提升比模拟奖励上涨更能支持“能力迁移”，因为目标已经换成外部角色扮演任务。不过它仍依赖 LLM 评审，论文没有给出这里的统计显著性检验或人类复核。它支持该训练流程改善了这一评测协议下的角色扮演表现，不能直接推广为真实人际判断或人类认知对齐。</p>
+<h3>计算代价：社会动作抽象之后，长上下文仍很昂贵</h3>
+<div class="table-wrap"><table data-source="Table 4; §5.4"><caption>每世界 100 角色 × 10 抽象年的模拟推理成本</caption><thead><tr><th scope="col">世界</th><th scope="col">输入 / 输出 token（十亿）</th><th scope="col">调用数（千次）</th><th scope="col">现实耗时（小时）</th></tr></thead><tbody>
+<tr><th scope="row">The Campus</th><td class="numeric">19.041 / 0.425</td><td class="numeric">544</td><td class="numeric">201.3</td></tr>
+<tr><th scope="row">Arcane Academy</th><td class="numeric">11.302 / 0.315</td><td class="numeric">572</td><td class="numeric">174.2</td></tr>
+<tr><th scope="row">The Apartment</th><td class="numeric">9.699 / 0.317</td><td class="numeric">584</td><td class="numeric">183.2</td></tr>
+<tr><th scope="row">平均</th><td class="numeric">13.347 / 0.352</td><td class="numeric">567</td><td class="numeric">186.2</td></tr>
+</tbody></table></div>
+<p>每次模拟部署三份 FP8 Qwen3.5-397B 实例，平均总量约 137 亿 token，输入约占 97.4%。角色模型又占全部输入的大约 95%，表明主要负担是反复携带人物、状态与记忆，而不只是环境裁判。随着经历增长，每周运行时间从约 80 分钟增至 140 分钟。抽象活动减少了低层动作调用，但没有解除记忆增长对后续每次调用的压力。</p>
+<p>上表是运行模拟的推理成本。微调另使用 30 节点 × 8 张 H100 80GB、训练 1 个 epoch；原文未报告最终训练 token 数与训练耗时，因此不能把 137 亿 token 当作微调数据量，也不能把 186.2 小时当作完整训练成本。没有完整算力与计价信息时，亦无法把这些用量换成精确账单。</p>
+</section>
+
+<section class="chapter" id="s4" data-source="§4–5; Limitations; interpretation">
+<h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2>
+<h3>核心贡献：让合成社会经历进入可计算的训练流程</h3>
+<p>Agentopia 的核心贡献在于把长期社会模拟的粒度、状态维护、环境反馈与训练数据构造连接起来。按周组织生活，使有限调用更多用于关系、选择和结果；文件记忆把个人经历带入后续阶段；年度奖励再将轨迹筛选变成明确操作。它提供了一种从模型生成的互动经验中构造角色扮演训练材料的系统路径。</p>
+<p>这个贡献有两层证据：三种环境中的长期运行说明系统能承载持续的社会情节和状态变化；外部 CoSER 提升说明完整训练配方的收益不局限于原模拟奖励。相比仅展示一个热闹社会，后者更接近可检验的模型能力结果。另一方面，论文没有分别隔离模拟时长、文件记忆、奖励选样与过滤的贡献，所以不能断言某个单独设计已经被证明必不可少。</p>
+<h3>“生活得更好”取决于奖励偏好，回退本身就是证据</h3>
+<p>储蓄奖励与消费满足发生冲突，技能进步活动在训练后下降，说明优化一个合成生活目标并不等于全方面成长。这个结果也让“像人”变得需要定义：模型可能更符合角色语气、更能经营关系，同时产生技能增长的活动更少，提示没有被直接奖励的成长维度可能受到削弱。总分把这些不同方向压在一起，容易掩盖价值取舍。</p>
+<p>更有区分力的后续检验，是固定其他训练条件，改变经济奖励权重或显式加入成长目标，再看消费、技能与角色扮演分数如何共同变化。若回退随权重系统变化，才更能说明它来自目标设计；若去掉奖励筛选、只用同样经过过滤的轨迹也能获得类似 CoSER 收益，则优势筛选的独立作用需要重新估计。这些对照是检验机制的建议，不是本文已有结果。</p>
+<h3>长期情节的生成，依赖时间抽象与环境提供的机会</h3>
+<p>社会行为并非逐句写死，但它也不是在没有外部安排的空间中自由产生。环境会生成公共事件、为闲置者配对偶遇，职业体系提供稀缺岗位与成长门槛，满足度衰减持续制造需求。部分相识还由共同活动后的程序流程建立。因此，关系变化和职业转折应被理解为角色选择与环境机制共同产生的结果，而不能全部归为自主涌现的社会规律。</p>
+<p>这不削弱构造环境的研究价值，却决定了外推边界：改变一周的活动槽、偶遇策略或衰减速度，就可能改变交往机会与长期分布。“模拟十年”首先说明系统能沿这些抽象层级连续推进；是否复现真实十年中的成长速度、关系惯性和职业约束，还需要现实数据校准与环境机制敏感性分析。</p>
+<h3>AI 产生反馈、AI 评价表现，人类有效性仍待验证</h3>
+<p>环境判断后果、角色互评喜欢与尊重，外部基准再由模型评分，构成了反馈主要来自 AI 的证据链。不同任务上的提升是有价值的迁移信号，但模型之间可能共享表达偏好，社会奖励也未与真实人类的幸福或认可校准。现有结果不能分离“更符合模拟器与评审的偏好”和“更符合真实人的心理与社会经验”。</p>
+<p>要进一步支持后一种解释，需要在人类评审或真实行为数据上检验角色选择，也需要固定环境模型来比较角色策略，避免把反馈变化误当成行动能力变化。当前更稳妥的评价是：Agentopia 展示了合成生活经验用于训练的可行性，并暴露出代理奖励如何塑造行为的明确取舍；真实社会有效性、奖励对齐和独立组件贡献仍是条件性结论。它最值得借鉴的是把长期经历接入数据与学习流程的方式，以及对“学到了什么”保持分层检验的必要性。</p>
+</section>
+</main></div>
+<script>
+const links=[...document.querySelectorAll('.toc a')];
+if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){for(const link of links)link.classList.toggle('active',link.hash==='#'+entry.target.id);}}},{rootMargin:'-8% 0px -65% 0px'});document.querySelectorAll('.chapter').forEach(section=>observer.observe(section));}
+</script>
+
+<script src="../library-nav.js" data-material-type="paper"></script></body></html>

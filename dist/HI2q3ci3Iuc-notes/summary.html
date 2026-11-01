@@ -1,0 +1,58 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>何时定制 Agent Harness｜Harrison Chase 视频学习笔记</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f2f5f9;color:#192638;font:17px/1.85 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}header{background:linear-gradient(125deg,#0b1930,#32205b);color:white;padding:48px max(22px,calc((100vw - 1100px)/2))}header small{color:#b9f45b}h1{font-size:clamp(28px,4vw,42px);line-height:1.35;margin:12px 0}header p{color:#d6dcea}header a{color:#d4efad}main{max-width:1140px;margin:28px auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;padding:0 20px}nav{position:sticky;top:20px;align-self:start;font-size:14px}nav a{display:block;padding:9px 0;color:#6246a5}article{min-width:0}section{padding:28px 34px;margin-bottom:24px;background:white;border:1px solid #e0e5ed;border-radius:12px}h2{font-size:25px;line-height:1.5;margin:0 0 8px}h3{font-size:19px;margin:28px 0 10px;color:#503585}p{margin:12px 0;text-indent:2em}header p,.boundary{text-indent:0}li{margin:9px 0}.time{font-size:14px;color:#6d7888;font-variant-numeric:tabular-nums}figure{margin:24px 0}img{max-width:100%;height:auto;display:block}figcaption,.boundary{font-size:14px;color:#637083}table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.7;table-layout:fixed}th,td{padding:10px;border:1px solid #dbe1ea;text-align:left;overflow-wrap:anywhere}th{background:#f1edf8}a{overflow-wrap:anywhere}footer{max-width:800px;margin:20px auto 40px;color:#657287;font-size:14px}@media(max-width:800px){main{display:block;padding:0 12px}nav{position:static;padding:0 12px 20px}section{padding:22px 18px}body{font-size:16px}h2{font-size:23px}header{padding:30px 22px}table{font-size:13px}th,td{padding:7px}}@media print{body{background:white}main{display:block}nav{display:none}section{border:0;padding:0;break-inside:auto}header{background:white;color:#111;padding:0}header p,header a{color:#333}figure{break-inside:avoid}}.manuscript-link{display:inline-block;margin:14px 0 0 18px;padding:10px 16px;border-radius:8px;background:#b9f45b;color:#10213c;font-size:15px;font-weight:700;text-decoration:none}@media(max-width:800px){.manuscript-link{display:block;margin:16px 0 0;text-align:center}}</style></head><body><header><small>AGENT ENGINEERING · 按时间顺序学习</small><h1>何时定制 Agent Harness：<br>从上下文编排到评估与持续改进</h1><p>Harrison Chase · LangChain ｜ Sequoia Capital ｜ 约 24 分钟<br>核心线索：通用循环 → 按任务定制 → 评估与追踪 → 反馈闭环 → 跨系统学习。</p><a href="https://www.youtube.com/watch?v=HI2q3ci3Iuc">观看原视频</a><a class="manuscript-link" href="manuscript.html">阅读完整中文逐字稿 →</a></header><main><nav class="toc" aria-label="章节目录"><a href="#s1">1. 从 Agent 循环理解 Harness</a><a href="#s2">2. 何时使用现成系统，何时定制</a><a href="#s3">3. 评估定义目标，可观测性解释失败</a><a href="#s4">4. 从运行轨迹构建持续改进闭环</a><a href="#s5">5. 结尾问答：用对比实验学习，保留控制</a></nav><article><section class="chapter" id="s1"><h2>1. 从 Agent 循环理解 Harness</h2><div class="time">00:00—05:39</div>
+<h3>00:00—02:42｜要拥有哪些层面的智能？</h3>
+<p>开场介绍把问题放在“让模型成为虚拟协作者”的背景下。Harrison Chase 随后用三个部分描述 Agent：<b>模型、上下文，以及组织二者运行的 Harness</b>。模型层的自主性包括切换模型的能力，既减少绑定，也方便采用更合适的模型；上下文层包括记忆、知识和历史会话，它们为行为提供个性化信息和约束。</p>
+<p>Harness 的核心职责是<b>在正确的时点，把合适的上下文送入模型</b>。它组织固定指令、动态信息和外部系统交互；工具运行产生的新观察，又成为下一次模型调用的上下文。因此它管理的是持续发生的信息流，而不只是第一次调用时的一段提示词。</p>
+<h3>02:43—04:26｜最小架构与可定制的插入点</h3>
+<p>最小 Agent 循环可以概括为：收到请求 → 模型生成 → 如有工具调用则执行 → 把观察交回模型 → 继续运行。讲者认为，大量复杂 Agent 仍建立在这个简单循环之上，差异来自循环周围加入的机制。</p>
+<p>他将 LangChain 描述为基础 Harness，将 Deep Agents 描述为建立在其上的、更通用且模型无关的系统，包含文件系统、Skills 和子 Agent。通过 middleware，可以在 Agent 启动前、每次模型调用前，以及模型调用和工具调用的外围插入逻辑。编码 Agent 中的 hooks、plugins，也承担类似的扩展作用。</p>
+<h3>04:27—05:39｜两个具体的上下文管理例子</h3>
+<ul><li><b>摘要压缩：</b>在模型调用前检查上下文长度，过长时先摘要，再继续调用。插入位置由机制决定：它要改变下一次模型实际看到的输入。</li><li><b>上下文卸载：</b>处理体积很大的工具输出，将其移出直接进入窗口的内容。讲者把它放在包装工具调用这一层讨论；核心是控制工具结果如何回流，而不改变 Agent 循环的基本形式。</li></ul>
+<p>画面把完整 Harness 的能力分为：执行环境（代码解释器、沙箱、文件系统）、任务委派（规划、子 Agent）、人工介入，以及上下文管理（Skills、记忆、摘要、卸载、提示缓存）。这些是可组合的能力，不代表每个任务都需要全部启用。</p>
+<figure><img src="frames/frame_0006_00-05-12.jpg" alt="Deep Agents Harness 的能力分组" width="640" height="360"><figcaption>05:12｜Harness 能力分组：同一个循环可以承载多种扩展。</figcaption></figure>
+</section><section class="chapter" id="s2"><h2>2. 何时使用现成系统，何时定制</h2><div class="time">05:40—09:05</div>
+<h3>05:40—06:54｜通用循环与显式认知架构</h3>
+<p>另一条定制路线，是显式规定认知流程。讲者用两个例子说明：深度研究先拆分子问题，再并行展开执行；代码审查机器人则采用专门设计的处理步骤。2023—2024 年模型较弱时，这类流程更常见；随着模型能力提升，一些控制被吸收到通用循环及其扩展中，但特定业务仍会需要明确的阶段、检查点和执行路径。</p>
+<p>建议的起点是通用 Harness，以较快获得可用结果；当目标用例逐步清晰，再加入有针对性的检查和约束。这里的选择存在连续谱：直接使用、增加 middleware 或 hooks、设计完整流程。</p>
+<h3>06:55—09:05｜按任务分布判断，按子能力保留适配</h3>
+<p>讲者将“现成还是自建”与<b>任务是否接近模型训练分布</b>联系起来：越接近其受训任务，现成 Harness 越可能有效；越偏离，越可能需要调整。视频举出的现成系统包括 Claude Code、Claude Agent SDK 和 Codex；这些名称用于说明当时的生态，不能据此推定产品今天的兼容范围。</p>
+<p><b>法律 AI 是关键反例：</b>整个法律任务可能超出通用模型擅长的分布，但其中“编辑文件”仍是模型通过强化学习训练过的子任务。因此，顶层可以定制法律工作流，底层却应该尽量沿用该模型熟悉的文件编辑工具方式。</p>
+<p>他指出，不同模型在各自 Harness 中受训的文件编辑方式不同；Deep Agents 用 <b>model profiles</b> 根据模型切换编辑实现。值得学习的原则是：整体任务需要定制，并不意味着所有局部能力都应重新设计。模型无关的编排层，仍可能需要模型相关的工具适配。</p>
+</section><section class="chapter" id="s3"><h2>3. 评估定义目标，可观测性解释失败</h2><div class="time">09:06—14:37</div>
+<h3>09:06—11:09｜用自己的任务定义“好”</h3>
+<p>讨论从架构转向验证：改模型、改 Harness 或改上下文，都需要知道系统内部发生了什么，以及结果是否变好。讲者借组织级评估、轨迹与反馈的所有权，说明持续学习闭环如何积累业务价值。</p>
+<p>对关键业务 Agent，私有 benchmark 有两项直接作用：<b>发现回归</b>，以及作为迭代优化的目标。评估不只比较模型，也可以比较 Harness、推理投入和不同系统组合。讲者认为 Harbor 正成为常用的开源评估运行器；这是演讲中的行业判断，不是本笔记独立验证的市场结论。</p>
+<h3>11:10—12:27｜Harbor 如何把任务变成可运行的评估</h3>
+<p>一个数据集包含多个任务，每个任务可以在独立沙箱中运行。对于会修改文件、依赖环境状态的长程 Agent，环境本身就是评估的一部分；不能只拿一道文本题替代完整任务。</p>
+<table><thead><tr><th>组成</th><th>视频中的作用</th></tr></thead><tbody><tr><td>Environment</td><td>定义 Agent 的运行环境，可通过 Dockerfile 构建沙箱，支持任务隔离及并行。</td></tr><tr><td>Solution</td><td>参考解，用于核查任务和评估设置是否合理。</td></tr><tr><td>Tests / verifier</td><td>定义评分，可运行代码、单元测试、LLM judge，乃至 Agent judge。</td></tr><tr><td>instruction.md</td><td>提供给被测 Agent 的任务指令。</td></tr></tbody></table>
+<p>把环境、指令和验证器捆成任务，再让不同模型与 Harness 的组合运行，就能比较它们对同一业务问题的表现。</p>
+<h3>12:28—13:03｜结果至少看质量、时延与成本</h3>
+<p>LangSmith 演示展示实验列表、反馈分数及逐任务结果，并可跟踪 latency 和 tokens。一个系统准确率更高，却可能更慢或消耗更多，因此不能只用单一成功率判断工程价值。视频没有给出足以重建数值结论的结果表，本笔记也不补造跑分。</p>
+<h3>13:04—14:37｜排查输入与形成输入的路径</h3>
+<p>讲者把模型调用失败分成两类：模型能力不够，或模型收到的上下文不够好；他认为后者经常是原因。调试时既要查看具体调用的输入输出，也要追查上下文怎样累积：此前执行了哪些工具、产生了什么结果、哪些结果进入了当前窗口。</p>
+<p><b>Trajectory 与 trace 的区别：</b>消息轨迹便于快速阅读“用户请求—工具调用—回答”的过程；完整 trace 则允许进一步钻取调用细节。产品界面可以折叠工具调用以提高可读性，但工程排错仍需要底层记录。</p>
+<figure><img src="frames/frame_0014_00-13-31.jpg" alt="可观测性幻灯片：模型能力与上下文质量" width="640" height="360"><figcaption>13:31｜调试关注单次输入输出，也关注到达该调用前的执行路径。</figcaption></figure>
+</section><section class="chapter" id="s4"><h2>4. 从运行轨迹构建持续改进闭环</h2><div class="time">14:38—19:18</div>
+<h3>14:38—16:19｜反馈是数据筛选的关键</h3>
+<p>持续改进的基本链条是：<b>运行 Agent → 收集 traces → 筛选整理数据 → 在数据上做实验</b>。难点不只是记录日志，而是识别哪些行为成功、哪些失败，哪些模式值得投入修复。</p>
+<p>反馈有两条来源。第一是用户及环境：讲者强调 UX 设计的重要性，因为用户未必主动点击赞踩，交互流程的设计却可能产生有用的反馈信号。视频没有展开具体界面方案，不宜把某种行为信号的实现归给他。</p>
+<p>第二是合成反馈，即对线上轨迹运行评估器。若每条 trace 都由昂贵的大模型判断，成本会迅速累积；讲者提及与 Harvey 的相关实验，并给出几种路径：微调小语言模型（SLM）、用现成模型配定制提示词，或在规则足够明确时直接用代码。他没有在本片报告具体降本比例或评估精度。</p>
+<h3>16:20—17:26｜闭环可以改变 Agent 的三个部分</h3>
+<table><thead><tr><th>被更新部分</th><th>对应方式</th><th>要追问的问题</th></tr></thead><tbody><tr><td>Harness</td><td>Harness engineering</td><td>编排、工具或检查机制是否需要调整？</td></tr><tr><td>模型</td><td>Fine-tuning</td><td>是否存在需要从数据中学习的能力缺口？</td></tr><tr><td>上下文</td><td>Memory</td><td>哪些经验应成为后续任务可用的信息？</td></tr></tbody></table>
+<p>表中第三列是便于学习的归纳。讲者强调，相同的轨迹与反馈流程可以支持三类更新，LangChain 团队在这里主要关注 Harness 的改进。所谓自动化闭环，需要把“发现问题、筛选证据、运行实验、提出修复”这些耗时工作尽可能自动化。</p>
+<h3>17:27—19:18｜LangSmith Engine 演示</h3>
+<p>Engine 是运行在轨迹之上的后台 Agent。演示中，它通过 LangSmith CLI 访问和筛选 traces，结合提示词与子 Agent 探索数据、寻找共同问题，然后形成 issue boards。问题记录提供描述和支持它的 trace 链接，使维护者能够回到证据。</p>
+<p>演示显示建议可以涉及提示词、上下文指令，以及加入 Harness 的代码。理解重点是把分散的轨迹转成可审查的问题与改进建议。视频展示了这一产品流程，不能据此推断所有修复都已自动部署、自动验证或必然提升质量。</p>
+</section><section class="chapter" id="s5"><h2>5. 结尾问答：用对比实验学习，保留控制</h2><div class="time">19:19—23:57</div>
+<h3>19:19—20:44｜用 Engine 改进 Engine，以及 Codex 案例</h3>
+<p>主持人追问能否让 Engine 分析自己的执行。Harrison 表示团队已在这样使用它，并通过 Slack 接收有关自身运行的报告。团队还构建了 Harbor 格式的 <b>Issue Bench</b>，持续比较不同模型和 Harness。</p>
+<p>最具体的例子来自 Deep Agents、Codex 与 Claude Code 的横向对比：团队观察到，Codex 会积极为自己编写许多小脚本，用来分析 traces，这种策略表现很好。他们随后专门把这种做法吸收到 Engine 的 Harness 中。</p>
+<p>这个案例说明 benchmark 除了输出排名，也可以帮助发现<b>可迁移的执行策略</b>。真正有用的学习过程是：让不同系统做同类任务，检查轨迹中的差异，再把有效行为纳入自己的系统。视频未给出迁移后的量化增益，因此不能把这段描述当作严格的因果实验。</p>
+<h3>20:45—22:41｜Harness 会统一，还是继续分化？</h3>
+<p>讲者没有给出确定预测。他观察到通用系统已能覆盖很多基础任务，文件系统、子 Agent 等能力也已经形成可复用经验，所以仍建议从现成系统开始。但任务越偏离训练分布，就越可能需要定制。</p>
+<p><b>可预测性是独立的定制理由。</b>金融服务客户的例子表明，即使通用 Agent 能力很强，组织也可能更偏好明确的认知架构，以便控制执行过程。选择不是简单的自建或采购，而是从直接使用，经 hooks 和 middleware 扩展，到完整受控工作流的连续谱。</p>
+<h3>22:42—23:57｜能力趋同不等于工具实现统一</h3>
+<p>不同模型实验室都在加强编码能力，相关 Harness 可能因此趋同；但文件编辑这样的小环节仍存在明显差别。若某家实验室重点进入生物等领域，也可能带来新的专门化 Harness。讲者明确承认这些变化尚难预测，因此最后回到评估与可观测性：持续测量，才能判断系统是否仍适合自己的任务。</p>
+<h3>读完后可执行的检查</h3>
+<p>先把业务任务和验证方式定义清楚；以现成 Harness 建立基线；查看失败时模型实际收到的上下文；区分整体工作流缺陷与模型相关工具适配；对改动同时测质量、时延和成本；将反复出现的生产问题沉淀为回归任务。这是基于本片整理的工程检查顺序，不是演讲原文中的固定清单。</p>
+<p class="boundary">阅读边界：本页是按原视频顺序重组的学习笔记，保留主要机制与案例，不是逐字稿。时间戳是定位锚点，可能存在秒级偏差。产品状态与行业判断均对应演讲当时；演示代码文字在 640×360 源视频中较小，因此不重建无法清晰辨认的具体补丁。全片口述已核对至结束，另检查了覆盖全时间轴的 24 张画面及选定原始帧。</p>
+</section></article></main><footer>技术名词：Harness（Agent 运行与编排机制）／Trace（调用追踪）／Trajectory（消息与行动轨迹）／Middleware（中间件）／Eval（评估）。</footer><script src="../library-nav.js" data-material-type="video"></script></body></html>

@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>长程 Agent 的上下文工程｜Harrison Chase 访谈中文总结</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f2f5f9;color:#192638;font:17px/1.85 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}header{background:linear-gradient(125deg,#0b1930,#32205b);color:white;padding:48px max(22px,calc((100vw - 1100px)/2))}header small{color:#b9f45b}h1{font-size:clamp(28px,4vw,42px);line-height:1.35;margin:12px 0}header p{color:#d6dcea}header a{color:#d4efad}main{max-width:1140px;margin:28px auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;padding:0 20px}nav{position:sticky;top:20px;align-self:start;font-size:14px}nav a{display:block;padding:9px 0;color:#6246a5}article{min-width:0}section{padding:28px 34px;margin-bottom:24px;background:white;border:1px solid #e0e5ed;border-radius:12px}h2{font-size:25px;line-height:1.5;margin:0 0 8px}h3{font-size:19px;margin:28px 0 10px;color:#503585}p{margin:12px 0;text-indent:2em}header p,.boundary{text-indent:0}li{margin:9px 0}.time{font-size:14px;color:#6d7888;font-variant-numeric:tabular-nums}figure{margin:24px 0}img{max-width:100%;height:auto;display:block}figcaption,.boundary{font-size:14px;color:#637083}table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.7;table-layout:fixed}th,td{padding:10px;border:1px solid #dbe1ea;text-align:left;overflow-wrap:anywhere}th{background:#f1edf8}a{overflow-wrap:anywhere}footer{max-width:800px;margin:20px auto 40px;color:#657287;font-size:14px}@media(max-width:800px){main{display:block;padding:0 12px}nav{position:static;padding:0 12px 20px}section{padding:22px 18px}body{font-size:16px}h2{font-size:23px}header{padding:30px 22px}table{font-size:13px}th,td{padding:7px}}@media print{body{background:white}main{display:block}nav{display:none}section{border:0;padding:0;break-inside:auto}header{background:white;color:#111;padding:0}header p,header a{color:#333}figure{break-inside:avoid}}.manuscript-link{display:inline-block;margin:14px 0 0 18px;padding:10px 16px;border-radius:8px;background:#b9f45b;color:#10213c;font-size:15px;font-weight:700;text-decoration:none}@media(max-width:800px){.manuscript-link{display:block;margin:16px 0 0;text-align:center}} .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:18px;background:#f1edf8;border-radius:8px;font-size:14px}.flow span{padding:7px 10px;border:1px solid #d9cdea;border-radius:5px;background:white}.note{font-size:14px;color:#637083}header .meta{color:#becce0;font-size:14px}th:first-child,td:first-child{width:29%}h3 a{font-size:13px;margin-right:8px;white-space:nowrap}@media(max-width:480px){table{font-size:13px}.flow{padding:12px;gap:7px}}</style></head><body><header><small>CONTEXT ENGINEERING · LONG-HORIZON AGENTS</small><h1>长程 Agent 的上下文工程：<br>从运行机制到轨迹、记忆与协作</h1><p>Harrison Chase × Sonya Huang × Pat Grady<br>围绕可审查成果、动态上下文、运行轨迹与跨会话记忆，理解长程 Agent 如何变得可用。</p><p class="meta">Training Data · Sequoia Capital ｜ 2026-01-21 发布 ｜ 39:47</p><a href="https://www.youtube.com/watch?v=vtugjs2chdA">观看原视频</a><a class="manuscript-link" href="manuscript.html">阅读完整中文逐字稿 →</a></header><main><nav class="toc" aria-label="章节目录"><a href="#s1">1. 长程 Agent 为什么开始可用</a><a href="#s2">2. 从显式流程转向上下文编排</a><a href="#s3">3. 开发方式为何改变：代码与轨迹共同解释行为</a><a href="#s4">4. 把人的判断转成反馈，让记忆积累价值</a><a href="#s5">5. 长程工作的界面与执行环境</a></nav><article><section class="chapter" id="s1"><h2>1. 长程 Agent 为什么开始可用</h2><div class="time">00:00—07:08</div>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=114" target="_blank" rel="noreferrer">01:54</a>—04:55｜先产出可审查的成果</h3>
+<p>Harrison Chase 将近期进展归因于两条同时成熟的路线：模型能够更可靠地推理与行动，围绕模型的 Harness 也更善于规划、组织工具和管理上下文。AutoGPT 时代已有“让模型在循环中自主行动”的设想，但当时两者都不足以支撑可靠的长程执行。</p>
+<p>他最看好的落点，是能长时间工作、最终交付一份<b>可由人审查的初稿</b>的任务。例如编码 Agent 提交 PR 而非直接上线；AI SRE 从事故出发挖掘日志、形成分析；金融研究与报告生成先交付草稿；客服升级时，后台 Agent 汇总事件经过，再交给人工客服。价值来自替人完成大量准备工作，同时保留审核环节。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=296" target="_blank" rel="noreferrer">04:56</a>—07:08｜模型、框架与 Harness 的分工</h3>
+<table><thead><tr><th>层次</th><th>访谈中的定位</th></tr></thead><tbody><tr><td>模型</td><td>接收消息、产生消息，决定下一步行动。</td></tr><tr><td>框架</td><td>提供模型、工具、向量库、记忆等抽象，方便连接与切换组件。</td></tr><tr><td>Harness</td><td>内置较明确的执行策略，例如默认规划工具、上下文压缩和文件系统访问。</td></tr></tbody></table>
+<p>Deep Agents 是这里的 Harness 示例。上下文窗口变大并不意味着无限：任务持续运行，就需要压缩历史、处理大工具结果。与此同时，模型越来越多地在文件系统和工具交互上受训，因此模型能力与 Harness 原语是共同演进的，不能把进步完全归于其中一侧。</p>
+</section><section class="chapter" id="s2"><h2>2. 从显式流程转向上下文编排</h2><div class="time">07:09—18:23</div>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=429" target="_blank" rel="noreferrer">07:09</a>—10:27｜复杂性迁移到工具与指令</h3>
+<p>早期需要用 LangGraph 等方式明确指定分支、检查与执行路径；随着模型变强，一些任务特定逻辑转入自然语言指令和工具，而核心循环变得更通用。复杂性仍然存在，只是从显式控制流迁移到提示词、工具协议与上下文管理。</p>
+<p>Harness 也并非完全模型无关。讲者指出，不同模型家族在不同工具上受训，提示词和工具实现需要相应适配。他举出 Claude Code、Factory、Amp 等编码系统，强调第三方团队仍可能通过理解模型行为获得性能收益；排行榜应比较<b>模型与 Harness 的组合</b>，不能把成绩全部归于模型。视频中的排行榜判断对应访谈当时。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=628" target="_blank" rel="noreferrer">10:28</a>—12:02｜子 Agent 交接失败的具体机制</h3>
+<p>一个值得保留的故障案例是：子 Agent 做了大量工作，最终只回复“看我上面的工作”。但主 Agent 实际只能收到子 Agent 的最终答复，看不到其完整中间过程，因而无法利用那些工作。修复重点是明确交接协议：委派时传足必要信息，并要求子 Agent 在最终消息中完整返回所需结果。Skills、MCP、子 Agent 能否组合良好，也依赖这些具体指令。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=723" target="_blank" rel="noreferrer">12:03</a>—16:33｜三代架构与下一步</h3>
+<p>讲者把演化概括为三个阶段：原始文本模型主要支持单次提示或链；工具调用开始可用后，以专门认知架构约束决策；模型进一步成熟后，多个系统共享“模型循环调用工具”的核心，差异更多来自上下文工程。他并未确定拐点的精确日期，也不认为现阶段已经知道最终架构。</p>
+<p>可能继续变化的部分包括：让模型决定何时压缩上下文，以及引入更长时间尺度的记忆。记忆在这个视角下，也是跨会话的上下文工程。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=994" target="_blank" rel="noreferrer">16:34</a>—18:23｜文件系统有用，但不等于必须运行代码</h3>
+<p>两个具体用法是：压缩历史时，把完整消息留在文件里供回查；工具输出很大时，写入文件，按需读取，而不是全部塞进窗口。文件系统还可以是由 Postgres 等存储支撑的虚拟接口，未必需要真实磁盘或代码执行能力。运行脚本则需要进一步提供执行环境。</p>
+<p>讲者认为编码能力可能支撑通用 Agent，但保留了一个区分：通用 Agent 可能需要编程能力，并不代表今天为编码优化的产品已经适合所有任务。</p>
+</section><section class="chapter" id="s3"><h2>3. 开发方式为何改变：代码与轨迹共同解释行为</h2><div class="time">18:24—27:24</div>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=1104" target="_blank" rel="noreferrer">18:24</a>—21:13｜第 14 步的上下文不能只从代码预知</h3>
+<p>传统软件的逻辑主要显式存在于代码中；Agent 的一部分逻辑来自模型，只读代码不足以知道具体情境下会做什么，必须运行观察。单次模型调用的输入往往由代码确定，而 Agent 第 14 步的输入，可能已受到前 13 步检索、工具调用和决策的影响。</p>
+<p>因此，trace 不只是上线后排错的附属日志，而是从开发开始就用于确认真实行为的证据。LangSmith 在访谈中承担这类追踪功能：帮助团队看清每一步调用、进入模型的材料，以及这些材料的形成路径。行为解释的依据由代码扩展为<b>代码加运行轨迹</b>。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=1274" target="_blank" rel="noreferrer">21:14</a>—23:51｜测试、协作与迭代一起迁移</h3>
+<p>Harness 的确定性部分仍能做单元测试，但真实轨迹可以提供回归案例；线上测试更有价值，因为某些行为只有遇到真实输入才出现。团队排查问题时，也从只分享代码，转向共享产生问题的 trace。</p>
+<p>这里“更迭代”的具体含义是：传统开发往往知道已实现的行为，再根据用户反馈调整需求；Agent 开发还要通过反复运行，才逐渐弄清系统实际上会怎样行动。记忆若能从交互中吸收纠正，就有机会减少工程师反复手改系统提示词的负担。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=1432" target="_blank" rel="noreferrer">23:52</a>—27:24｜既有软件公司的优势在哪里？</h3>
+<p>讨论没有把年龄或资历当作决定因素。讲者观察到部分 Agent 团队较年轻，也提到资深开发者能很好地采用 Agent 编程，关键仍是思维方式。对公司而言，已有数据与 API 是潜在优势；新增难点是把过去由人掌握的“如何使用这些数据完成工作”，转化为明确指令和领域操作知识。Rogo 被用作金融领域知识进入 Agent 的例子。</p>
+</section><section class="chapter" id="s4"><h2>4. 把人的判断转成反馈，让记忆积累价值</h2><div class="time">27:25—34:31</div>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=1645" target="_blank" rel="noreferrer">27:25</a>—29:37｜评估器需要与人校准</h3>
+<p>当 Agent 承担过去由人完成的工作，程序断言往往覆盖不了全部质量。人工标注可以判断轨迹好坏、给出自然语言反馈，或直接示范正确步骤。LLM-as-a-judge 则是人的判断的代理，必须验证它是否符合业务人员的偏好；评分器本身不准，分数就不值得优化。</p>
+<p>讲者介绍了 LangSmith 的 Align Evals 思路：先由人标注部分轨迹，再据此校准模型评判器。模型评判可以离线运行，也可以用于线上不依赖标准答案的检查；它与错误修正、回顾轨迹、更新记忆之间存在共通机制。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=1778" target="_blank" rel="noreferrer">29:38</a>—32:46｜应用团队如何使用这些反馈？</h3>
+<p>对于当时的 Agent 应用团队，讲者更看好通过轨迹诊断并改进系统，而非立即依赖强化学习。LangSmith MCP 和 fetch CLI 能把 trace 带入编码 Agent 的工作环境，帮助其定位故障并修改代码或提示词；修改仍可先作为初稿，由人审核。</p>
+<div class="flow" aria-label="基于轨迹的改进流程"><span>真实运行</span><b>→</b><span>轨迹与评价</span><b>→</b><span>提出修改</span><b>→</b><span>人工审核与复测</span></div>
+<p>Agent Builder 的记忆例子更具体：用户指出“应该做 Y 而不是 X”时，Agent 可修改存放在文件里的自身指令。每晚扫描全天轨迹并更新指令，在访谈中仍是希望加入的能力；不能把这项设想写成当时已经上线的事实。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=1967" target="_blank" rel="noreferrer">32:47</a>—34:31｜相同提示词与工具，为什么还不够？</h3>
+<p>讲者迁移自己的邮件 Agent 时，保留了初始提示词和工具，却没有迁入旧记忆，新系统因而明显不如原来。这个案例说明：在反复执行同类工作的场景，历史纠正和偏好积累会形成价值与迁移成本。</p>
+<p>他也明确限定了这一观点：对于软件、饮食、旅行等彼此独立的一次性提问，自己并未感到聊天记忆带来同等价值。因此，记忆并非普遍适用；更重要的是任务是否重复，以及更新行为能否安全、可接受地呈现给用户。</p>
+</section><section class="chapter" id="s5"><h2>5. 长程工作的界面与执行环境</h2><div class="time">34:32—39:47</div>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=2072" target="_blank" rel="noreferrer">34:32</a>—37:28｜异步管理与同步纠偏需要切换</h3>
+<p>如果任务运行一天，用户不会一直盯着聊天窗口；看板、任务系统或邮件，可以作为并行管理多个 Agent 的参考。但拿到研究结果后，用户又可能需要即时指出错误，连续讨论修改。因此，讲者主张异步管理和同步交流并存。</p>
+<p>仅有聊天也不够：Agent 正在修改文件等外部状态，用户需要能查看和编辑这些成果。工作区可以是目录、共享文档空间或其他状态容器。这里的重点是，用户与 Agent 围绕同一份可见状态协作，而不仅是互发消息。</p>
+<p>Agent Inbox 的经验进一步说明这一点：早期只有后台提醒和逐次回复，用户纠偏后还要等待下一次提醒；加入打开收件箱后直接进入聊天的方式，才让连续修改更顺畅。访谈将此作为同步、异步切换的实际产品例子。</p>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=2249" target="_blank" rel="noreferrer">37:29</a>—38:50｜文件系统、代码沙箱与浏览器的层次</h3>
+<table><thead><tr><th>能力</th><th>讲者的判断与边界</th></tr></thead><tbody><tr><td>文件系统</td><td>态度最明确：管理历史、大结果和可回查材料，对重复任务也有价值。</td></tr><tr><td>代码执行 / 沙箱</td><td>对长尾任务尤其灵活；支持写脚本解决未预设的问题，但不等于每种任务都必须编程。</td></tr><tr><td>浏览器与电脑操作</td><td>认为当时成熟度不及编码；提到通过 CLI 使用浏览器的可能性，未给出普遍可靠性的结论。</td></tr></tbody></table>
+<h3><a href="https://www.youtube.com/watch?v=vtugjs2chdA&amp;t=2331" target="_blank" rel="noreferrer">38:51</a>—39:47｜应带走的工程判断</h3>
+<p>这场访谈的主线可以收束为三个问题：任务是否适合先交付可审查成果；运行轨迹能否解释动态形成的上下文；反馈能否在重复任务中沉淀为更好的指令和记忆。讲者最后也承认未来难以预测，因此产品形态与能力判断都应放回访谈当时理解。</p>
+<p class="note">时间戳用于原视频定位，可能存在秒级偏差。本文依据全片讨论整理；访谈中的产品与行业判断不等同于今天的独立验证结论。正文图示是对机制的归纳，没有补造源视频中不存在的幻灯片或实验结果。</p>
+</section></article></main><script src="../library-nav.js" data-material-type="video"></script></body></html>

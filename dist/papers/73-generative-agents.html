@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Generative Agents 中文精读：自然语言记忆流、三因素检索、递归反思、分层规划与反应，以及25个角色小镇实验的证据和边界。">
+<title>Generative Agents：以记忆、反思和计划维持角色行为的连贯性</title>
+<style>
+:root{--sans:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;--ink:#172234;--muted:#64748b;--line:#dbe4ef;--blue:#356db2;--navy:#243b59;--pale:#f3f7fc;--green:#287a60;--amber:#996121}
+*{box-sizing:border-box}html{font-family:var(--sans);scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:#eef3f9;color:var(--ink);font-size:15.5px;line-height:1.84;-webkit-font-smoothing:antialiased}body,button,input,select,textarea,table,pre,code,kbd,samp{font-family:inherit}a{color:var(--blue);text-decoration:none;text-underline-offset:3px}a:hover{text-decoration:underline}a:focus-visible,summary:focus-visible{outline:3px solid #6495cf;outline-offset:4px}
+.hero{position:relative;overflow:hidden;color:#f7fbff;background:radial-gradient(circle at 86% 8%,rgba(185,244,91,.12),transparent 26%),radial-gradient(circle at 8% 90%,rgba(120,85,199,.32),transparent 32%),linear-gradient(125deg,#0b1930,#17285a 60%,#431668)}.hero:after{content:"";position:absolute;inset:0;opacity:.1;background-image:linear-gradient(rgba(255,255,255,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.16) 1px,transparent 1px);background-size:42px 42px}.hero-in{position:relative;z-index:1;max-width:1240px;margin:auto;padding:42px 28px 35px}h1{max-width:1120px;margin:0;font-size:clamp(28px,3.3vw,40px);line-height:1.46;font-weight:700;letter-spacing:-.025em;overflow-wrap:anywhere}.paper-name{margin:16px 0 10px;color:#e0e8f7;font-size:20px;line-height:1.65;font-weight:400}.paper-authors,.paper-affiliation{margin:7px 0;color:#d4dff1;font-size:16px;line-height:1.8}.paper-links{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin-top:14px}.paper-links a,.paper-links span{color:#e7efff;font-size:15px;line-height:1.8}
+.layout{display:grid;grid-template-columns:210px minmax(0,940px);align-items:start;justify-content:center;gap:28px;max-width:1240px;margin:auto;padding:28px 20px 64px}.toc{position:sticky;top:22px;max-height:calc(100vh - 44px);overflow:auto}.toc-label{margin-bottom:10px;color:var(--muted);font-size:12px}.toc ol{list-style:none;margin:0;padding:0}.toc li{margin:4px 0}.toc a{display:block;padding:8px 10px;border-left:2px solid transparent;color:var(--muted);font-size:13px;line-height:1.6}.toc a:hover,.toc a.active{border-left-color:var(--blue);background:#e6effc;color:var(--blue)}main{min-width:0;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(39,44,51,.045)}.chapter{min-width:0;padding:29px 34px 32px}.chapter+.chapter{border-top:1px solid var(--line)}h2{display:flex;align-items:baseline;gap:14px;margin:0 0 18px;color:#1c2d43;font-size:24px;line-height:1.4}h2 .num{flex:0 0 auto;font-size:inherit;font-weight:inherit;line-height:inherit}h2 .chapter-title{flex:1 1 auto;min-width:0}h3{margin:26px 0 10px;color:var(--navy);font-size:18px;line-height:1.55}p{margin:11px 0}.chapter>p,.prose p{font-size:15.5px;line-height:1.84;text-indent:2em;text-align:justify;font-weight:400}strong{font-weight:650}
+.table-wrap{width:100%;max-width:100%;min-width:0;margin:16px 0 12px;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid var(--line);border-radius:9px}table{width:100%;min-width:620px;border-collapse:collapse;font-size:13.5px;line-height:1.65}caption{padding:11px 13px;text-align:left;color:var(--navy);font-size:14px;font-weight:650;background:#f7f9fc}th,td{padding:10px 12px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}th{background:#edf3fb;color:#294865;font-weight:650}th[scope=row]{background:#f9fbfe;width:22%}.numeric{white-space:nowrap;font-variant-numeric:tabular-nums}.best td,.best th[scope=row]{background:#edf8f3}.table-note,.chapter>p.table-note{font-size:12.5px;line-height:1.75;color:var(--muted);text-indent:0;text-align:left}.callout{margin:17px 0;padding:13px 16px;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;background:#edf4fd;font-size:14px;line-height:1.8}.callout.amber{border-color:var(--amber);background:#fff6e9}.formula{margin:16px 0;padding:13px 16px;border:1px solid var(--line);background:var(--pale);border-radius:8px}.equation{font-size:16px;font-weight:650;text-align:center;overflow-wrap:anywhere}.formula p{margin:8px 0 0;font-size:13px;line-height:1.75;text-indent:0}
+.method-map{margin:18px 0 22px;padding:18px;border:1px solid #cbd9ec;border-radius:12px;background:#f7faff;line-height:1.65}.method-map>figcaption{margin-bottom:14px;font-size:15px;font-weight:650;color:var(--navy)}.map-node{min-width:0;padding:12px 14px;border:1px solid #b8cbe4;border-radius:8px;background:#fff;color:#32475f;font-size:13px}.map-node strong{display:block;margin-bottom:5px;font-size:14px;color:#223e61}.map-node small{display:block;margin-top:5px;color:#60758d;font-size:12px}.store{background:#eaf1fb;border:2px solid #91add1}.arrow{text-align:center;margin:7px 0;color:#486e9a;font-size:12.5px}.arrow b{font-size:19px;margin-right:5px}.lanes{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;margin-top:13px}.lane{min-width:0;padding:12px;border:1px solid #cad9eb;border-radius:10px;background:#edf3fb}.lane.side{background:#f1f7f5;border-color:#bcd2c8}.lane-title{margin-bottom:10px;font-size:12px;font-weight:650;color:#4b6481}.lane.side .lane-title{color:#3d6957}.side .map-node{border-color:#b7d2c4}.map-return{margin-top:11px;padding:9px 11px;border-left:3px solid #6b94c3;background:#e5edf8;font-size:12px;color:#345574}.side .map-return{background:#e5f0e9;border-color:#6c9b82;color:#3b6651}.decision{margin-top:10px;padding-top:8px;border-top:1px solid #d8e2ef}.decision span{display:block;margin:4px 0}.engine{margin-top:13px;background:#172f4c;color:#e5eefb;border-color:#172f4c}.engine strong{color:white}.engine small{color:#c2d5ee}.loop{margin:11px 0 0;text-align:center;font-size:12.5px;color:#385c87}.map-note{margin:12px 0 0;color:var(--muted);font-size:12px}
+.reflection-flow{display:flex;align-items:stretch;gap:10px;margin:15px 0}.reflection-flow>div{flex:1;min-width:0;border:1px solid var(--line);border-radius:7px;padding:10px 12px;background:#f8fafc;font-size:13px}.reflection-flow strong{display:block;color:var(--navy);margin-bottom:4px}.reflection-flow>.local-arrow{flex:0 0 auto;border:0;background:none;padding:18px 0;color:#5d7da6;align-self:center;font-size:18px}
+details{margin:16px 0;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe}summary{cursor:pointer;color:var(--navy);font-size:14px;font-weight:600}.example-label{font-size:12px;color:var(--muted)}.input-panel{margin:12px 0;padding:14px 16px;border-radius:8px;background:#162b47;color:#e5edfa;font-size:13px;line-height:1.8}.input-panel strong{display:block;margin-bottom:6px;color:white}.example-block p{font-size:14px}.example-stages{padding-left:22px;font-size:14px}.example-stages li{margin:10px 0}.paper-figure{margin:14px 0;background:white;border:1px solid var(--line);border-radius:8px;overflow:hidden}.paper-figure img{display:block;width:100%;height:auto;object-fit:contain}.paper-figure figcaption{padding:10px 13px;font-size:12px;color:var(--muted)}
+@media(max-width:1000px){.layout{grid-template-columns:170px minmax(0,1fr);gap:18px;padding-inline:16px}.chapter{padding:26px}.hero-in{padding:34px 22px}.lanes{grid-template-columns:1fr}.reflection-flow{flex-wrap:wrap}.reflection-flow>div{flex-basis:25%}}
+@media(max-width:700px){.layout{display:block;padding:16px 12px 42px}.toc{position:static;max-height:none;margin-bottom:15px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#f8faff}.toc ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.toc-label{padding-left:10px}.toc a{font-size:12px;padding:7px}.chapter{padding:24px 19px}h2{gap:11px;font-size:22px;line-height:1.45}h3{font-size:17px}h1{font-size:28px}.paper-name{font-size:17px;margin-top:14px}.paper-authors,.paper-affiliation{font-size:15px}.paper-links a,.paper-links span{font-size:14.5px}.hero-in{padding:30px 20px}.method-map{padding:12px}.lane{padding:10px}.reflection-flow{display:block}.reflection-flow>.local-arrow{padding:2px;text-align:center;transform:rotate(90deg)}}
+@media print{html{scroll-behavior:auto}body{background:white;color:#111;font-size:11pt}.hero{background:white;color:#111;border-bottom:2px solid #243b59}.hero:after,.toc{display:none}.hero-in{padding:10px 0 18px}.hero h1{font-size:23pt;line-height:1.45}.paper-name{font-size:12.5pt}.paper-authors,.paper-affiliation{font-size:11pt}.paper-links a,.paper-links span{font-size:10.5pt}.paper-name,.paper-authors,.paper-affiliation,.paper-links a,.paper-links span{color:#333}.layout{display:block;max-width:none;margin:0;padding:16px 0}main{border:0;box-shadow:none;overflow:visible}.chapter{padding:18px 0}.chapter>p,.prose p{font-size:11pt}h2{font-size:18pt;gap:12px}h3{font-size:13pt}h2,h3,summary{break-after:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9pt}thead{display:table-header-group}tr,.map-node,.paper-figure{break-inside:avoid}th,td{padding:7px 8px}.method-map{padding:12px;break-inside:auto}.lanes{grid-template-columns:1.2fr 1fr}.lane{padding:8px}.map-node{padding:9px;font-size:9pt}.map-node strong{font-size:10pt}.map-node small,.arrow,.map-return,.loop{font-size:8.5pt}.engine,.input-panel{background:#edf2f8;color:#111;border:1px solid #acbed5}.engine strong,.input-panel strong{color:#111}.engine small{color:#333}.formula,.callout{break-inside:avoid}.reflection-flow{display:flex;flex-wrap:nowrap}.reflection-flow>div{font-size:9pt}.paper-links a[href^="https"]:after{content:" (" attr(href) ")";font-size:8pt}}
+</style>
+</head>
+<body>
+<header class="hero" id="top"><div class="hero-in">
+<h1>Generative Agents：以记忆、反思和计划维持角色行为的连贯性</h1>
+<p class="paper-name">Generative Agents: Interactive Simulacra of Human Behavior</p>
+<p class="paper-authors">Joon Sung Park、Joseph C. O’Brien、Carrie J. Cai、Meredith Ringel Morris、Percy Liang、Michael S. Bernstein</p>
+<p class="paper-affiliation">Stanford University；Google Research（Carrie J. Cai）；Google DeepMind（Meredith Ringel Morris）</p>
+<div class="paper-links"><a href="https://arxiv.org/abs/2304.03442v2" target="_blank" rel="noreferrer">阅读原论文 ↗</a><span>UIST 2023 · arXiv v2，2023-08-06</span><a href="index.html">返回论文目录</a></div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="文章目录"><div class="toc-label">文章目录</div><ol>
+<li><a href="#s1">01 · 研究背景与问题定义</a></li><li><a href="#s2">02 · 方法与技术路线</a></li><li><a href="#s3">03 · 实验设计与结果分析</a></li><li><a href="#s4">04 · 贡献、局限与综合评价</a></li>
+</ol></nav>
+<main>
+<section class="chapter" id="s1" data-source="§1–3; §4.1–4.3">
+<h2><span class="num">01</span><span class="chapter-title">研究背景与问题定义</span></h2>
+<p>一个角色说出一句符合人设的话，并不意味着它能连续生活两天。它需要记住别人昨天发出的邀请，从多次交往中形成对别人的判断，把约定放进今天的日程，还要在遇到突发事件后调整安排。如果每一刻只问语言模型“现在应该做什么”，当前选择可以各自合理，整段行为却可能互相冲突。论文举出的失调是：角色在中午、半小时后、再半小时后都决定吃午饭。</p>
+<p>这篇论文研究的是<strong>行为的可信度（believability）</strong>：观察者是否觉得角色像一个有经历、有倾向、行为前后连贯的人。作者把 25 个角色放进手工构建的 Smallville 小镇，用大语言模型生成行为。目标是减少逐个编写生活脚本的负担，让交往、信息传播和活动协调能从局部互动中形成；这与验证人类心理机制、预测真实社会规律是不同的证明任务。</p>
+<h3>问题从生成一句话，转向维护一段生活</h3>
+<div class="table-wrap"><table><caption>连续生活需要补上的三种能力</caption><thead><tr><th scope="col">具体失效</th><th scope="col">为什么会影响后续行为</th><th scope="col">论文改变的对象</th></tr></thead><tbody>
+<tr><th scope="row">经历越来越多，当前提示容纳不下</th><td>关键邀请可能被日常琐事淹没；统一摘要又容易丢掉具体的人、时间与事件。</td><td>保存完整经历，按当前情境选择少量记忆进入提示。</td></tr>
+<tr><th scope="row">记住事件，不等于形成稳定判断</th><td>多次看到某人研究、阅读，仍需归纳其兴趣，才能影响交往与选择。</td><td>把有来源的高层推断也存成可检索记忆。</td></tr>
+<tr><th scope="row">每一步合理，全天安排仍可能失调</th><td>缺少跨时刻约束，容易重复活动，或知道约定却没有安排赴约。</td><td>生成可细分、可打断并重排的时间计划。</td></tr>
+</tbody></table></div>
+<p>单纯扩大上下文，只是让模型一次能读更多材料，没有决定哪些经历值得被关注；把整段历史压成一段人物总结，又可能丢掉对某次行动至关重要的细节。论文因此保留细粒度经历，同时新增抽象判断与未来计划，让三者在决策时共同被调用。其核心变化是<strong>从固定人设条件下的即时生成，转为由不断更新的个人经历来持续约束生成</strong>。</p>
+<p>从实际操作看，模型参数并未因角色“生活”而更新。系统不断把观察、推断和日程写成文字，存到角色自己的外部记忆中；每次行动前再选择材料放回模型输入。它以存储、检索和额外模型调用，换取跨时刻的连贯性。这种连贯性依赖于材料选得对、归纳没有失真，以及计划能被执行，不能仅由“已经保存全部经历”来保证。</p>
+</section>
+
+<section class="chapter" id="s2" data-source="§4–5; Appendix A">
+<h2><span class="num">02</span><span class="chapter-title">方法与技术路线</span></h2>
+<p>系统使用论文当时的 gpt3.5-turbo。每个角色拥有自己的记忆流和已知环境；游戏提供局部观察，模型据此决定沿用计划还是作出反应。反思按新经历的累计重要性触发，生成的判断与计划都返回记忆流，影响以后而非只影响当前一次回复。</p>
+<figure class="method-map" aria-label="Generative Agents 运行闭环与反思支路" data-source="§4.1–4.3; §5.1">
+<figcaption>运行闭环：个人记忆支撑行动，反思形成可重复使用的判断</figcaption>
+<div class="map-node"><strong>环境感知 · Perception</strong>游戏服务器提供视野内的角色、物体及状态，转成自然语言观察。<small>每个角色只接收其局部可见信息；自身行为也成为经历。</small></div>
+<div class="arrow"><b>↓</b>每步把观察写入个人记忆</div>
+<div class="map-node store"><strong>记忆流 · Memory Stream（持续保存）</strong>观察 Observation ＋ 反思 Reflection ＋ 计划 Plan<small>记录描述、创建/访问时间；反思另存支持记录的指针。初始化人设也作为种子记忆。</small></div>
+<div class="lanes">
+<div class="lane"><div class="lane-title">行动主循环 · 从记忆读取到当下决策</div>
+<div class="map-node"><strong>检索 · Retrieval</strong>当前情境形成查询；按近期性、重要性、相关性排序，选择窗口能容纳的记录。<small>输出：与当前行动或交谈有关的个人经历、判断和日程。</small></div>
+<div class="arrow"><b>↓</b>相关记忆 ＋ 人物摘要 ＋ 当前观察/日程</div>
+<div class="map-node"><strong>规划与反应 · Planning &amp; Reacting</strong>日计划 → 近未来小时安排 → 5–15 分钟行动；模型判断是否需要响应新观察。
+<div class="decision"><span>继续原计划 → 执行当前行动</span><span>需要反应 → 从当前时刻重排后续计划</span><span>选择交谈 → 双方各自检索记忆，轮流生成对话</span></div></div>
+<div class="map-return">↥ 新计划写回上方记忆流；对话与行动形成后续观察。</div>
+</div>
+<div class="lane side"><div class="lane-title">反思支路 · 按新事件的重要性累计触发</div>
+<div class="map-node"><strong>反思 · Reflection</strong>累计重要性 &gt; 150 时，读取最近 100 条记忆，让模型提出 3 个高层问题。<small>问题决定“需要从哪些经历归纳什么”。</small></div>
+<div class="arrow"><b>↓</b>以问题为查询，调用检索</div>
+<div class="map-node"><strong>依据记录生成高层见解</strong>每个问题检出相关观察和已有反思，要求模型归纳 5 条见解并引用记录编号。<small>旧反思可成为新反思的依据，形成递归的反思树。</small></div>
+<div class="map-return">↥ 见解与来源指针写回记忆流，以后可被行动主循环检索；来源引用没有独立判真环节。</div>
+</div>
+</div>
+<div class="arrow"><b>↓</b>行动主循环输出：做什么、何时做；交谈时输出话语</div>
+<div class="map-node engine"><strong>环境落地 · Grounding &amp; Execution</strong>模型沿个人已知的空间树逐层选地点；游戏程序计算行走路径、更新位置，并应用物体状态变化。<small>物体操作后的文字状态也由模型判断；这里没有完整的物理模拟。</small></div>
+<div class="loop">↶ 新位置、对话和物体状态 → 下一步局部感知 → 再写入个人记忆</div>
+<div class="map-note">图中两列区分持续行动与条件触发的归纳，不表示论文已将角色或模块并行执行。</div>
+</figure>
+
+<details class="original-figure"><summary>原论文架构图：观察、检索、反思与计划的关系</summary><figure class="paper-figure" data-source="Figure 5"><a href="assets/73-generative-agents/architecture.png"><img src="assets/73-generative-agents/architecture.png" width="3568" height="1294" loading="lazy" alt="原论文 Figure 5：环境感知写入记忆流，检索支持行动、计划和反思，计划与反思回写记忆。"></a><figcaption>原论文 Figure 5。点击图片可查看完整尺寸。</figcaption></figure></details>
+
+<h3>Memory Stream 与 Retrieval：决定这一次想起什么</h3>
+<p>角色初始化时，一段描述其职业、性格、家人和熟人的文字，按分号拆为种子记忆。运行中，每条观察以自然语言保存，并带有创建时间和最近访问时间。系统不会把所有经历一起送入模型，而是根据当前查询计算各条记忆的分数。这里把“最近想起过”“对角色很重要”和“与当前事情有关”作为三种不同信号。</p>
+<div class="table-wrap"><table><caption>三种检索信号：分别解决时间、分量和主题的问题</caption><thead><tr><th scope="col">信号</th><th scope="col">如何产生</th><th scope="col">应当怎样理解</th></tr></thead><tbody>
+<tr><th scope="row">近期性 Recency</th><td>距该记忆最近被访问/检索的游戏小时数为 Δt，原始分数按 0.995<sup>Δt</sup> 衰减。</td><td>衡量最近是否被想起，不能直接替换成距事件发生多久。</td></tr>
+<tr><th scope="row">重要性 Importance</th><td>创建记忆时，让模型按 1–10 分评价事件的分量，如琐事低、重要关系变化高。</td><td>是角色经历的重要程度，并非对当前查询的相关性。</td></tr>
+<tr><th scope="row">相关性 Relevance</th><td>计算记忆文本与查询文本的 embedding 余弦相似度。</td><td>随问题改变，让主题相关的旧事也有机会被找回。</td></tr>
+</tbody></table></div>
+<div class="formula" data-source="§4.1"><div class="equation">Score(m, q) = R̃(m) + Ĩ(m) + Rel̃(m, q)</div><p>三项先分别用 min–max 缩放到 [0, 1]，论文中权重均为 1。按总分选取上下文窗口能容纳的高排名记录；正文没有规定所有调用共用一个固定 top-k。</p></div>
+<p>这个加法提供了一种折中：只看相关性，日常琐事可能挤掉对角色很重要的旧经历；只看近期性，又可能遗忘很久以前的约定。但三项都是启发式信号，分数高不等于事实完整，也没有保证多条记录互相一致。检索负责提供可用材料，模型仍需判断如何组合它们。</p>
+
+<h3>Reflection：把多次经历变成可再次调用的判断</h3>
+<p>原始记录回答“见过什么”，反思尝试回答“这些经历意味着什么”。系统在近期感知事件的重要性分数累计超过 150 时启动反思；论文运行中大约每天发生两三次。150 是分数阈值，不是条目数量，也不是固定的每日反思日程。</p>
+<div class="reflection-flow" role="group" aria-label="反思的三个操作">
+<div><strong>选问题</strong>从最近 100 条记录提出 3 个值得归纳的高层问题。</div><div class="local-arrow" aria-hidden="true">→</div>
+<div><strong>找材料</strong>按问题检索相关观察，也可取回已有反思。</div><div class="local-arrow" aria-hidden="true">→</div>
+<div><strong>存判断</strong>归纳 5 条见解，连同支持记录的指针写回。</div>
+</div>
+<p>先提出问题，是为了决定从经历中提炼哪一层信息；再次检索，则让归纳不只依赖最近发生的事情。因为反思可以引用更早的反思，系统逐步形成从具体观察到人物倾向的树状结构。这相当于提前把分散线索组织成判断，使后续一次简短检索也能获得较高层的认识。不过，模型生成的引用只提供可追溯性，论文没有设置独立检查器验证这些记录是否足以推出结论。</p>
+<details class="example-block"><summary>论文示例：为什么 Klaus 会选择与 Maria 相处</summary>
+<p class="example-label">依据 §4.2 与 Figure 7 作中文转述，非新增运行记录。</p>
+<ol class="example-stages"><li><strong>只有观察：</strong>Klaus 与宿舍邻居 Wolfgang 经常擦肩而过，原始交往频率容易使 Wolfgang 成为选择。</li><li><strong>归纳自己：</strong>多次阅读、写作和讨论研究的经历，支持“Klaus 非常投入研究”的反思。</li><li><strong>归纳他人：</strong>从 Maria 努力研究的经历中认识到两人具有共同兴趣，即使具体领域不同。</li><li><strong>影响选择：</strong>当被问到最想与谁共处一小时，带有这些反思的角色选择 Maria。</li></ol>
+<figure class="paper-figure" data-source="Figure 7"><a href="assets/73-generative-agents/reflection.png"><img src="assets/73-generative-agents/reflection.png" width="3260" height="1664" loading="lazy" alt="原论文反思树：具体研究活动逐层支持兴趣、投入程度及自我认识的高层判断。"></a><figcaption>原论文 Figure 7：观察是叶节点，反思可成为更高层反思的依据。</figcaption></figure>
+<p>这个定性例子说明反思希望补上的“跨记录归纳”，不能把它当成对所有人物判断准确率的量化证明。</p>
+</details>
+
+<h3>Planning &amp; Reacting：让日程既有延续性，也能被打断</h3>
+<p>日计划以人物摘要、前一天的总结和当前日期为输入，先生成 5–8 个大块，再递归分成小时级安排和 5–15 分钟行动。每项安排包含地点、开始时间与持续时长，并作为记忆保存。附录补充了一个重要实现选择：只提前生成高层日程，临近要做某件事时才展开细节，避免整天的精细安排刚生成就因新事件过时。</p>
+<p>计划提供跨时刻的约束，反应机制则处理新情况。每步先保存观察，再让模型判断是否继续原安排。观察到别人时，系统分别检索“我与此人的关系”及“与对方当前行为有关的经历”，汇总情境供模型判断。若决定响应，就从反应发生的时刻重建后续计划。是否打断、怎样响应都依赖模型判断；时间表本身没有把角色变成一个有形式化约束保证的调度器。</p>
+<h3>Dialogue：双方根据各自的经历逐轮回应</h3>
+<p>如果反应是交谈，发起方结合人物摘要、对对方的记忆和交流意图生成第一句话。接收方把这句话看成新事件，检索自己关于对方和话题的记忆，再结合已有对话生成回复。这个过程持续到一方决定结束。因此，两人可能拥有不同的信息和看法，后续传播也通过实际交谈发生；论文实现并非由一个全知提示一次写完双方的全部台词。</p>
+<details class="example-block"><summary>说明性示例：一次派对邀请怎样成为次日行动的依据</summary>
+<p class="example-label">依据论文机制构造的最小流程，文字与过程描述为说明用途，不是作者公开的逐步日志。</p>
+<div class="input-panel"><strong>收到邀请 · 形成观察</strong>“Isabella 邀请我明天下午到 Hobbs Cafe 参加派对。”<br>记录内容与时间，生成重要性分数，加入我的记忆流。</div>
+<div class="input-panel"><strong>准备日程 · 取回约定</strong>规划次日活动时，检索当前目标与相关经历；如果邀请被取回且角色决定参加，就把赴会放进日程。</div>
+<div class="input-panel"><strong>到了时间 · 环境执行</strong>展开相应计划，沿已知空间树选择咖啡馆，由游戏程序寻路；途中出现新事件，仍可能触发反应和重排。</div>
+<p>这条链上，“收到”“想起”“决定参加”“写入日程”“实际到场”是不同环节。任意一环缺失，都可能导致角色知情却没有赴约。</p>
+</details>
+
+<h3>Grounding：把文字行动落到程序维护的环境中</h3>
+<p>小镇不是模型从画面中自行理解的世界。Phaser 负责地图和角色呈现，服务器维护位置、动作和物体状态，并把预设视野内的信息提供给角色。空间用“区域包含子区域或物体”的树表示：每个角色只保有自己知道的部分，探索时扩展，离开后记录可能过时，重新进入时才刷新。</p>
+<p>模型决定动作地点时，从空间树顶层开始，逐层选择合适区域，直到具体对象或地点；走到那里所需的路径由传统游戏算法计算。操作物体后的文字状态变化也会询问模型，再由服务器应用。这种分工让语言生成接上可交互环境，但复杂物理规则和场所规范仍需要明确表达，模型不能仅凭一句活动描述可靠补足所有约束。</p>
+<p data-source="§3.1.2–3.2">用户也能进入这条循环：以指定身份与角色交谈，操控已有角色或作为访客进入小镇，或者以角色的“内心声音”提出指令，使其更容易把话语视为行动要求。用户还可直接改写物体状态，让角色在下一次感知时响应变化。这些入口使它成为可被人介入的交互系统，而不只是自动播放的生活记录。</p>
+<p data-source="Appendix A">人物摘要也会随经历定期更新并缓存：分别检索核心特征、日常职业和对近期生活进展的感受，概括后与姓名、年龄、性格拼接，供多种提示复用。这是减少重复生成的已实现优化。批量生成双方对话、只重排受影响的计划片段、让多个角色并行执行，则是附录提出的后续优化方向。</p>
+</section>
+
+<section class="chapter" id="s3" data-source="§6–7; §8.2">
+<h2><span class="num">03</span><span class="chapter-title">实验设计与结果分析</span></h2>
+<p>论文把评价分成两部分：受控访谈检验角色能否依据经历回答得可信，端到端运行观察一个角色群体是否出现信息传播、相互认识和共同活动。两部分共同说明系统的可行性，但评价对象与控制强度不同，不能合并成一个“社会模拟准确率”。</p>
+<h3>受控访谈：哪些记忆类型有助于角色表现</h3>
+<p>完整架构先让 25 个角色生活两个游戏日，再从自我认知、记忆、计划、反应、反思五类问题中进行访谈，每类题库含 5 题。100 名评审各查看一个随机分配角色的生活回放和记忆，再对每类抽取的一题比较五种条件的回答，按可信程度排序。作者将这些相对排名转成 TrueSkill 评分；数值越高，表示在这组比较中更常被排在前面。</p>
+<div class="table-wrap"><table data-source="§6.2; §6.5.1; Figure 8"><caption>同一生活历史下的访谈比较：TrueSkill 越高越可信</caption><thead><tr><th scope="col">回答条件</th><th scope="col">可访问的经历类型</th><th scope="col">μ</th><th scope="col">σ</th></tr></thead><tbody>
+<tr class="best"><th scope="row">完整架构</th><td>观察、计划、反思</td><td class="numeric">29.89</td><td class="numeric">0.72</td></tr>
+<tr><th scope="row">无反思</th><td>观察、计划</td><td class="numeric">26.88</td><td class="numeric">0.69</td></tr>
+<tr><th scope="row">无反思、无计划</th><td>观察</td><td class="numeric">25.64</td><td class="numeric">0.68</td></tr>
+<tr><th scope="row">众包人类扮演</th><td>看回放和记忆后，扮演角色作答</td><td class="numeric">22.95</td><td class="numeric">0.69</td></tr>
+<tr><th scope="row">三类均不可访问</th><td>无法访问记忆流中的观察、计划、反思</td><td class="numeric">21.21</td><td class="numeric">0.70</td></tr>
+</tbody></table></div>
+<p class="table-note">μ 与 σ 是 TrueSkill 建模的技能均值与标准差；不是百分制准确率，也不是多次独立小镇运行的均值与标准误。人类条件被作者定位为基本行为能力参照，不代表专家上限。</p>
+<p>排序显示，原始观察已能提供显著价值，而加入计划、再加入反思，访谈回答进一步改善。作者报告经多重比较校正后，除众包人类与完全消融这一对外，其余两两差异均显著（p &lt; 0.001）。尤其是完整架构与无反思条件的差异，支持高层归纳能为回答提供原始事件之外的帮助；它没有单独证明每个反思都正确，也没有隔离检索三项分数各自的贡献。</p>
+<div class="callout amber"><strong>消融控制的是回答时能读什么。</strong>各条件共享完整架构已经生成的两天历史，只在访谈时禁用不同记忆类型。这个设计减少了生活经历不同带来的混淆，但没有测出删掉规划或反思后，角色社会从头运行会怎样。因此，结论应落在这些材料对访谈表现的作用上。</div>
+<h3>端到端运行：信息能传播，记住也不保证赴约</h3>
+<p>群体评价让 25 个角色自由互动两个游戏日。在初始化时，只有 Sam 知道自己准备竞选，只有 Isabella 知道自己要组织派对；后续不再由用户干预传播。作者在结束时访谈知情情况，并回查记忆中的具体对话确认信息来源；相互认识则要求双方都表示知道对方，才在无向关系图中连边。</p>
+<div class="table-wrap"><table data-source="§7.1.1–7.1.2"><caption>一次两游戏日运行中的群体现象与资源代价</caption><thead><tr><th scope="col">观察对象</th><th scope="col">报告结果</th><th scope="col">结果能支持到哪里</th></tr></thead><tbody>
+<tr><th scope="row">竞选信息传播</th><td class="numeric">1/25 → 8/25（4% → 32%）</td><td>信息从发起者扩散到其他角色，知情回答均找到对话来源。</td></tr>
+<tr><th scope="row">派对信息传播</th><td class="numeric">1/25 → 13/25（4% → 52%）</td><td>13 人包括组织者，另外 12 人获知派对。</td></tr>
+<tr><th scope="row">相互认识的图密度</th><td class="numeric">0.167 → 0.74</td><td>双方知道彼此的关系变多；不等于亲密程度或社会结构真实性。</td></tr>
+<tr><th scope="row">派对协调</th><td>12 名受邀者中 5 人到场</td><td>部分角色完成了从信息到日程再到行动的衔接，仍有执行缺口。</td></tr>
+<tr><th scope="row">该规模的运行成本</th><td>数千美元 token 额度；现实耗时数天</td><td>25 角色 × 2 游戏日的整体描述；未给精确 token 数、调用数或成本拆分。</td></tr>
+</tbody></table></div>
+<p>比“自发办成派对”更有解释力的，是知情与行动之间的落差。没有到场的 7 人中，3 人解释有其他安排，另外 4 人在事后访谈中表示有参加兴趣，但当天没有安排赴会。这说明群体协调需要多个局部环节同时成功；访谈中表达的参加意愿，并不自动对应实际日程中的安排。该实验展示了协调可以发生，尚未把它变成稳定保证。</p>
+<p>这些数字是一次运行的描述统计，不能解释为跨架构、跨随机种子的平均社会表现。成本同样属于当时模型和实现下的整体报告。附录另给出串行架构约“一秒现实时间对应一分钟游戏时间”的速度描述，但不能据此替换整场实验实际花费的数天，更不能推出今天的复现价格。</p>
+<details class="example-block"><summary>论文案例：派对邀请如何沿交往关系传播</summary>
+<p class="example-label">原论文 Figure 9 与 §3.4、§7.1 的传播案例。</p>
+<figure class="paper-figure"><a href="assets/73-generative-agents/diffusion.png"><img src="assets/73-generative-agents/diffusion.png" width="3258" height="2006" loading="lazy" alt="原论文派对邀请扩散图：从 Isabella 出发，信息通过角色对话传至其余12位角色。"></a><figcaption>原论文 Figure 9 展示对话传播路径。图中获知邀请的人数，不等于实际出席人数。</figcaption></figure>
+<p>组织者准备、邀请，其他角色转告或进一步约人，这些环节没有被逐个写成共同脚本。其“涌现”含义是局部生成行为形成了群体结果；举办派对的起始意图、人物关系与小镇环境仍由人设定。</p>
+</details>
+<h3>失败证据：数据已存下，决策仍可能失真</h3>
+<p>记忆错误未必来自完全遗忘。Tom 曾取回“到派对上讨论竞选”的片段，却没有取回派对通知，因此回答出“记得要在那里讨论事情，但不确定有没有派对”的矛盾。另一些回答会在真实记录上补写细节，或把模型世界知识误套到同名角色上。它们共同暴露出：外部记忆解决了保存与调用通路，没有自动解决记录组合、证据充分性和虚构世界边界。</p>
+<p>随着角色知道的地点增加，行动地点的选择也可能漂移：一些角色开始去原设计用于晚间聚会的酒吧吃午餐，偏离了环境设计者的预期。作者还报告了角色误入已关门商店、把单人浴室当成多人浴室，以及交谈过度正式、过度配合等现象。后者甚至可能使角色吸收他人的兴趣而偏离最初倾向。这些现象使“能产生热闹互动”与“能保持人物差异和情境规范”成为两个需要分别检验的目标。论文中 1.3% 的幻觉比例仅指相互认识访谈的 453 条回答中有 6 条被核查为幻觉，不能当作整套系统的总体幻觉率。</p>
+</section>
+
+<section class="chapter" id="s4" data-source="§6.2; §7.2; §8.2–8.3; interpretation">
+<h2><span class="num">04</span><span class="chapter-title">贡献、局限与综合评价</span></h2>
+<h3>真正值得保留的思想：把经历组织成持续生成的条件</h3>
+<p>这篇工作的核心贡献在于架构设计：把自然语言经历作为统一接口，使观察、抽象判断与未来安排可以共同参与决策。其价值不只在于“给模型加数据库”，还在于形成了<strong>经历被记录、问题引导检索、归纳再次成为记忆、计划被新观察调整</strong>的闭环。即使更换底层语言模型，这种让角色行为依赖个人历史的组织方式仍然具有独立意义。</p>
+<p>实验为两个层次提供了证据：同一历史下的访谈排序支持计划与反思材料有助于可信表达；小镇部署展示这些局部机制可以连接成信息传播与共同活动。后者是有意义的系统可行性结果，但并未验证一套可以复现真实人类群体规律的模型。认识到这个分层，才能同时看到工作的创造性和证据边界。</p>
+<h3>反思让判断可以复用，也让错误可能持续影响后续行为</h3>
+<p>反思写回后与观察一起参与检索，还可以成为更高层反思的依据。这正是抽象知识能积累的原因，也产生了一个可靠性问题：来源指针证明“从哪里生成”，并不证明“推出得对”。论文已经观察到补写细节与模型先验污染，而没有独立测量错误反思被反复引用后会如何发展。因此，错误经递归归纳而扩大是值得检验的风险，不能当作本文已量化证明的现象。</p>
+<p>要区分反思收益来自可靠抽象，还是只来自预先整理材料、减少当场推理的负担，可以在相同调用预算下比较：带证据的高层推断、只重组原始事实的摘要，以及加入证据充分性检查的反思。这样的对照会帮助确定，系统真正需要的是哪一种可复用表示，以及为它增加验证是否值得。</p>
+<h3>可信表达与真实行为之间，还隔着模型偏好和长期检验</h3>
+<p>评审判断角色回答是否可信，并不会自动检验这些回答是否符合某个真实人群的行为分布。模型过度礼貌、过度合作的倾向，可能提高表面流畅度，也可能夸大关系增长和活动协调。文中关于兴趣漂移的观察已提示这一问题，但没有跨底层模型或真实人群数据的对照来分离两种影响。若将小镇用于社会研究，就需要进一步检验同一环境和人物设定下，更换模型后哪些群体结果仍保持，以及它们是否符合真实观察。</p>
+<p>两个游戏日也不足以说明人物身份、记忆质量和社会关系在长期交互中能稳定维持。随着记录增加，检索遗漏、过时环境知识和人物倾向变化可能相互影响；论文的失败案例已经涉及这几条链。更长时间运行的意义不只是扩大演示规模，而是观察这些偏差是否累积、能否被新经历纠正，以及额外维护成本是否持续增长。</p>
+<p>综合来看，这篇论文把语言模型单次扮演角色的能力，扩展成了一个能够持续接收经历、形成判断并安排生活的交互系统。最值得学习的是外部记忆如何参与生成，以及抽象与规划如何把不同时间的行动连接起来。现有证据支持这种设计能提高短期角色表现的可信度，并产生若干群体现象；它的有效性仍取决于检索、归纳、日程落实和环境表达，真实社会预测与长期稳定性则需要更强的验证。</p>
+</section>
+</main></div>
+<script>
+const links=[...document.querySelectorAll('.toc a')];
+if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){for(const link of links)link.classList.toggle('active',link.hash==='#'+entry.target.id);}}},{rootMargin:'-8% 0px -65% 0px'});document.querySelectorAll('.chapter').forEach(section=>observer.observe(section));}
+</script>
+<script src="../library-nav.js" data-material-type="paper"></script></body></html>
